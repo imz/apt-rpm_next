@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: contents.h,v 1.2 2001/02/20 07:03:18 jgg Exp $
+// $Id: contents.h,v 1.2 2002/07/25 18:07:19 niemeyer Exp $
 /* ######################################################################
    
    contents - Contents of archive things.

@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: depcache.cc,v 1.25 2001/05/27 05:36:04 jgg Exp $
+// $Id: depcache.cc,v 1.1 2002/07/23 17:54:50 niemeyer Exp $
 /* ######################################################################
 
    Dependency Cache - Caches Dependency information.
@@ -16,6 +16,9 @@
 #include <apt-pkg/error.h>
 #include <apt-pkg/sptr.h>
 #include <apt-pkg/algorithms.h>
+
+// CNC:2002-07-05
+#include <apt-pkg/pkgsystem.h>
     
 #include <apti18n.h>    
 									/*}}}*/
@@ -115,18 +118,17 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
       PkgIterator Pkg = Dep.TargetPkg();
       // Check the base package
       if (Type == NowVersion && Pkg->CurrentVer != 0)
-	 if (VS().CheckDep(Pkg.CurrentVer().VerStr(),Dep->CompareOp,
-				 Dep.TargetVer()) == true)
+	 if (VS().CheckDep(Pkg.CurrentVer().VerStr(),Dep) == true) // CNC:2002-07-10
 	    return true;
       
       if (Type == InstallVersion && PkgState[Pkg->ID].InstallVer != 0)
 	 if (VS().CheckDep(PkgState[Pkg->ID].InstVerIter(*this).VerStr(),
-				 Dep->CompareOp,Dep.TargetVer()) == true)
+				 Dep) == true) // CNC:2002-07-10
 	    return true;
       
       if (Type == CandidateVersion && PkgState[Pkg->ID].CandidateVer != 0)
 	 if (VS().CheckDep(PkgState[Pkg->ID].CandidateVerIter(*this).VerStr(),
-				 Dep->CompareOp,Dep.TargetVer()) == true)
+				 Dep) == true) // CNC:2002-07-10
 	    return true;
    }
    
@@ -165,11 +167,18 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
       }
       
       // Compare the versions.
-      if (VS().CheckDep(P.ProvideVersion(),Dep->CompareOp,Dep.TargetVer()) == true)
+      if (VS().CheckDep(P.ProvideVersion(),Dep) == true) // CNC:2002-07-10
       {
 	 Res = P.OwnerPkg();
 	 return true;
       }
+   }
+
+   // CNC:2002-07-05
+   if (_system->IgnoreDep(VS(),Dep) == true)
+   {
+      Res = Dep.TargetPkg();
+      return true;
    }
    
    return false;
@@ -864,3 +873,4 @@ bool pkgDepCache::Policy::IsImportantDep(DepIterator Dep)
    return Dep.IsCritical();
 }
 									/*}}}*/
+// vim:sts=3:sw=3

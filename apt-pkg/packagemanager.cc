@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: packagemanager.cc,v 1.29 2002/04/02 06:01:49 jgg Exp $
+// $Id: packagemanager.cc,v 1.8 2003/01/31 16:32:30 niemeyer Exp $
 /* ######################################################################
 
    Package Manager - Abstacts the package manager
@@ -216,7 +216,7 @@ bool pkgPackageManager::CheckRConflicts(PkgIterator Pkg,DepIterator D,
       if (D.ParentPkg() == Pkg || D.ParentVer() != D.ParentPkg().CurrentVer())
 	 continue;
       
-      if (Cache.VS().CheckDep(Ver,D->CompareOp,D.TargetVer()) == false)
+      if (Cache.VS().CheckDep(Ver,D) == false) // CNC:2002-07-10
 	 continue;
 
       if (EarlyRemove(D.ParentPkg()) == false)
@@ -422,6 +422,19 @@ bool pkgPackageManager::SmartRemove(PkgIterator Pkg)
       return true;
 
    List->Flag(Pkg,pkgOrderList::Configured,pkgOrderList::States);
+   
+   /* CNC:2003-01-29 - Do not remove obsoleted packages. */
+   for (pkgCache::DepIterator D = Pkg.RevDependsList(); D.end() == false; D++)
+   {
+      if (D->Type == pkgCache::Dep::Obsoletes &&
+          Cache[D.ParentPkg()].Install() &&
+          (pkgCache::Version*)D.ParentVer() == Cache[D.ParentPkg()].InstallVer &&
+          Cache.VS().CheckDep(Pkg.CurrentVer().VerStr(), D) == true)
+      {
+         return true;
+      }
+   }
+   
    return Remove(Pkg,(Cache[Pkg].iFlags & pkgDepCache::Purge) == pkgDepCache::Purge);
 }
 									/*}}}*/
@@ -430,6 +443,8 @@ bool pkgPackageManager::SmartRemove(PkgIterator Pkg)
 /* This performs the task of handling pre-depends. */
 bool pkgPackageManager::SmartUnPack(PkgIterator Pkg)
 {
+// CNC:2003-01-30 - Configuring makes no sense for rpm packages.
+#if 0
    // Check if it is already unpacked
    if (Pkg.State() == pkgCache::PkgIterator::NeedsConfigure &&
        Cache[Pkg].Keep() == true)
@@ -490,15 +505,23 @@ bool pkgPackageManager::SmartUnPack(PkgIterator Pkg)
 	 {
 	    // This triggers if someone make a pre-depends/depend loop.
 	    if (Start == End)
+	    {
 	       return _error->Error("Couldn't configure pre-depend %s for %s, "
 				    "probably a dependency cycle.",
 				    End.TargetPkg().Name(),Pkg.Name());
+	    }
 	    Start++;
 	 }
 	 else
 	    break;
       }
       
+// CNC:2002-10-18
+// RPM seems to handle well cases where an upgraded package removes
+// a conflict which would be created between the current version of
+// itself and the install version of a second package. OTOH, removing
+// a package temporarily could move a configuration file to a .rpmsave
+// file, or even have catastrophic results (think about glibc).
       if (End->Type == pkgCache::Dep::Conflicts || 
 	  End->Type == pkgCache::Dep::Obsoletes)
       {
@@ -519,6 +542,7 @@ bool pkgPackageManager::SmartUnPack(PkgIterator Pkg)
 	 }
       }
    }
+#endif
 
    // Check for reverse conflicts.
    if (CheckRConflicts(Pkg,Pkg.RevDependsList(),
@@ -533,11 +557,14 @@ bool pkgPackageManager::SmartUnPack(PkgIterator Pkg)
       return false;
    
    List->Flag(Pkg,pkgOrderList::UnPacked,pkgOrderList::States);
-   
+ 
+// CNC:2003-01-30 - Configuring makes no sense for rpm packages.
+#if 0
    // Perform immedate configuration of the package.
    if (List->IsFlag(Pkg,pkgOrderList::Immediate) == true)
       if (SmartConfigure(Pkg) == false)
 	 return _error->Error("Internal Error, Could not perform immediate configuration (2) on %s",Pkg.Name());
+#endif
    
    return true;
 }
@@ -640,3 +667,4 @@ pkgPackageManager::OrderResult pkgPackageManager::DoInstall()
    return Res;
 }
 									/*}}}*/
+// vim:sts=3:sw=3

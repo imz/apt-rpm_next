@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: depcache.h,v 1.14 2001/02/20 07:03:17 jgg Exp $
+// $Id: depcache.h,v 1.2 2003/01/29 13:04:48 niemeyer Exp $
 /* ######################################################################
 
    DepCache - Dependency Extension data for the cache
@@ -207,5 +207,52 @@ class pkgDepCache : protected pkgCache::Namespace
    pkgDepCache(pkgCache *Cache,Policy *Plcy = 0);
    virtual ~pkgDepCache();
 };
+
+/* This is an exact copy of the structure above, nested in pkgDepCache.
+ * This is defined again here since SWIG doesn't know how to handle nested
+ * structures yet. It will be dropped once that situation changes. */
+#ifdef SWIG
+   struct pkgDepCache::StateCache
+   {
+      // Epoch stripped text versions of the two version fields
+      const char *CandVersion;
+      const char *CurVersion;
+
+      // Pointer to the candidate install version. 
+      Version *CandidateVer;
+
+      // Pointer to the install version.
+      Version *InstallVer;
+      
+      // Copy of Package::Flags
+      unsigned short Flags;
+      unsigned short iFlags;           // Internal flags
+
+      // Various tree indicators
+      signed char Status;              // -1,0,1,2
+      unsigned char Mode;              // ModeList
+      unsigned char DepState;          // DepState Flags
+
+      // Update of candidate version
+      const char *StripEpoch(const char *Ver);
+      void Update(PkgIterator Pkg,pkgCache &Cache);
+      
+      // Various test members for the current status of the package
+      inline bool NewInstall() const {return Status == 2 && Mode == ModeInstall;};
+      inline bool Delete() const {return Mode == ModeDelete;};
+      inline bool Keep() const {return Mode == ModeKeep;};
+      inline bool Upgrade() const {return Status > 0 && Mode == ModeInstall;};
+      inline bool Upgradable() const {return Status >= 1;};
+      inline bool Downgrade() const {return Status < 0 && Mode == ModeInstall;};
+      inline bool Held() const {return Status != 0 && Keep();};
+      inline bool NowBroken() const {return (DepState & DepNowMin) != DepNowMin;};
+      inline bool InstBroken() const {return (DepState & DepInstMin) != DepInstMin;};
+      inline bool Install() const {return Mode == ModeInstall;};
+      inline VerIterator InstVerIter(pkgCache &Cache)
+                {return VerIterator(Cache,InstallVer);};
+      inline VerIterator CandidateVerIter(pkgCache &Cache)
+                {return VerIterator(Cache,CandidateVer);};
+   };
+#endif
 
 #endif

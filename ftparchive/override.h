@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: override.h,v 1.4 2001/06/26 02:50:27 jgg Exp $
+// $Id: override.h,v 1.2 2002/07/25 18:07:19 niemeyer Exp $
 /* ######################################################################
 
    Override

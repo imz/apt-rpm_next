@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: configuration.cc,v 1.25 2002/11/09 19:52:03 doogie Exp $
+// $Id: configuration.cc,v 1.4 2003/01/29 18:43:48 niemeyer Exp $
 /* ######################################################################
 
    Configuration Class
@@ -710,7 +710,9 @@ bool ReadConfigDir(Configuration &Conf,string Dir,bool AsSectional,
       // Skip bad file names ala run-parts
       const char *C = Ent->d_name;
       for (; *C != 0; C++)
-	 if (isalpha(*C) == 0 && isdigit(*C) == 0 && *C != '_' && *C != '-')
+	 // CNC:2002-11-25
+	 if (isalpha(*C) == 0 && isdigit(*C) == 0
+	     && *C != '_' && *C != '-' && *C != '.')
 	    break;
       if (*C != 0)
 	 continue;

@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
-// Description								/*{{{*/// $Id: ftp.h,v 1.4 2001/03/06 07:15:29 jgg Exp $
-// $Id: ftp.h,v 1.4 2001/03/06 07:15:29 jgg Exp $
+// Description								/*{{{*/// $Id: ftp.h,v 1.1 2002/07/23 17:54:53 niemeyer Exp $
+// $Id: ftp.h,v 1.1 2002/07/23 17:54:53 niemeyer Exp $
 /* ######################################################################
 
    FTP Aquire Method - This is the FTP aquire method for APT.

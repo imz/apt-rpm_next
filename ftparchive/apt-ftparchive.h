@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: apt-ftparchive.h,v 1.3 2001/05/29 03:51:37 jgg Exp $
+// $Id: apt-ftparchive.h,v 1.2 2002/07/25 18:07:19 niemeyer Exp $
 /* ######################################################################
 
    Writer 

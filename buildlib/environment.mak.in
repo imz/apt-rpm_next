@@ -20,6 +20,10 @@ SOCKETLIBS:= @SOCKETLIBS@
 AR:=@AR@
 RANLIB:=@RANLIB@
 
+# CNC:2002-07-03
+# RPM stuff
+RPMLIBS:= @RPMLIBS@
+
 # Dep generation - this only works for gnu stuff
 GCC3DEP = @GCC3DEP@
 INLINEDEPFLAG = -MD
@@ -56,7 +60,8 @@ NEED_SOCKLEN_T_DEFINE = @NEED_SOCKLEN_T_DEFINE@
 
 # Shared library things
 HOST_OS = @host_os@
-ifneq ($(words $(filter linux-gnu gnu% %gnu,$(HOST_OS))),0)
+# CNC:2002-07-25
+ifneq ($(words $(filter linux% gnu%,$(HOST_OS))),0)
    SONAME_MAGIC=-Wl,-soname -Wl,
    LFLAGS_SO=
 else

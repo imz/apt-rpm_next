@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: clean.cc,v 1.4 2001/02/20 07:03:17 jgg Exp $
+// $Id: clean.cc,v 1.1 2002/07/23 17:54:50 niemeyer Exp $
 /* ######################################################################
 
    Clean - Clean out downloaded directories

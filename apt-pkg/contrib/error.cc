@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: error.cc,v 1.11 2002/03/26 07:38:58 jgg Exp $
+// $Id: error.cc,v 1.2 2002/07/25 18:07:18 niemeyer Exp $
 /* ######################################################################
    
    Global Erorr Class - Global error mechanism

@@ -39,7 +39,8 @@ bool pkgInitConfig(Configuration &Cnf)
       Cnf.Set("APT::Architecture",COMMON_CPU);
    else
       Cnf.Set("APT::Architecture",COMMON_OS "-" COMMON_CPU);
-   Cnf.Set("APT::Build-Essential::", "build-essential");
+   // CNC:2002-09-10
+   //Cnf.Set("APT::Build-Essential::", "build-essential");
    Cnf.Set("Dir","/");
    
    // State   

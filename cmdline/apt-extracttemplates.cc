@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: apt-extracttemplates.cc,v 1.14 2003/01/11 07:18:44 jgg Exp $
+// $Id: apt-extracttemplates.cc,v 1.5 2003/01/29 18:43:48 niemeyer Exp $
 /* ######################################################################
    
    APT Extract Templates - Program to extract debconf config and template
@@ -35,7 +35,9 @@
 #include <unistd.h>
 #include <fstream>
 
-#include <locale.h>
+// CNC:2003-02-14 - apti18n.h includes libintl.h which includes locale.h,
+// 		    as reported by Radu Greab.
+//#include <locale.h>
 #include <config.h>
 #include <apti18n.h>
 #include "apt-extracttemplates.h"

@@ -45,7 +45,9 @@
 
 #include "acqprogress.h"
 
-#include <locale.h>
+// CNC:2003-02-14 - apti18n.h includes libintl.h which includes locale.h,
+// 		    as reported by Radu Greab.
+//#include <locale.h>
 #include <fstream>
 #include <termios.h>
 #include <sys/ioctl.h>
@@ -343,19 +345,45 @@ void ShowDel(ostream &out,CacheFile &Cache)
 {
    /* Print out a list of packages that are going to be removed extra
       to what the user asked */
-   string List;
+   string List, RepList; // CNC:2002-07-25
    for (unsigned J = 0; J < Cache->Head().PackageCount; J++)
    {
       pkgCache::PkgIterator I(Cache,Cache.List[J]);
       if (Cache[I].Delete() == true)
       {
-	 if ((Cache[I].iFlags & pkgDepCache::Purge) == pkgDepCache::Purge)
-	    List += string(I.Name()) + "* ";
+	 // CNC:2002-07-25
+	 bool Obsoleted = false;
+	 string by;
+	 for (pkgCache::DepIterator D = I.RevDependsList(); D.end() == false; D++)
+	 {
+	    if (D->Type == pkgCache::Dep::Obsoletes &&
+	        Cache[D.ParentPkg()].Install() &&
+	        (pkgCache::Version*)D.ParentVer() == Cache[D.ParentPkg()].InstallVer &&
+	        Cache->VS().CheckDep(I.CurrentVer().VerStr(), D) == true)
+	    {
+	       if (Obsoleted)
+		  by += ", " + string(D.ParentPkg().Name());
+	       else
+	       {
+		  Obsoleted = true;
+		  by = D.ParentPkg().Name();
+	       }
+	    }
+	 }
+	 if (Obsoleted)
+	    RepList += string(I.Name()) + " (by " + by + ")  ";
 	 else
-	    List += string(I.Name()) + " ";
+	 {
+	    if ((Cache[I].iFlags & pkgDepCache::Purge) == pkgDepCache::Purge)
+	       List += string(I.Name()) + "* ";
+	    else
+	       List += string(I.Name()) + " ";
+	 }
       }
    }
    
+   // CNC:2002-07-25
+   ShowList(out,_("The following packages will be REPLACED:"),RepList);
    ShowList(out,_("The following packages will be REMOVED:"),List);
 }
 									/*}}}*/
@@ -502,6 +530,9 @@ void Stats(ostream &out,pkgDepCache &Dep)
    unsigned long Downgrade = 0;
    unsigned long Install = 0;
    unsigned long ReInstall = 0;
+   // CNC:2002-07-29
+   unsigned long Replace = 0;
+   unsigned long Remove = 0;
    for (pkgCache::PkgIterator I = Dep.PkgBegin(); I.end() == false; I++)
    {
       if (Dep[I].NewInstall() == true)
@@ -514,8 +545,29 @@ void Stats(ostream &out,pkgDepCache &Dep)
 	    if (Dep[I].Downgrade() == true)
 	       Downgrade++;
       }
-      
-      if (Dep[I].Delete() == false && (Dep[I].iFlags & pkgDepCache::ReInstall) == pkgDepCache::ReInstall)
+      // CNC:2002-07-29
+      if (Dep[I].Delete() == true)
+      {
+	 bool Obsoleted = false;
+	 string by;
+	 for (pkgCache::DepIterator D = I.RevDependsList();
+	      D.end() == false; D++)
+	 {
+	    if (D->Type == pkgCache::Dep::Obsoletes &&
+	        Dep[D.ParentPkg()].Install() &&
+	        (pkgCache::Version*)D.ParentVer() == Dep[D.ParentPkg()].InstallVer &&
+	        Dep.VS().CheckDep(I.CurrentVer().VerStr(), D) == true)
+	    {
+	       Obsoleted = true;
+	       break;
+	    }
+	 }
+	 if (Obsoleted)
+	    Replace++;
+	 else
+	    Remove++;
+      }
+      else if ((Dep[I].iFlags & pkgDepCache::ReInstall) == pkgDepCache::ReInstall)
 	 ReInstall++;
    }   
 
@@ -526,9 +578,13 @@ void Stats(ostream &out,pkgDepCache &Dep)
       ioprintf(out,_("%lu reinstalled, "),ReInstall);
    if (Downgrade != 0)
       ioprintf(out,_("%lu downgraded, "),Downgrade);
+   // CNC:2002-07-29
+   if (Replace != 0)
+      ioprintf(out,_("%lu replaced, "),Replace);
 
-   ioprintf(out,_("%lu to remove and %lu not upgraded.\n"),
-	    Dep.DelCount(),Dep.KeepCount());
+   // CNC:2002-07-29
+   ioprintf(out,_("%lu removed and %lu not upgraded.\n"),
+	    Remove,Dep.KeepCount());
    
    if (Dep.BadCount() != 0)
       ioprintf(out,_("%lu packages not fully installed or removed.\n"),
@@ -615,6 +671,9 @@ bool CacheFile::CheckDeps(bool AllowBroken)
    return true;
 }
 									/*}}}*/
+// CNC:2002-07-06
+bool DoClean(CommandLine &CmdL);
+bool DoAutoClean(CommandLine &CmdL);
 
 // InstallPackages - Actually download and install the packages		/*{{{*/
 // ---------------------------------------------------------------------
@@ -637,13 +696,14 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
    bool Essential = false;
    
    // Show all the various warning indicators
+   // CNC:2002-07-06
+   if (_config->FindB("APT::Get::Show-Upgraded",false) == true)
+      ShowUpgraded(c1out,Cache);
    ShowDel(c1out,Cache);
    ShowNew(c1out,Cache);
    if (ShwKept == true)
       ShowKept(c1out,Cache);
    Fail |= !ShowHold(c1out,Cache);
-   if (_config->FindB("APT::Get::Show-Upgraded",false) == true)
-      ShowUpgraded(c1out,Cache);
    Fail |= !ShowDowngraded(c1out,Cache);
    Essential = !ShowEssential(c1out,Cache);
    Fail |= Essential;
@@ -745,8 +805,9 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
       if (statvfs(OutputDir.c_str(),&Buf) != 0)
 	 return _error->Errno("statvfs","Couldn't determine free space in %s",
 			      OutputDir.c_str());
-      if (unsigned(Buf.f_bfree) < (FetchBytes - FetchPBytes)/Buf.f_bsize)
-	 return _error->Error(_("You don't have enough free space in %s."),
+      // CNC:2002-07-11
+      if (unsigned(Buf.f_bavail) < (FetchBytes - FetchPBytes)/Buf.f_bsize)
+	 return _error->Error(_("Sorry, you don't have enough free space in %s to hold all packages."),
 			      OutputDir.c_str());
    }
    
@@ -892,20 +953,36 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
 	 cerr << _("Unable to correct missing packages.") << endl;
 	 return _error->Error(_("Aborting Install."));
       }
-       	 
-      _system->UnLock();
-      pkgPackageManager::OrderResult Res = PM->DoInstall();
-      if (Res == pkgPackageManager::Failed || _error->PendingError() == true)
-	 return false;
-      if (Res == pkgPackageManager::Completed)
-	 return true;
+
+      // CNC:2002-10-18
+      if (Transient == false || _config->FindB("Acquire::CDROM::Copy-All", false) == false) {
+	 if (Transient == true) {
+	    // We must do that in a system independent way. */
+	    _config->Set("RPM::Install-Options::", "--nodeps");
+	 }
+	 _system->UnLock();
+	 pkgPackageManager::OrderResult Res = PM->DoInstall();
+	 if (Res == pkgPackageManager::Failed || _error->PendingError() == true)
+	    return false;
+
+	 // CNC:2002-07-06
+	 if (Res == pkgPackageManager::Completed)
+	 {
+	    CommandLine *CmdL = NULL; // Watch out! If used will blow up!
+	    bool ret = true;
+	    if (_config->FindB("APT::Post-Install::Clean",false) == true) 
+	       ret = DoClean(*CmdL);
+	    else if (_config->FindB("APT::Post-Install::AutoClean",false) == true) 
+	       ret = DoAutoClean(*CmdL);
+	    return ret;
+	 }
+	 _system->Lock();
+      }
       
       // Reload the fetcher object and loop again for media swapping
       Fetcher.Shutdown();
       if (PM->GetArchives(&Fetcher,&List,&Recs) == false)
 	 return false;
-      
-      _system->Lock();
    }   
 }
 									/*}}}*/
@@ -995,7 +1072,9 @@ bool TryToInstall(pkgCache::PkgIterator Pkg,pkgDepCache &Cache,
 	 pkgCache::DepIterator Dep = Pkg.RevDependsList();
 	 for (; Dep.end() == false; Dep++)
 	 {
-	    if (Dep->Type != pkgCache::Dep::Replaces)
+	    // CNC:2002-07-30
+	    if (Dep->Type != pkgCache::Dep::Replaces &&
+	        Dep->Type != pkgCache::Dep::Obsoletes)
 	       continue;
 	    if (Seen[Dep.ParentPkg()->ID] == true)
 	       continue;
@@ -1198,6 +1277,25 @@ bool DoUpdate(CommandLine &CmdL)
    AcqTextStatus Stat(ScreenWidth,_config->FindI("quiet",0));
    pkgAcquire Fetcher(&Stat);
 
+   // CNC:2002-07-03
+   bool Failed = false;
+   // Populate it with release file URIs
+   if (List.GetReleases(&Fetcher) == false)
+      return false;
+   if (_config->FindB("APT::Get::Print-URIs") == false)
+   {
+      Fetcher.Run();
+      for (pkgAcquire::ItemIterator I = Fetcher.ItemsBegin(); I != Fetcher.ItemsEnd(); I++)
+      {
+	 if ((*I)->Status == pkgAcquire::Item::StatDone)
+	    continue;
+	 (*I)->Finished();
+	 Failed = true;
+      }
+      if (Failed == true)
+	 _error->Warning(_("Release files for some repositories could not be retrieved or authenticated. Such repositories are being ignored."));
+   }
+   
    // Populate it with the source selection
    if (List.GetIndexes(&Fetcher) == false)
 	 return false;
@@ -1216,7 +1314,6 @@ bool DoUpdate(CommandLine &CmdL)
    if (Fetcher.Run() == pkgAcquire::Failed)
       return false;
 
-   bool Failed = false;
    for (pkgAcquire::ItemIterator I = Fetcher.ItemsBegin(); I != Fetcher.ItemsEnd(); I++)
    {
       if ((*I)->Status == pkgAcquire::Item::StatDone)
@@ -1399,6 +1496,10 @@ bool DoInstall(CommandLine &CmdL)
 	    return false;
       }      
    }
+
+   // CNC:2002-08-01
+   if (_config->FindB("APT::Remove-Depends",false) == true)
+      Fix.RemoveDepends();
 
    /* If we are in the Broken fixing mode we do not attempt to fix the
       problems. This is if the user invoked install without -f and gave
@@ -1698,7 +1799,8 @@ bool DoSource(CommandLine &CmdL)
 	   I != Lst.end(); I++)
       {
 	 // Try to guess what sort of file it is we are getting.
-	 if (I->Type == "dsc")
+	 // CNC:2002-07-06
+	 if (I->Type == "dsc" || I->Type == "srpm")
 	 {
 	    Dsc[J].Package = Last->Package();
 	    Dsc[J].Version = Last->Version();
@@ -1732,8 +1834,9 @@ bool DoSource(CommandLine &CmdL)
    if (statvfs(OutputDir.c_str(),&Buf) != 0)
       return _error->Errno("statvfs","Couldn't determine free space in %s",
 			   OutputDir.c_str());
-   if (unsigned(Buf.f_bfree) < (FetchBytes - FetchPBytes)/Buf.f_bsize)
-      return _error->Error(_("You don't have enough free space in %s"),
+   // CNC:2002-07-12
+   if (unsigned(Buf.f_bavail) < (FetchBytes - FetchPBytes)/Buf.f_bsize)
+      return _error->Error(_("Sorry, you don't have enough free space in %s"),
 			   OutputDir.c_str());
    
    // Number of bytes
@@ -1801,6 +1904,33 @@ bool DoSource(CommandLine &CmdL)
 	     Dsc[I].Dsc.empty() == true)
 	    continue;
 
+// CNC:2002-07-06
+#if 1
+	 if (_config->FindB("APT::Get::Compile",false) == true)
+	 {
+	    char S[500];
+	    snprintf(S,sizeof(S),"%s %s",
+		     _config->Find("RPM::Source::Build-Command","rpm --rebuild").c_str(),
+		     Dsc[I].Dsc.c_str());
+	    if (system(S) != 0)
+	    {
+	       fprintf(stderr,_("Build command '%s' failed.\n"),S);
+	       _exit(1);
+	    }	    
+	 }
+	 else
+	 {
+	    char S[500];
+	    snprintf(S,sizeof(S),"%s %s",
+		     _config->Find("RPM::Source::Install-Command","rpm -ivh").c_str(),
+		     Dsc[I].Dsc.c_str());
+	    if (system(S) != 0)
+	    {
+	       fprintf(stderr,_("Unpack command '%s' failed.\n"),S);
+	       _exit(1);
+	    }	    
+	 } 
+#else
 	 // See if the package is already unpacked
 	 struct stat Stat;
 	 if (stat(Dir.c_str(),&Stat) == 0 &&
@@ -1839,6 +1969,7 @@ bool DoSource(CommandLine &CmdL)
 	       _exit(1);
 	    }	    
 	 }      
+#endif
       }
       
       _exit(0);
@@ -2116,7 +2247,8 @@ bool ShowHelp(CommandLine &CmdL)
       "   source - Download source archives\n"
       "   build-dep - Configure build-dependencies for source packages\n"
       "   dist-upgrade - Distribution upgrade, see apt-get(8)\n"
-      "   dselect-upgrade - Follow dselect selections\n"
+// CNC:2002-08-01
+//      "   dselect-upgrade - Follow dselect selections\n"
       "   clean - Erase downloaded archive files\n"
       "   autoclean - Erase old downloaded archive files\n"
       "   check - Verify that there are no broken dependencies\n"
@@ -2132,6 +2264,8 @@ bool ShowHelp(CommandLine &CmdL)
       "  -m  Attempt to continue if archives are unlocatable\n"
       "  -u  Show a list of upgraded packages as well\n"
       "  -b  Build the source package after fetching it\n"
+// CNC:2002-08-02
+      "  -D  When removing packages, remove dependencies as possible\n"
       "  -c=? Read this configuration file\n"
       "  -o=? Set an arbitary configuration option, eg -o dir::cache=/tmp\n"
       "See the apt-get(8), sources.list(5) and apt.conf(5) manual\n"
@@ -2190,6 +2324,7 @@ int main(int argc,const char *argv[])
       {'f',"fix-broken","APT::Get::Fix-Broken",0},
       {'u',"show-upgraded","APT::Get::Show-Upgraded",0},
       {'m',"ignore-missing","APT::Get::Fix-Missing",0},
+      {'D',"remove-deps","APT::Remove-Depends",0}, // CNC:2002-08-01
       {'t',"target-release","APT::Default-Release",CommandLine::HasArg},
       {'t',"default-release","APT::Default-Release",CommandLine::HasArg},
       {0,"download","APT::Get::Download",0},
@@ -2282,3 +2417,5 @@ int main(int argc,const char *argv[])
    
    return 0;   
 }
+
+// vim:sts=3:sw=3

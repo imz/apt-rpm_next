@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: algorithms.cc,v 1.44 2002/11/28 18:49:16 jgg Exp $
+// $Id: algorithms.cc,v 1.11 2003/01/29 18:43:48 niemeyer Exp $
 /* ######################################################################
 
    Algorithms - A set of misc algorithms
@@ -21,6 +21,10 @@
 #include <apt-pkg/error.h>
 #include <apt-pkg/configuration.h>
 #include <apt-pkg/sptr.h>
+
+// CNC:2002-07-04
+#include <apt-pkg/pkgsystem.h>
+#include <apt-pkg/version.h>
     
 #include <apti18n.h>
     
@@ -301,6 +305,14 @@ bool pkgFixBroken(pkgDepCache &Cache)
    }
    
    pkgProblemResolver Fix(&Cache);
+   
+   // CNC:2002-07-04
+   _system->ProcessCache(Cache,Fix);
+
+   // CNC:2002-08-08
+   if (_config->FindB("APT::Remove-Depends",false) == true)
+      Fix.RemoveDepends();
+   
    return Fix.Resolve(true);
 }
 									/*}}}*/
@@ -317,8 +329,29 @@ bool pkgDistUpgrade(pkgDepCache &Cache)
    /* Auto upgrade all installed packages, this provides the basis 
       for the installation */
    for (pkgCache::PkgIterator I = Cache.PkgBegin(); I.end() == false; I++)
+   {
+      // CNC:2002-07-23
       if (I->CurrentVer != 0)
-	 Cache.MarkInstall(I,true);
+      {
+	 // Was it obsoleted?
+	 bool Obsoleted = false;
+	 for (pkgCache::DepIterator D = I.RevDependsList(); D.end() == false; D++)
+	 {
+	    if (D->Type == pkgCache::Dep::Obsoletes &&
+	        Cache[D.ParentPkg()].CandidateVer != 0 &&
+		Cache[D.ParentPkg()].CandidateVerIter(Cache).Downloadable() == true &&
+	        (pkgCache::Version*)D.ParentVer() == Cache[D.ParentPkg()].CandidateVer &&
+	        Cache.VS().CheckDep(I.CurrentVer().VerStr(), D) == true)
+	    {
+	       Cache.MarkInstall(D.ParentPkg(),true);
+	       Obsoleted = true;
+	       break;
+	    }
+	 }
+	 if (Obsoleted == false)
+	    Cache.MarkInstall(I,true);
+      }
+   }
 
    /* Now, auto upgrade all essential packages - this ensures that
       the essential packages are present and working */
@@ -329,10 +362,34 @@ bool pkgDistUpgrade(pkgDepCache &Cache)
    /* We do it again over all previously installed packages to force 
       conflict resolution on them all. */
    for (pkgCache::PkgIterator I = Cache.PkgBegin(); I.end() == false; I++)
+   {
+      // CNC:2002-07-23
       if (I->CurrentVer != 0)
-	 Cache.MarkInstall(I,false);
+      {
+	 // Was it obsoleted?
+	 bool Obsoleted = false;
+	 for (pkgCache::DepIterator D = I.RevDependsList(); D.end() == false; D++)
+	 {
+	    if (D->Type == pkgCache::Dep::Obsoletes &&
+	        Cache[D.ParentPkg()].CandidateVer != 0 &&
+		Cache[D.ParentPkg()].CandidateVerIter(Cache).Downloadable() == true &&
+	        (pkgCache::Version*)D.ParentVer() == Cache[D.ParentPkg()].CandidateVer &&
+	        Cache.VS().CheckDep(I.CurrentVer().VerStr(), D) == true)
+	    {
+	       Cache.MarkInstall(D.ParentPkg(),false);
+	       Obsoleted = true;
+	       break;
+	    }
+	 }
+	 if (Obsoleted == false)
+	    Cache.MarkInstall(I,false);
+      }
+   }
 
    pkgProblemResolver Fix(&Cache);
+
+   // CNC:2002-07-04
+   _system->ProcessCache(Cache,Fix);
 
    // Hold back held packages.
    if (_config->FindB("APT::Ignore-Hold",false) == false)
@@ -346,6 +403,10 @@ bool pkgDistUpgrade(pkgDepCache &Cache)
 	 }
       }
    }
+
+   // CNC:2002-08-08
+   if (_config->FindB("APT::Remove-Depends",false) == true)
+      Fix.RemoveDepends();
    
    return Fix.Resolve();
 }
@@ -375,6 +436,9 @@ bool pkgAllUpgrade(pkgDepCache &Cache)
       if (I->CurrentVer != 0 && Cache[I].InstallVer != 0)
 	 Cache.MarkInstall(I,false);
    }
+
+   // CNC:2002-07-04
+   _system->ProcessCache(Cache,Fix);
       
    return Fix.ResolveByKeep();
 }
@@ -957,6 +1021,10 @@ bool pkgProblemResolver::Resolve(bool BrokenFix)
 		  if (Debug == true)
 		     clog << "  Added " << Pkg.Name() << " to the remove list" << endl;
 		  
+		  // CNC:2002-07-09
+		  if (*(V+1) != 0) //XXX Look for other solutions?
+		      continue;
+
 		  LEnd->Pkg = Pkg;
 		  LEnd->Dep = End;
 		  LEnd++;
@@ -1145,7 +1213,8 @@ bool pkgProblemResolver::ResolveByKeep()
 		   Pkg->CurrentVer == 0)
 		  continue;
 	       
-	       if ((Flags[I->ID] & Protected) == 0)
+	       // CNC:2002-08-05
+	       if ((Flags[Pkg->ID] & Protected) == 0)
 	       {
 		  if (Debug == true)
 		     clog << "  Keeping Package " << Pkg.Name() << " due to dep" << endl;
@@ -1198,6 +1267,113 @@ void pkgProblemResolver::InstallProtect()
    }   
 }
 									/*}}}*/
+// CNC:2002-08-01
+// ProblemSolver::RemoveDepends - Remove dependencies selectively	/*{{{*/
+// ---------------------------------------------------------------------
+// This will remove every dependency which is required only by packages
+// already being removed. This will allow one to reverse the effect a
+// task package, for example.
+bool pkgProblemResolver::RemoveDepends()
+{ 
+   bool Debug = _config->FindB("Debug::pkgRemoveDepends",false);
+   bool MoreSteps = true;
+   while (MoreSteps == true)
+   {
+      MoreSteps = false;
+      for (pkgCache::PkgIterator Pkg = Cache.PkgBegin();
+	   Pkg.end() == false; Pkg++)
+      {
+	 if (Cache[Pkg].Delete() == false)
+	    continue;
+	 for (pkgCache::DepIterator D = Pkg.CurrentVer().DependsList();
+	      D.end() == false; D++)
+	 {
+	    if (D->Type != pkgCache::Dep::Depends &&
+		D->Type != pkgCache::Dep::PreDepends)
+	       continue;
+	    
+	    pkgCache::PkgIterator DPkg = D.TargetPkg();
+	    if (DPkg->CurrentVer == 0 || Cache[DPkg].Delete() == true)
+	       continue;
+	    if ((Flags[DPkg->ID] & Protected) == Protected)
+	       continue;
+	    
+	    bool Remove = true;
+
+	    // Check if another package not being removed or being
+	    // installed requires this dependency.
+	    for (pkgCache::DepIterator R = DPkg.RevDependsList();
+		 R.end() == false; R++)
+	    {
+	       pkgCache::PkgIterator RPkg = R.ParentPkg();
+
+	       if (R->Type != pkgCache::Dep::Depends &&
+		   R->Type != pkgCache::Dep::PreDepends)
+		  continue;
+
+	       if ((Cache[RPkg].Install() &&
+		    (pkgCache::Version*)R.ParentVer() == Cache[RPkg].InstallVer &&
+		    Cache.VS().CheckDep(DPkg.CurrentVer().VerStr(), R) == true) ||
+		   (RPkg->CurrentVer != 0 &&
+		    Cache[RPkg].Install() == false &&
+		    Cache[RPkg].Delete() == false &&
+		    Cache.VS().CheckDep(DPkg.CurrentVer().VerStr(), R) == true))
+	       {
+		  Remove = false;
+		  break;
+	       }
+	    }
+
+	    if (Remove == false)
+	       continue;
+
+	    // Also check every virtual package provided by this
+	    // dependency is required by packages not being removed,
+	    // or being installed.
+	    for (pkgCache::PrvIterator P = DPkg.CurrentVer().ProvidesList();
+		 P.end() == false; P++)
+	    {
+	       pkgCache::PkgIterator PPkg = P.ParentPkg();
+	       for (pkgCache::DepIterator R = PPkg.RevDependsList();
+		    R.end() == false; R++)
+	       {
+		  pkgCache::PkgIterator RPkg = R.ParentPkg();
+	       
+		  if (R->Type != pkgCache::Dep::Depends &&
+		      R->Type != pkgCache::Dep::PreDepends)
+		     continue;
+
+		  if ((Cache[RPkg].Install() &&
+		       (pkgCache::Version*)R.ParentVer() == Cache[RPkg].InstallVer &&
+		       Cache.VS().CheckDep(P.ProvideVersion(), R) == true) ||
+		      (RPkg->CurrentVer != 0 &&
+		       Cache[RPkg].Install() == false &&
+		       Cache[RPkg].Delete() == false &&
+		       Cache.VS().CheckDep(P.ProvideVersion(), R) == true))
+		  {
+		     Remove = false;
+		     break;
+		  }
+	       }
+	    }
+
+	    if (Remove == false)
+	       continue;
+
+	    if (Debug == true)
+	       clog << "Marking " << DPkg.Name() << " as a removable dependency of " << Pkg.Name() << endl;
+
+	    Cache.MarkDelete(DPkg);
+
+	    // Do at least one more step, to ensure that packages which
+	    // were being hold because of this one also get removed.
+	    MoreSteps = true;
+	 }
+      }
+   }
+   return true;
+}
+									/*}}}*/
 
 // PrioSortList - Sort a list of versions by priority			/*{{{*/
 // ---------------------------------------------------------------------
@@ -1209,12 +1385,13 @@ static int PrioComp(const void *A,const void *B)
    pkgCache::VerIterator L(*PrioCache,*(pkgCache::Version **)A);
    pkgCache::VerIterator R(*PrioCache,*(pkgCache::Version **)B);
    
-   if ((L.ParentPkg()->Flags & pkgCache::Flag::Essential) == pkgCache::Flag::Essential &&
-       (R.ParentPkg()->Flags & pkgCache::Flag::Essential) != pkgCache::Flag::Essential)
-     return 1;
-   if ((L.ParentPkg()->Flags & pkgCache::Flag::Essential) != pkgCache::Flag::Essential &&
-       (R.ParentPkg()->Flags & pkgCache::Flag::Essential) == pkgCache::Flag::Essential)
-     return -1;
+   // CNC:2002-11-27
+   if ((R.ParentPkg()->Flags & pkgCache::Flag::Essential) == pkgCache::Flag::Essential &&
+       (L.ParentPkg()->Flags & pkgCache::Flag::Essential) != pkgCache::Flag::Essential)
+   return 1;
+   if ((R.ParentPkg()->Flags & pkgCache::Flag::Essential) != pkgCache::Flag::Essential &&
+       (L.ParentPkg()->Flags & pkgCache::Flag::Essential) == pkgCache::Flag::Essential)
+   return -1;
    
    if (L->Priority != R->Priority)
       return R->Priority - L->Priority;
@@ -1229,3 +1406,4 @@ void pkgPrioSortList(pkgCache &Cache,pkgCache::Version **List)
    qsort(List,Count,sizeof(*List),PrioComp);
 }
 									/*}}}*/
+// vim:sts=3:sw=3

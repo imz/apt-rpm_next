@@ -180,7 +180,7 @@ pkgCache::PkgIterator pkgCache::FindPkg(string Name)
    for (; Pkg != PkgP; Pkg = PkgP + Pkg->NextPackage)
    {
       if (Pkg->Name != 0 && StrP[Pkg->Name] == Name[0] &&
-	  stringcasecmp(Name,StrP + Pkg->Name) == 0)
+	  stringcmp(Name,StrP + Pkg->Name) == 0) // CNC:2002-07-23
 	 return PkgIterator(*this,Pkg);
    }
    return PkgIterator(*this,0);
@@ -366,7 +366,7 @@ pkgCache::Version **pkgCache::DepIterator::AllTargets()
       // Walk along the actual package providing versions
       for (VerIterator I = DPkg.VersionList(); I.end() == false; I++)
       {
-	 if (Owner->VS->CheckDep(I.VerStr(),Dep->CompareOp,TargetVer()) == false)
+	 if (Owner->VS->CheckDep(I.VerStr(),*this) == false) // CNC:2002-07-10
 	    continue;
 
 	 if ((Dep->Type == pkgCache::Dep::Conflicts ||
@@ -382,7 +382,7 @@ pkgCache::Version **pkgCache::DepIterator::AllTargets()
       // Follow all provides
       for (PrvIterator I = DPkg.ProvidesList(); I.end() == false; I++)
       {
-	 if (Owner->VS->CheckDep(I.ProvideVersion(),Dep->CompareOp,TargetVer()) == false)
+	 if (Owner->VS->CheckDep(I.ProvideVersion(),*this) == false) // CNC:2002-07-10
 	    continue;
 	 
 	 if ((Dep->Type == pkgCache::Dep::Conflicts ||

@@ -30,7 +30,8 @@ include $(PROGRAM_H)
 PROGRAM=apt-cdrom
 SLIBS = -lapt-pkg
 LIB_MAKES = apt-pkg/makefile
-SOURCE = apt-cdrom.cc indexcopy.cc
+# CNC:2002-07-11
+SOURCE = apt-cdrom.cc rpmindexcopy.cc
 include $(PROGRAM_H)
 
 # The apt-sortpkgs program
@@ -40,6 +41,7 @@ LIB_MAKES = apt-pkg/makefile
 SOURCE = apt-sortpkgs.cc
 include $(PROGRAM_H)
 
+# CNC:2003-02-14
 # The apt-extracttemplates program
 PROGRAM=apt-extracttemplates
 SLIBS = -lapt-pkg -lapt-inst

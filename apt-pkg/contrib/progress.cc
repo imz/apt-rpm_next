@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: progress.cc,v 1.12 2003/01/11 07:17:04 jgg Exp $
+// $Id: progress.cc,v 1.2 2003/01/29 18:43:48 niemeyer Exp $
 /* ######################################################################
    
    OpProgress - Operation Progress

@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: debversion.cc,v 1.6 2003/01/27 00:05:59 jgg Exp $
+// $Id: debversion.cc,v 1.2 2003/01/29 18:43:48 niemeyer Exp $
 /* ######################################################################
 
    Debian Version - Versioning system for Debian

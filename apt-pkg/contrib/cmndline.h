@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: cmndline.h,v 1.7 1999/10/31 06:32:28 jgg Exp $
+// $Id: cmndline.h,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
 
    Command Line Class - Sophisticated command line parser

@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: cachedb.h,v 1.3 2002/11/22 07:19:51 doogie Exp $
+// $Id: cachedb.h,v 1.3 2003/01/29 18:43:48 niemeyer Exp $
 /* ######################################################################
 
    CacheDB

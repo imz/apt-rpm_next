@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: deblistparser.cc,v 1.28 2001/10/02 03:03:47 tausq Exp $
+// $Id: deblistparser.cc,v 1.2 2002/07/25 18:07:18 niemeyer Exp $
 /* ######################################################################
    
    Package Cache Generator - Generator for the cache structure.

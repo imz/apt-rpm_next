@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: sourcelist.cc,v 1.24 2002/07/08 04:18:07 jgg Exp $
+// $Id: sourcelist.cc,v 1.3 2002/08/15 20:51:37 niemeyer Exp $
 /* ######################################################################
 
    List of Sources
@@ -176,6 +176,19 @@ bool pkgSourceList::ReadVendors()
       Vendor->VendorID = Top->Tag;
       Vendor->FingerPrint = Block.Find("Fingerprint");
       Vendor->Description = Block.Find("Name");
+
+      // CNC:2002-08-15
+      char *buffer = new char[Vendor->FingerPrint.length()+1];
+      char *p = buffer;;
+      for (string::const_iterator I = Vendor->FingerPrint.begin();
+	   I != Vendor->FingerPrint.end(); I++)
+      {
+	 if (*I != ' ' && *I != '\t')
+	    *p++ = *I;
+      }
+      *p = 0;
+      Vendor->FingerPrint = buffer;
+      delete [] buffer;
       
       if (Vendor->FingerPrint.empty() == true || 
 	  Vendor->Description.empty() == true)
@@ -328,6 +341,18 @@ bool pkgSourceList::GetIndexes(pkgAcquire *Owner) const
 {
    for (const_iterator I = SrcList.begin(); I != SrcList.end(); I++)
       if ((*I)->GetIndexes(Owner) == false)
+	 return false;
+   return true;
+}
+									/*}}}*/
+// CNC:2002-07-04
+// SourceList::GetReleases - Load release files into the downloader	/*{{{*/
+// ---------------------------------------------------------------------
+/* */
+bool pkgSourceList::GetReleases(pkgAcquire *Owner) const
+{
+   for (const_iterator I = SrcList.begin(); I != SrcList.end(); I++)
+      if ((*I)->GetReleases(Owner) == false)
 	 return false;
    return true;
 }

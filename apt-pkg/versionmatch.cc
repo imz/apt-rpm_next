@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: versionmatch.cc,v 1.7 2002/11/06 06:43:14 jgg Exp $
+// $Id: versionmatch.cc,v 1.2 2003/01/29 18:43:48 niemeyer Exp $
 /* ######################################################################
 
    Version Matching 

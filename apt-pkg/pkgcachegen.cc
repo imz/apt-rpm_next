@@ -131,12 +131,16 @@ bool pkgCacheGenerator::MergeList(ListParser &List,
 	 continue;
       }
 
+      // CNC:2002-07-09
+      string Arch = List.Architecture();
+
       pkgCache::VerIterator Ver = Pkg.VersionList();
       map_ptrloc *Last = &Pkg->VersionList;
       int Res = 1;
       for (; Ver.end() == false; Last = &Ver->NextVer, Ver++)
       {
-	 Res = Cache.VS->CmpVersion(Version,Ver.VerStr());
+	 // CNC:2002-07-09
+	 Res = Cache.VS->CmpVersionArch(Version,Arch,Ver.VerStr(),Ver.Arch());
 	 if (Res >= 0)
 	    break;
       }
@@ -170,7 +174,9 @@ bool pkgCacheGenerator::MergeList(ListParser &List,
       {
 	 for (; Ver.end() == false; Last = &Ver->NextVer, Ver++)
 	 {
-	    Res = Cache.VS->CmpVersion(Version,Ver.VerStr());
+	    // CNC:2002-07-09
+	    Res = Cache.VS->CmpVersionArch(Version,Arch,
+			    		   Ver.VerStr(),Ver.Arch());
 	    if (Res != 0)
 	       break;
 	 }
@@ -248,7 +254,8 @@ bool pkgCacheGenerator::MergeFileProvides(ListParser &List)
       pkgCache::VerIterator Ver = Pkg.VersionList();
       for (; Ver.end() == false; Ver++)
       {
-	 if (Ver->Hash == Hash && Version.c_str() == Ver.VerStr())
+	 // CNC:2002-07-25
+	 if (Ver->Hash == Hash && strcmp(Version.c_str(), Ver.VerStr()) == 0)
 	 {
 	    if (List.CollectFileProvides(Cache,Ver) == false)
 	       return _error->Error(_("Error occured while processing %s (CollectFileProvides)"),PackageName.c_str());
@@ -571,8 +578,9 @@ static bool CheckValidity(string CacheFile, FileIterator Start,
     
       if ((*Start)->Exists() == false)
       {
-	 _error->WarningE("stat",_("Couldn't stat source package list %s"),
-			  (*Start)->Describe().c_str());
+	 // CNC:2002-07-04
+	 /*_error->WarningE("stat",_("Couldn't stat source package list %s"),
+	 		  (*Start)->Describe().c_str());*/
 	 continue;
       }
 
@@ -660,6 +668,8 @@ static bool BuildCache(pkgCacheGenerator &Gen,
 	 if ((*I)->MergeFileProvides(Gen,Progress) == false)
 	    return false;
       }
+      // CNC:2002-07-04
+      Progress.Done();
    }
    
    return true;
@@ -707,6 +717,14 @@ bool pkgMakeStatusCache(pkgSourceList &List,OpProgress &Progress,
       return true;
    }
    
+   // CNC:2002-07-03
+#if DYING
+   if (_system->PreProcess(Files.begin(),Files.end(),Progress) == false) 
+   {
+       _error->Error(_("Error pre-processing package lists"));
+       return false;
+   }
+#endif
    /* At this point we know we need to reconstruct the package cache,
       begin. */
    SPtr<FileFd> CacheF;
@@ -729,6 +747,7 @@ bool pkgMakeStatusCache(pkgSourceList &List,OpProgress &Progress,
    // Lets try the source cache.
    unsigned long CurrentSize = 0;
    unsigned long TotalSize = 0;
+#if DISABLED
    if (CheckValidity(SrcCacheFile,Files.begin(),
 		     Files.begin()+EndOfSource) == true)
    {
@@ -788,6 +807,19 @@ bool pkgMakeStatusCache(pkgSourceList &List,OpProgress &Progress,
 		     Files.begin()+EndOfSource,Files.end()) == false)
 	 return false;
    }
+#else
+   {
+      TotalSize = ComputeSize(Files.begin(),Files.end());
+      
+      // Build the whole cache at once
+      pkgCacheGenerator Gen(Map.Get(),&Progress);
+      if (_error->PendingError() == true)
+	 return false;
+      if (BuildCache(Gen,Progress,CurrentSize,TotalSize,
+		     Files.begin(),Files.end()) == false)
+	 return false;
+   }
+#endif
 
    if (_error->PendingError() == true)
       return false;
@@ -841,3 +873,5 @@ bool pkgMakeOnlyStatusCache(OpProgress &Progress,DynamicMMap **OutMap)
    return true;
 }
 									/*}}}*/
+
+// vim:sts=3:sw=3

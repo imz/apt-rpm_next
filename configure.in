@@ -16,14 +16,18 @@ AC_INIT(configure.in)
 AC_CONFIG_AUX_DIR(buildlib)
 AC_CONFIG_HEADER(include/config.h:buildlib/config.h.in include/apti18n.h:buildlib/apti18n.h.in)
 
+dnl CNC:2002-07-08
 dnl -- SET THIS TO THE RELEASE VERSION --
-AC_DEFINE_UNQUOTED(VERSION,"0.5.4.9")
-PACKAGE="apt"
-AC_DEFINE_UNQUOTED(PACKAGE,"$PACKAGE")
-AC_SUBST(PACKAGE)
+dnl AC_DEFINE_UNQUOTED(VERSION,"0.5.5")
+dnl PACKAGE="apt"
+dnl AC_DEFINE_UNQUOTED(PACKAGE,"$PACKAGE")
+dnl AC_SUBST(PACKAGE)
 
 dnl Check the archs, we want the target type.
 AC_CANONICAL_SYSTEM
+
+dnl CNC:2002-07-08
+AM_INIT_AUTOMAKE("apt", "0.5.5")
 
 dnl Check our C compiler
 AC_CHECK_TOOL_PREFIX
@@ -57,6 +61,51 @@ AC_CHECK_HEADER(db2/db.h,
      [AC_CHECK_LIB(db2,db_open,
         [AC_DEFINE(HAVE_DB2) DB2LIB="-ldb2"])])
 AC_SUBST(DB2LIB)
+
+dnl CNC:2002-07-03
+dnl Check for rpm version
+rpm_version="none"
+SAVE_LIBS="$LIBS"
+SAVE_CPPFLAGS="$CPPFLAGS"
+
+CPPFLAGS="$SAVE_CPPFLAGS -I/usr/include/rpm"
+AC_CHECK_HEADERS(db1/db.h)
+AC_CHECK_HEADER(rpm/rpmlib.h, rpm_header_ok=1, rpm_header_ok=0)
+
+if test $rpm_header_ok = 1; then
+
+      LIBS="$SAVE_LIBS -lrpm -lrpmio -lz -lbz2 -lpopt"
+      AC_CHECK_LIB(rpmdb,rpmdbOpen,
+        [RPMDBLIBS="-lrpmdb"],
+        [RPMDBLIBS="-ldb-3.1"])
+
+      LIBS="$SAVE_LIBS $RPMDBLIBS -lrpmio -lz -lbz2 -lpopt"
+      AC_CHECK_LIB(rpm,rpmdbGetIteratorOffset,
+        [AC_DEFINE_UNQUOTED(HAVE_RPM, 1) AC_DEFINE_UNQUOTED(HAVE_RPM4, 1)
+	 RPMLIBS="-lrpm $RPMDBLIBS -lrpmio -lz -lbz2 -lpopt"
+         SAVE_CPPFLAGS="$SAVE_CPPFLAGS -I/usr/include/rpm"
+         AC_CHECK_LIB(rpm, rpmtsUpdateDSI,
+		      [AC_DEFINE_UNQUOTED(HAVE_RPM41, 1)
+		       rpm_version="4.1"],
+		      [rpm_version="4.0.X"])
+	])
+
+      if test $rpm_version = "none"; then
+        LIBS="$SAVE_LIBS -ldb1 -lz -lbz2 -lpopt"
+        AC_CHECK_LIB(rpm,rpmdbFirstRecNum,
+              [AC_DEFINE_UNQUOTED(HAVE_RPM, 1) 
+	       RPMLIBS="-lrpm -ldb1 -lz -lbz2 -lpopt"
+               SAVE_CPPFLAGS="$SAVE_CPPFLAGS -I/usr/include/rpm"
+	       rpm_version="3"])
+      fi
+fi
+AC_MSG_CHECKING(for RPM version)
+AC_MSG_RESULT($rpm_version)
+
+AC_SUBST(RPMLIBS)
+CPPFLAGS="$SAVE_CPPFLAGS"
+LIBS="$SAVE_LIBS"
+
 
 dnl Converts the ARCH to be something singular for this general CPU family
 dnl This is often the dpkg architecture string.
@@ -171,7 +220,8 @@ ah_GCC3DEP
 dnl It used to be that the user could select translations and that could get
 dnl passed to the makefiles, but now that can only work if you use special
 dnl gettext approved makefiles, so this feature is unsupported by this.
-ALL_LINGUAS="da de en_GB es fr hu it nl no_NO pl pt_BR ru sv zh_TW"
+dnl CNC:2002-10-22
+ALL_LINGUAS="de_DE es_ES it_IT pt_BR ru"
 AM_GNU_GETTEXT(external)
 if test x"$USE_NLS" = "xyes"; then
    AC_DEFINE(USE_NLS)
@@ -179,4 +229,5 @@ fi
 AC_SUBST(USE_NLS)
 AC_PATH_PROG(BASH, bash)
 
+dnl CNC:2002-07-08
 AC_OUTPUT(environment.mak:buildlib/environment.mak.in makefile:buildlib/makefile.in,make -s dirs)

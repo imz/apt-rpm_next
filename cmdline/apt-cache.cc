@@ -31,7 +31,9 @@
 #include <config.h>
 #include <apti18n.h>
 
-#include <locale.h>
+// CNC:2003-02-14 - apti18n.h includes libintl.h which includes locale.h,
+// 		    as reported by Radu Greab.
+//#include <locale.h>
 #include <iostream>
 #include <unistd.h>
 #include <errno.h>
@@ -429,8 +431,24 @@ bool DumpAvail(CommandLine &Cmd)
 	 }
       }
       
+// CNC:2002-07-24
+#if HAVE_RPM
+      if (VF.end() == false)
+      {
+	 pkgRecords Recs(Cache);
+	 pkgRecords::Parser &P = Recs.Lookup(VF);
+	 const char *Start;
+	 const char *End;
+	 P.GetRec(Start,End);
+	 fwrite(Start,End-Start,1,stdout);
+	 putc('\n',stdout);
+      }
+   }
+   return !_error->PendingError();
+#else
       VFList[P->ID] = VF;
    }
+#endif
    
    LocalitySort(VFList,Count,sizeof(*VFList));
 
@@ -865,6 +883,16 @@ bool DisplayRecord(pkgCache::VerIterator V)
    if (Vf.end() == true)
       Vf = V.FileList();
       
+// CNC:2002-07-24
+#if HAVE_RPM
+   pkgRecords Recs(*GCache);
+   pkgRecords::Parser &P = Recs.Lookup(Vf);
+   const char *Start;
+   const char *End;
+   P.GetRec(Start,End);
+   fwrite(Start,End-Start,1,stdout);
+   putc('\n',stdout);
+#else
    // Check and load the package list file
    pkgCache::PkgFileIterator I = Vf.File();
    if (I.IsOk() == false)
@@ -886,6 +914,7 @@ bool DisplayRecord(pkgCache::VerIterator V)
    }
    
    delete [] Buffer;
+#endif
 
    return true;
 }
@@ -1408,3 +1437,5 @@ int main(int argc,const char *argv[])
           
    return 0;
 }
+
+// vim:sts=3:sw=3

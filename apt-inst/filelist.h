@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: filelist.h,v 1.2 2001/02/20 07:03:16 jgg Exp $
+// $Id: filelist.h,v 1.2 2002/07/25 18:07:17 niemeyer Exp $
 /* ######################################################################
 
    File Listing - Manages a Cache of File -> Package names.

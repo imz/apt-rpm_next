@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: policy.h,v 1.4 2001/05/07 04:24:08 jgg Exp $
+// $Id: policy.h,v 1.1 2002/07/23 17:54:50 niemeyer Exp $
 /* ######################################################################
 
    Package Version Policy implementation

@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: version.cc,v 1.10 2001/02/20 07:03:17 jgg Exp $
+// $Id: version.cc,v 1.1 2002/07/23 17:54:50 niemeyer Exp $
 /* ######################################################################
 
    Version - Versioning system..
@@ -42,3 +42,4 @@ pkgVersioningSystem *pkgVersioningSystem::GetVS(const char *Label)
    return 0;
 }
 									/*}}}*/
+// vim:sts=3:sw=3

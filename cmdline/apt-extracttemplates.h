@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: apt-extracttemplates.h,v 1.2 2001/02/27 04:26:03 jgg Exp $
+// $Id: apt-extracttemplates.h,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
 
    apt-extracttemplate - tool to extract template and config data

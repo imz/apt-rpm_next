@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: indexcopy.h,v 1.3 2001/05/27 04:46:54 jgg Exp $
+// $Id: indexcopy.h,v 1.1 2002/07/23 17:54:52 niemeyer Exp $
 /* ######################################################################
 
    Index Copying - Aid for copying and verifying the index files

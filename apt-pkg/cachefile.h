@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: cachefile.h,v 1.5 2002/04/27 04:28:04 jgg Exp $
+// $Id: cachefile.h,v 1.2 2002/07/25 18:07:18 niemeyer Exp $
 /* ######################################################################
    
    CacheFile - Simple wrapper class for opening, generating and whatnot

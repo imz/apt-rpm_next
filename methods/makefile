@@ -59,6 +59,14 @@ LIB_MAKES = apt-pkg/makefile
 SOURCE = rsh.cc
 include $(PROGRAM_H)
 
+# CNC:2002-07-03
+# The gpg method
+PROGRAM=gpg
+SLIBS = -lapt-pkg
+LIB_MAKES = apt-pkg/makefile
+SOURCE = gpg.cc
+include $(PROGRAM_H)
+
 # SSH and vzip2 method symlink
 all: $(BIN)/ssh $(BIN)/bzip2
 veryclean: clean-$(BIN)/ssh clean-$(BIN)/bzip2

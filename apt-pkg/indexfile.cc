@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: indexfile.cc,v 1.2 2001/02/20 07:03:17 jgg Exp $
+// $Id: indexfile.cc,v 1.1 2002/07/23 17:54:50 niemeyer Exp $
 /* ######################################################################
 
    Index File - Abstraction for an index of archive/souce file.

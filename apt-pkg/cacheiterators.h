@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: cacheiterators.h,v 1.17 2001/04/29 05:13:51 jgg Exp $
+// $Id: cacheiterators.h,v 1.1 2002/07/23 17:54:50 niemeyer Exp $
 /* ######################################################################
    
    Cache Iterators - Iterators for navigating the cache structure

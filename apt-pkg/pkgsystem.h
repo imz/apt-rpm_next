@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: pkgsystem.h,v 1.6 2002/11/11 06:55:50 doogie Exp $
+// $Id: pkgsystem.h,v 1.4 2003/01/29 18:43:48 niemeyer Exp $
 /* ######################################################################
 
    System - Abstraction for running on different systems.
@@ -49,6 +49,9 @@ class pkgVersioningSystem;
 class Configuration;
 class pkgIndexFile;
 
+// CNC:2002-07-05
+class pkgProblemResolver;
+
 class pkgSystem
 {   
    public:
@@ -65,6 +68,9 @@ class pkgSystem
       other locks (cache or state locks) */
    virtual bool Lock() = 0;
    virtual bool UnLock(bool NoErrors = false) = 0;
+
+   // CNC:2002-07-06
+   virtual bool LockRead() {return true;};
    
    /* Various helper classes to interface with specific bits of this
       environment */
@@ -87,6 +93,15 @@ class pkgSystem
       etc.. */
    virtual signed Score(Configuration const &/*Cnf*/) {return 0;};
    
+   // CNC:2002-07-03
+   // Do environment specific pre-processing over the Index Files
+   virtual bool PreProcess(pkgIndexFile **Start,pkgIndexFile **End,
+                           OpProgress &Progress) {return true;};
+   virtual bool ProcessCache(pkgDepCache &Cache, pkgProblemResolver &Fix)
+   	{return true;};
+   virtual bool IgnoreDep(pkgVersioningSystem &VS, pkgCache::DepIterator &Dep)
+	{return false;};
+
    pkgSystem();
    virtual ~pkgSystem() {};
 };

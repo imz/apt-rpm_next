@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: algorithms.h,v 1.10 2001/05/22 04:17:41 jgg Exp $
+// $Id: algorithms.h,v 1.4 2003/01/29 13:04:48 niemeyer Exp $
 /* ######################################################################
 
    Algorithms - A set of misc algorithms
@@ -41,6 +41,7 @@
 
 using std::ostream;
 
+#ifndef SWIG
 class pkgSimulate : public pkgPackageManager
 {
    protected:
@@ -74,6 +75,7 @@ class pkgSimulate : public pkgPackageManager
 
    pkgSimulate(pkgDepCache *Cache);
 };
+#endif
 
 class pkgProblemResolver
 {
@@ -118,6 +120,8 @@ class pkgProblemResolver
    bool ResolveByKeep();
    
    void InstallProtect();   
+
+   bool RemoveDepends(); // CNC:2002-08-01
    
    pkgProblemResolver(pkgDepCache *Cache);
    ~pkgProblemResolver();

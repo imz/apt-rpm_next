@@ -43,3 +43,12 @@
 
 /* The package name string */
 #undef PACKAGE
+
+/* CNC:2002-07-03 */
+#undef HAVE_RPM
+#undef HAVE_RPM4
+#undef HAVE_RPM41
+#undef HAVE_SETLOCALE
+#undef HAVE_LOCALE_H
+#undef HAVE_LIBINTL_H
+#undef LOCALEDIR

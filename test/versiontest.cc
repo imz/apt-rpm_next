@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: versiontest.cc,v 1.3 2002/03/26 07:38:58 jgg Exp $
+// $Id: versiontest.cc,v 1.2 2002/07/25 18:07:19 niemeyer Exp $
 /* ######################################################################
 
    Version Test - Simple program to run through a file and comare versions.
