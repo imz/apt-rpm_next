@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: acquire-method.cc,v 1.27 2001/05/22 04:27:11 jgg Exp $
+// $Id: acquire-method.cc,v 1.1 2002/07/23 17:54:50 niemeyer Exp $
 /* ######################################################################
 
    Acquire Method
@@ -37,6 +37,7 @@ using namespace std;
 // ---------------------------------------------------------------------
 /* This constructs the initialization text */
 pkgAcqMethod::pkgAcqMethod(const char *Ver,unsigned long Flags)
+	: Flags(Flags) // CNC:2002-07-11
 {
    char S[300] = "";
    char *End = S;
@@ -181,6 +182,10 @@ void pkgAcqMethod::URIDone(FetchResult &Res, FetchResult *Alt)
       End += snprintf(End,sizeof(S)-50 - (End - S),"MD5-Hash: %s\n",Res.MD5Sum.c_str());
    if (Res.SHA1Sum.empty() == false)
       End += snprintf(End,sizeof(S)-50 - (End - S),"SHA1-Hash: %s\n",Res.SHA1Sum.c_str());
+
+   // CNC:2002-07-04
+   if (Res.SignatureFP.empty() == false)
+      End += snprintf(End,sizeof(S)-50 - (End - S),"Signature-Fingerprint: %s\n",Res.SignatureFP.c_str());
 
    if (Res.ResumePoint != 0)
       End += snprintf(End,sizeof(S)-50 - (End - S),"Resume-Point: %lu\n",
@@ -366,6 +371,11 @@ int pkgAcqMethod::Run(bool Single)
 	       Tmp->LastModified = 0;
 	    Tmp->IndexFile = StringToBool(LookupTag(Message,"Index-File"),false);
 	    Tmp->Next = 0;
+
+	    // CNC:2002-07-11
+	    if (StringToBool(LookupTag(Message,"Local-Only-IMS"),false) == true
+	        && (Flags & LocalOnly) == 0)
+	       Tmp->LastModified = 0;
 	    
 	    // Append it to the list
 	    FetchItem **I = &Queue;
@@ -454,3 +464,4 @@ void pkgAcqMethod::FetchResult::TakeHashes(Hashes &Hash)
    SHA1Sum = Hash.SHA1.Result();
 }
 									/*}}}*/
+// vim:sts=3:sw=3

@@ -8,7 +8,6 @@
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
-#include <apti18n.h>
 #include <apt-pkg/acquire-method.h>
 #include <apt-pkg/cdromutl.h>
 #include <apt-pkg/error.h>
@@ -19,7 +18,13 @@
 #include <unistd.h>
 
 #include <iostream>
+
+// CNC:2003-02-20 - Moved header to fix compilation error when
+// 		    --disable-nls is used.
+#include <apti18n.h>
 									/*}}}*/
+// CNC:2002-10-18
+#include <utime.h>  
 
 using namespace std;
 
@@ -34,6 +39,9 @@ class CDROMMethod : public pkgAcqMethod
    virtual bool Fetch(FetchItem *Itm);
    string GetID(string Name);
    virtual void Exit();
+
+   // CNC:2002-10-18
+   bool Copy(string Src, string Dest);
    
    public:
    
@@ -80,6 +88,44 @@ string CDROMMethod::GetID(string Name)
    return string();
 }
 									/*}}}*/
+// CNC:2002-10-18
+bool CDROMMethod::Copy(string Src, string Dest)
+{
+   // See if the file exists
+   FileFd From(Src,FileFd::ReadOnly);
+   FileFd To(Dest,FileFd::WriteEmpty);
+   To.EraseOnFailure();
+   if (_error->PendingError() == true)
+   {
+      To.OpFail();
+      return false;
+   }
+   
+   // Copy the file
+   if (CopyFile(From,To) == false)
+   {
+      To.OpFail();
+      return false;
+   }
+
+   From.Close();
+   To.Close();
+ 
+   struct stat Buf;
+   if (stat(Src.c_str(),&Buf) != 0)
+       return _error->Error("File not found");      
+   
+   // Transfer the modification times
+   struct utimbuf TimeBuf;
+   TimeBuf.actime = Buf.st_atime;
+   TimeBuf.modtime = Buf.st_mtime;
+   if (utime(Dest.c_str(),&TimeBuf) != 0)
+   {
+      To.OpFail();
+      return _error->Errno("utime","Failed to set modification time");
+   }
+}
+
 // CDROMMethod::Fetch - Fetch a file					/*{{{*/
 // ---------------------------------------------------------------------
 /* */
@@ -170,8 +216,17 @@ bool CDROMMethod::Fetch(FetchItem *Itm)
       }
    }
    
+   // CNC:2002-10-18
    // Found a CD
-   Res.Filename = CDROM + File;
+   if (_config->FindB("Acquire::CDROM::Copy-All", false) == true ||
+       _config->FindB("Acquire::CDROM::Copy", false) == true) {
+      Res.Filename = Queue->DestFile;
+      URIStart(Res);
+      Copy(CDROM+File, Queue->DestFile);
+   } else {
+      Res.Filename = CDROM + File;
+   }
+   
    struct stat Buf;
    if (stat(Res.Filename.c_str(),&Buf) != 0)
       return _error->Error(_("File not found"));

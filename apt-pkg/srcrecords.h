@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: srcrecords.h,v 1.8 2001/11/04 17:09:18 tausq Exp $
+// $Id: srcrecords.h,v 1.2 2002/07/25 18:07:18 niemeyer Exp $
 /* ######################################################################
    
    Source Package Records - Allows access to source package records

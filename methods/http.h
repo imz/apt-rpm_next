@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
-// Description								/*{{{*/// $Id: http.h,v 1.12 2002/04/18 05:09:38 jgg Exp $
-// $Id: http.h,v 1.12 2002/04/18 05:09:38 jgg Exp $
+// Description								/*{{{*/// $Id: http.h,v 1.2 2002/07/25 18:07:19 niemeyer Exp $
+// $Id: http.h,v 1.2 2002/07/25 18:07:19 niemeyer Exp $
 /* ######################################################################
 
    HTTP Aquire Method - This is the HTTP aquire method for APT.

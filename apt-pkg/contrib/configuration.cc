@@ -50,6 +50,35 @@ Configuration::Configuration(const Item *Root) : Root((Item *)Root), ToFree(fals
 {
 };
 
+// CNC:2003-02-23 - Copy constructor.
+Configuration::Configuration(Configuration &Conf) : ToFree(true)
+{
+   Root = new Item;
+   if (Conf.Root->Child)
+      CopyChildren(Conf.Root, Root);
+}
+
+void Configuration::CopyChildren(Item *From, Item *To)
+{
+   Item *Parent = To;
+   To->Child = new Item;
+   From = From->Child;
+   To = To->Child;
+   while (1) {
+      To->Parent = Parent;
+      To->Value = From->Value;
+      To->Tag = From->Tag;
+      if (From->Child)
+	 CopyChildren(From, To);
+      From = From->Next;
+      if (From) {
+	 To->Next = new Item;
+	 To = To->Next;
+      } else {
+	 break;
+      }
+   }
+}
 									/*}}}*/
 // Configuration::~Configuration - Destructor				/*{{{*/
 // ---------------------------------------------------------------------
@@ -714,7 +743,9 @@ bool ReadConfigDir(Configuration &Conf,string Dir,bool AsSectional,
       // Skip bad file names ala run-parts
       const char *C = Ent->d_name;
       for (; *C != 0; C++)
-	 if (isalpha(*C) == 0 && isdigit(*C) == 0 && *C != '_' && *C != '-')
+	 // CNC:2002-11-25
+	 if (isalpha(*C) == 0 && isdigit(*C) == 0
+	     && *C != '_' && *C != '-' && *C != '.')
 	    break;
       if (*C != 0)
 	 continue;
@@ -738,3 +769,5 @@ bool ReadConfigDir(Configuration &Conf,string Dir,bool AsSectional,
    return true;
 }
 									/*}}}*/
+
+// vim:sts=3:sw=3

@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: pkgcache.h,v 1.25 2001/07/01 22:28:24 jgg Exp $
+// $Id: pkgcache.h,v 1.2 2003/01/29 13:04:48 niemeyer Exp $
 /* ######################################################################
    
    Cache - Structure definitions for the cache file
@@ -82,6 +82,25 @@ class pkgCache
       enum PkgFlags {Auto=(1<<0),Essential=(1<<3),Important=(1<<4)};
       enum PkgFFlags {NotSource=(1<<0),NotAutomatic=(1<<1)};
    };
+
+   /* Unnested structures for SWIG. Don't use them for APT internal
+    * purposes as this will be dropped as soon as SWIG starts
+    * supporting nested structures. Use definitions above instead. */
+   enum _DepType {DepDepends=1,DepPreDepends=2,DepSuggests=3,DepRecommends=4,
+      DepConflicts=5,DepReplaces=6,DepObsoletes=7};
+   enum _DepCompareOp {DepOr=0x10,DepNoOp=0,DepLessEq=0x1,DepGreaterEq=0x2,
+      DepLess=0x3,DepGreater=0x4,DepEquals=0x5,DepNotEquals=0x6};
+   enum _VerPriority {StateImportant=1,StateRequired=2,StateStandard=3,
+      StateOptional=4,StateExtra=5};
+   enum _PkgSelectedState {StateUnknown=0,StateInstall=1,StateHold=2,
+      StateDeInstall=3,StatePurge=4};
+   enum _PkgInstState {StateOk=0,StateReInstReq=1,StateHoldInst=2,
+      StateHoldReInstReq=3};
+   enum _PkgCurrentState {StateNotInstalled=0,StateUnPacked=1,
+      StateHalfConfigured=2,StateHalfInstalled=4,StateConfigFiles=5,
+      StateInstalled=6};
+   enum _PkgFlags {FlagAuto=(1<<0),FlagEssential=(1<<3),FlagImportant=(1<<4)};
+   enum _PkgFFlags {FlagNotSource=(1<<0),FlagNotAutomatic=(1<<1)};
    
    protected:
    
@@ -89,8 +108,9 @@ class pkgCache
    string CacheFile;
    MMap &Map;
 
-   unsigned long sHash(string S) const;
-   unsigned long sHash(const char *S) const;
+   // CNC:2003-02-16 - Inlined here.
+   inline unsigned long sHash(const char *S) const;
+   inline unsigned long sHash(string S) const {return sHash(S.c_str());};
    
    public:
    
@@ -119,6 +139,8 @@ class pkgCache
    
    // Accessors
    PkgIterator FindPkg(string Name);
+   // CNC:2003-02-17 - A slightly changed FindPkg(), hacked for performance.
+   Package *FindPackage(const char *Name);
    Header &Head() {return *HeaderP;};
    inline PkgIterator PkgBegin();
    inline PkgIterator PkgEnd();
@@ -145,6 +167,9 @@ struct pkgCache::Header
    short MajorVersion;
    short MinorVersion;
    bool Dirty;
+
+   // CNC:2003-03-18
+   bool HasFileDeps;
    
    // Size of structure values
    unsigned short HeaderSz;
@@ -175,7 +200,7 @@ struct pkgCache::Header
    DynamicMMap::Pool Pools[7];
    
    // Rapid package name lookup
-   map_ptrloc HashTable[2*1048];
+   map_ptrloc HashTable[8*1048];
 
    bool CheckSizes(Header &Against) const;
    Header();
@@ -283,6 +308,19 @@ struct pkgCache::StringItem
 
 #include <apt-pkg/cacheiterators.h>
 
+// CNC:2003-02-16 - Inlined here.
+#include <ctype.h>
+#define hash_count(a) (sizeof(a)/sizeof(a[0]))
+inline unsigned long pkgCache::sHash(const char *Str) const
+{
+   unsigned long Hash = 0;
+   for (const char *I = Str; *I != 0; I++)
+      //Hash = 5*Hash + tolower(*I);
+      Hash = 5*Hash + *I;
+   return Hash % hash_count(HeaderP->HashTable);
+}
+#undef hash_count
+
 inline pkgCache::PkgIterator pkgCache::PkgBegin() 
        {return PkgIterator(*this);};
 inline pkgCache::PkgIterator pkgCache::PkgEnd() 
@@ -311,3 +349,5 @@ class pkgCache::Namespace
 };
 
 #endif
+
+// vim:sts=3:sw=3

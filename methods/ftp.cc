@@ -15,7 +15,6 @@
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
-#include <apti18n.h>
 #include <apt-pkg/fileutl.h>
 #include <apt-pkg/acquire-method.h>
 #include <apt-pkg/error.h>
@@ -36,6 +35,10 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+
+// CNC:2003-02-20 - Moved header to fix compilation error when
+// 		    --disable-nls is used.
+#include <apti18n.h>
 
 #include "rfc2553emu.h"
 #include "connect.h"
@@ -186,7 +189,8 @@ bool FTPConn::Login()
    
    // Setup the variables needed for authentication
    string User = "anonymous";
-   string Pass = "apt_get_ftp_2.1@debian.linux.user";
+   // CNC:2003-06-16
+   string Pass = "apt_get_ftp_2.1@rpm.linux.user";
 
    // Fill in the user/pass
    if (ServerName.User.empty() == false)

@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: indexfile.h,v 1.6 2002/07/08 03:13:30 jgg Exp $
+// $Id: indexfile.h,v 1.2 2002/07/25 18:07:18 niemeyer Exp $
 /* ######################################################################
 
    Index File - Abstraction for an index of archive/source file.
@@ -65,6 +65,9 @@ class pkgIndexFile
    // Interface for acquire
    virtual string ArchiveURI(string /*File*/) const {return string();};
    virtual bool GetIndexes(pkgAcquire *Owner) const;
+
+   // CNC:2002-07-04
+   virtual bool GetReleases(pkgAcquire *Owner) const {return true;};
 
    // Interface for the record parsers
    virtual pkgSrcRecords::Parser *CreateSrcParser() const {return 0;};

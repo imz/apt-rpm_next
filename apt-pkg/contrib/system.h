@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: system.h,v 1.3 1999/12/10 23:40:29 jgg Exp $
+// $Id: system.h,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
    
    System Header - Usefull private definitions
