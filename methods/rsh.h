@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
-// Description								/*{{{*/// $Id: rsh.h,v 1.4 2002/11/09 23:33:26 doogie Exp $
-// $Id: rsh.h,v 1.4 2002/11/09 23:33:26 doogie Exp $
+// Description								/*{{{*/// $Id: rsh.h,v 1.2 2003/01/29 18:43:48 niemeyer Exp $
+// $Id: rsh.h,v 1.2 2003/01/29 18:43:48 niemeyer Exp $
 /* ######################################################################
 
    RSH method - Transfer files via rsh compatible program

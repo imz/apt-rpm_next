@@ -20,6 +20,9 @@
 #include <utime.h>
 #include <stdio.h>
 #include <errno.h>
+
+// CNC:2003-02-20 - Moved header to fix compilation error when
+// 		    --disable-nls is used.
 #include <apti18n.h>
 									/*}}}*/
 

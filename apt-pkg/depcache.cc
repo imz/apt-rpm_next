@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: depcache.cc,v 1.25 2001/05/27 05:36:04 jgg Exp $
+// $Id: depcache.cc,v 1.1 2002/07/23 17:54:50 niemeyer Exp $
 /* ######################################################################
 
    Dependency Cache - Caches Dependency information.
@@ -16,6 +16,13 @@
 #include <apt-pkg/error.h>
 #include <apt-pkg/sptr.h>
 #include <apt-pkg/algorithms.h>
+
+// CNC:2002-07-05
+#include <apt-pkg/pkgsystem.h>
+
+// CNC:2003-03-17
+#include <config.h>
+#include <apt-pkg/luaiface.h>
     
 #include <apti18n.h>    
 									/*}}}*/
@@ -91,6 +98,13 @@ bool pkgDepCache::Init(OpProgress *Prog)
    }
    
    Update(Prog);
+
+// CNC:2003-03-17
+#ifdef WITH_LUA
+   _lua->SetDepCache(this);
+   _lua->RunScripts("Scripts::Cache::Init", true);
+   _lua->ResetCaches();
+#endif
    
    return true;
 } 
@@ -104,6 +118,11 @@ bool pkgDepCache::Init(OpProgress *Prog)
    set to the package which was used to satisfy the dep. */
 bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
 {
+// CNC:2003-02-17 - This function is the main path when checking
+//                  dependencies, so we must avoid as much overhead
+//                  as possible. It has several changes to improve
+//                  performance.
+#if 0
    Res = Dep.TargetPkg();
 
    /* Check simple depends. A depends -should- never self match but 
@@ -115,18 +134,19 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
       PkgIterator Pkg = Dep.TargetPkg();
       // Check the base package
       if (Type == NowVersion && Pkg->CurrentVer != 0)
-	 if (VS().CheckDep(Pkg.CurrentVer().VerStr(),Dep->CompareOp,
-				 Dep.TargetVer()) == true)
+	 // CNC:2002-07-10 - RPM must check the dependency type to properly
+	 //                  define if it would be satisfied or not.
+	 if (VS().CheckDep(Pkg.CurrentVer().VerStr(),Dep) == true)
 	    return true;
       
       if (Type == InstallVersion && PkgState[Pkg->ID].InstallVer != 0)
 	 if (VS().CheckDep(PkgState[Pkg->ID].InstVerIter(*this).VerStr(),
-				 Dep->CompareOp,Dep.TargetVer()) == true)
+				 Dep) == true)
 	    return true;
       
       if (Type == CandidateVersion && PkgState[Pkg->ID].CandidateVer != 0)
 	 if (VS().CheckDep(PkgState[Pkg->ID].CandidateVerIter(*this).VerStr(),
-				 Dep->CompareOp,Dep.TargetVer()) == true)
+				 Dep) == true)
 	    return true;
    }
    
@@ -165,13 +185,127 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
       }
       
       // Compare the versions.
-      if (VS().CheckDep(P.ProvideVersion(),Dep->CompareOp,Dep.TargetVer()) == true)
+      if (VS().CheckDep(P.ProvideVersion(),Dep) == true) // CNC:2002-07-10
       {
 	 Res = P.OwnerPkg();
 	 return true;
       }
    }
+
+   // CNC:2002-07-05
+   if (_system->IgnoreDep(VS(),Dep) == true)
+   {
+      Res = Dep.TargetPkg();
+      return true;
+   }
    
+#else
+
+   Res = Dep.TargetPkg();
+
+   // CNC:2003-02-17 - Res is currently not changed. If it happens to
+   //		       be changed in this function (besides when
+   //		       returning anyway), assign a new Dep.TargetPkg()
+   //		       to Dep_TargetPkg instead of using Res.
+   //
+   PkgIterator &Dep_TargetPkg = Res;
+   PkgIterator Dep_ParentPkg = Dep.ParentPkg();
+   pkgVersioningSystem &VS = this->VS();
+
+   /* Check simple depends. A depends -should- never self match but 
+      we allow it anyhow because dpkg does. Technically it is a packaging
+      bug. Conflicts may never self match */
+   if (Dep_TargetPkg != Dep_ParentPkg || 
+       (Dep->Type != Dep::Conflicts && Dep->Type != Dep::Obsoletes))
+   {
+      PkgIterator &Pkg = Dep_TargetPkg;
+
+      // Check the base package
+      switch (Type)
+      {
+	 case NowVersion:
+	    if (Pkg->CurrentVer != 0)
+	       // CNC:2002-07-10 - RPM must check the dependency type to
+	       //		   properly define if it would be satisfied
+	       //		   or not.
+	       if (VS.CheckDep(Pkg.CurrentVer().VerStr(),Dep) == true)
+		  return true;
+	    break;
+
+	 case InstallVersion:
+	    if (PkgState[Pkg->ID].InstallVer != 0)
+	       if (VS.CheckDep(PkgState[Pkg->ID].InstVerIter(*this).VerStr(),
+				       Dep) == true)
+		  return true;
+	    break;
+      
+	 case CandidateVersion:
+	    if (PkgState[Pkg->ID].CandidateVer != 0)
+	       if (VS.CheckDep(PkgState[Pkg->ID].CandidateVerIter(*this).VerStr(),
+				       Dep) == true)
+		  return true;
+	    break;
+      }
+
+      
+   }
+   
+   if (Dep->Type == Dep::Obsoletes)
+      return false;
+   
+   // Check the providing packages
+   PrvIterator P = Dep_TargetPkg.ProvidesList();
+   PkgIterator &Pkg = Dep_ParentPkg;
+   for (; P.end() != true; P++)
+   {
+      PkgIterator P_OwnerPkg = P.OwnerPkg();
+
+      /* Provides may never be applied against the same package if it is
+         a conflicts. See the comment above. */
+      if (P_OwnerPkg == Pkg && Dep->Type == Dep::Conflicts)
+	 continue;
+      
+      // Check if the provides is a hit
+      switch (Type)
+      {
+	 case NowVersion:
+	    {
+	       if (P_OwnerPkg.CurrentVer() != P.OwnerVer())
+		  continue;
+	       break;
+	    }
+	 case InstallVersion:
+	    {
+	       StateCache &State = PkgState[P_OwnerPkg->ID];
+	       if (State.InstallVer != (Version *)P.OwnerVer())
+		  continue;
+	       break;
+	    }
+	 case CandidateVersion:
+	    {
+	       StateCache &State = PkgState[P_OwnerPkg->ID];
+	       if (State.CandidateVer != (Version *)P.OwnerVer())
+		  continue;
+	       break;
+	    }
+      }
+      
+      // Compare the versions.
+      if (VS.CheckDep(P.ProvideVersion(),Dep) == true) // CNC:2002-07-10
+      {
+	 Res = P_OwnerPkg;
+	 return true;
+      }
+   }
+
+   // CNC:2002-07-05
+   if (_system->IgnoreDep(VS,Dep) == true)
+   {
+      Res = Dep_TargetPkg;
+      return true;
+   }
+#endif
+
    return false;
 }
 									/*}}}*/
@@ -331,6 +465,10 @@ unsigned char pkgDepCache::VersionState(DepIterator D,unsigned char Check,
 	 LastOR = (D->CompareOp & Dep::Or) == Dep::Or;
       }
 	
+      // CNC:2003-02-17 - IsImportantDep() currently calls IsCritical(), so
+      //		  these two are currently doing the same thing. Check
+      //		  comments in IsImportantDep() definition.
+#if 0
       // Minimum deps that must be satisfied to have a working package
       if (Start.IsCritical() == true)
 	 if ((State & Check) != Check)
@@ -340,6 +478,13 @@ unsigned char pkgDepCache::VersionState(DepIterator D,unsigned char Check,
       if (IsImportantDep(Start) == true && 
 	  (State & Check) != Check)
 	 Dep &= ~SetPolicy;
+#else
+      if (Start.IsCritical() == true)
+	 if ((State & Check) != Check) {
+	    Dep &= ~SetMin;
+	    Dep &= ~SetPolicy;
+	 }
+#endif
    }
 
    return Dep;
@@ -660,6 +805,10 @@ void pkgDepCache::MarkInstall(PkgIterator const &Pkg,bool AutoInst,
       if (Result == false)
 	 continue;
 
+      // CNC:2003-02-17 - IsImportantDep() currently calls IsCritical(), so
+      //		  these two are currently doing the same thing. Check
+      //		  comments in IsImportantDep() definition.
+#if 0
       /* Check if this dep should be consider for install. If it is a user
          defined important dep and we are installed a new package then 
 	 it will be installed. Otherwise we only worry about critical deps */
@@ -667,6 +816,10 @@ void pkgDepCache::MarkInstall(PkgIterator const &Pkg,bool AutoInst,
 	 continue;
       if (Pkg->CurrentVer != 0 && Start.IsCritical() == false)
 	 continue;
+#else
+      if (Start.IsCritical() == false)
+	 continue;
+#endif
       
       /* If we are in an or group locate the first or that can 
          succeed. We have already cached this.. */
@@ -861,6 +1014,85 @@ pkgCache::VerIterator pkgDepCache::Policy::GetCandidateVer(PkgIterator Pkg)
 /* */
 bool pkgDepCache::Policy::IsImportantDep(DepIterator Dep)
 {
+   // CNC:2002-03-17 - Every place that uses this function seems to
+   //		       currently check for IsCritical() as well. Since
+   //		       this is a virtual (heavy) function, we'll try
+   //		       not to use it while not necessary.
    return Dep.IsCritical();
 }
 									/*}}}*/
+
+// CNC:2003-02-24
+// pkgDepCache::State::* - Routines to work on the state of a DepCache.	/*{{{*/
+// ---------------------------------------------------------------------
+/* */
+void pkgDepCache::State::Copy(pkgDepCache::State const &Other)
+{
+   memcpy(this, &Other, sizeof(*this));
+   int Size = Dep->Head().PackageCount;
+   int DepSize = Dep->Head().DependsCount;
+   PkgState = new StateCache[Size];
+   PkgIgnore = new bool[Size];
+   DepState = new unsigned char[DepSize];
+   memcpy(PkgState, Other.PkgState, Size*sizeof(*PkgState));
+   memcpy(PkgIgnore, Other.PkgIgnore, Size*sizeof(*PkgIgnore));
+   memcpy(DepState, Other.DepState, DepSize*sizeof(*DepState));
+}
+
+void pkgDepCache::State::Save(pkgDepCache *dep)
+{
+   Dep = dep;
+   delete[] PkgState;
+   delete[] DepState;
+   delete[] PkgIgnore;
+   int Size = Dep->Head().PackageCount;
+   int DepSize = Dep->Head().DependsCount;
+   PkgState = new StateCache[Size];
+   PkgIgnore = new bool[Size];
+   DepState = new unsigned char[DepSize];
+   memcpy(PkgState, Dep->PkgState, Size*sizeof(*PkgState));
+   memset(PkgIgnore, 0, Size*sizeof(*PkgIgnore));
+   memcpy(DepState, Dep->DepState, DepSize*sizeof(*DepState));
+   iUsrSize = Dep->iUsrSize;
+   iDownloadSize= Dep->iDownloadSize;
+   iInstCount = Dep->iInstCount;
+   iDelCount = Dep->iDelCount;
+   iKeepCount = Dep->iKeepCount;
+   iBrokenCount = Dep->iBrokenCount;
+   iBadCount = Dep->iBadCount;
+}
+
+void pkgDepCache::State::Restore()
+{
+   memcpy(Dep->PkgState, PkgState, Dep->Head().PackageCount*sizeof(*PkgState));
+   memcpy(Dep->DepState, DepState, Dep->Head().DependsCount*sizeof(*DepState));
+   Dep->iUsrSize = iUsrSize;
+   Dep->iDownloadSize= iDownloadSize;
+   Dep->iInstCount = iInstCount;
+   Dep->iDelCount = iDelCount;
+   Dep->iKeepCount = iKeepCount;
+   Dep->iBrokenCount = iBrokenCount;
+   Dep->iBadCount = iBadCount;
+}
+
+bool pkgDepCache::State::Changed()
+{
+   int Size = Dep->Head().PackageCount;
+   StateCache *NewPkgState = Dep->PkgState;
+   for (int i = 0; i != Size; i++) {
+      if (PkgIgnore[i] == false &&
+          ((PkgState[i].Status != NewPkgState[i].Status) ||
+          (PkgState[i].Mode != NewPkgState[i].Mode)))
+         return true;
+   }
+   return false;
+}
+
+void pkgDepCache::State::UnIgnoreAll()
+{
+   memset(PkgIgnore, 0, Dep->Head().PackageCount*sizeof(*PkgIgnore));
+}
+
+									/*}}}*/
+
+// vim:sts=3:sw=3

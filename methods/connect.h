@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: connect.h,v 1.3 2001/02/20 07:03:18 jgg Exp $
+// $Id: connect.h,v 1.1 2002/07/23 17:54:53 niemeyer Exp $
 /* ######################################################################
 
    Connect - Replacement connect call

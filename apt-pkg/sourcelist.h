@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: sourcelist.h,v 1.12 2002/07/01 21:41:11 jgg Exp $
+// $Id: sourcelist.h,v 1.2 2002/07/25 18:07:18 niemeyer Exp $
 /* ######################################################################
 
    SourceList - Manage a list of sources
@@ -94,6 +94,11 @@ class pkgSourceList
    bool ReadMainList();
    bool Read(string File);
    bool ReadVendors();
+
+   // CNC:2003-03-03
+   void Reset();
+   bool ReadAppend(string File);
+   bool ReadSourceDir(string Dir);
    
    // List accessors
    inline const_iterator begin() const {return SrcList.begin();};
@@ -104,6 +109,9 @@ class pkgSourceList
    bool FindIndex(pkgCache::PkgFileIterator File,
 		  pkgIndexFile *&Found) const;
    bool GetIndexes(pkgAcquire *Owner) const;
+
+   // CNC:2002-07-04
+   bool GetReleases(pkgAcquire *Owner) const;
    
    pkgSourceList();
    pkgSourceList(string File);

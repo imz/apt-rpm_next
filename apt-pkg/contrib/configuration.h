@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: configuration.h,v 1.16 2002/11/11 06:55:50 doogie Exp $
+// $Id: configuration.h,v 1.2 2003/01/29 18:43:48 niemeyer Exp $
 /* ######################################################################
 
    Configuration Class
@@ -65,6 +65,9 @@ class Configuration
    {
       return ((Configuration *)this)->Lookup(Name,false);
    }  
+
+   // CNC:2003-02-23 - Helper for copy constructor.
+   void CopyChildren(Item *From, Item *To);
    
    public:
 
@@ -94,6 +97,9 @@ class Configuration
    inline void Dump() { Dump(std::clog); };
    void Dump(std::ostream& str);
 
+   // CNC:2003-02-23 - Copy constructor.
+   Configuration(Configuration &Conf);
+
    Configuration(const Item *Root);
    Configuration();
    ~Configuration();
@@ -106,5 +112,20 @@ bool ReadConfigFile(Configuration &Conf,string FName,bool AsSectional = false,
 
 bool ReadConfigDir(Configuration &Conf,string Dir,bool AsSectional = false,
 		    unsigned Depth = 0);
+
+#ifdef SWIG
+   struct Configuration::Item
+   {
+      string Value;
+      string Tag;
+      Item *Parent;
+      Item *Child;
+      Item *Next;
+      
+      string FullTag(const Item *Stop = 0) const;
+      
+      Item() : Parent(0), Child(0), Next(0) {};
+   };
+#endif
 
 #endif

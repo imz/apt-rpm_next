@@ -16,6 +16,9 @@
 #include <sys/stat.h>
 #include <utime.h>
 #include <unistd.h>
+
+// CNC:2003-02-20 - Moved header to fix compilation error when
+// 		    --disable-nls is used.
 #include <apti18n.h>
 									/*}}}*/
 

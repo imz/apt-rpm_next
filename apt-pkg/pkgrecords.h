@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: pkgrecords.h,v 1.6 2001/03/13 06:51:46 jgg Exp $
+// $Id: pkgrecords.h,v 1.2 2002/11/28 18:54:15 niemeyer Exp $
 /* ######################################################################
    
    Package Records - Allows access to complete package description records
@@ -34,6 +34,9 @@ class pkgRecords
    pkgCache &Cache;
    Parser **Files;
       
+   // CNC:2002-11-28
+   int PackageFileCount;
+   
    public:
 
    // Lookup function

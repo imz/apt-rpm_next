@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: debsystem.h,v 1.4 2003/01/11 07:16:33 jgg Exp $
+// $Id: debsystem.h,v 1.2 2003/01/29 18:43:48 niemeyer Exp $
 /* ######################################################################
 
    System - Debian version of the  System Class

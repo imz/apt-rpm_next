@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: acquire-method.h,v 1.15 2001/03/13 06:51:46 jgg Exp $
+// $Id: acquire-method.h,v 1.1 2002/07/23 17:54:50 niemeyer Exp $
 /* ######################################################################
 
    Acquire Method - Method helper class + functions
@@ -25,6 +25,9 @@ class pkgAcqMethod
 {
    protected:
 
+   // CNC:2002-07-11
+   unsigned long Flags;
+
    struct FetchItem
    {
       FetchItem *Next;
@@ -39,6 +42,8 @@ class pkgAcqMethod
    {
       string MD5Sum;
       string SHA1Sum;
+      // CNC:2002-07-03
+      string SignatureFP;
       time_t LastModified;
       bool IMSHit;
       string Filename;

@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: md5.h,v 1.6 2001/05/07 05:06:52 jgg Exp $
+// $Id: md5.h,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
    
    MD5SumValue - Storage for a MD5Sum

@@ -23,6 +23,15 @@
 #include <apt-pkg/strutl.h>
 #include <apt-pkg/fileutl.h>
 
+// CNC:2002-07-03
+#include <apt-pkg/repository.h>
+#include <apt-pkg/md5.h>
+#include <config.h>
+#include <apt-pkg/luaiface.h>
+#include <iostream>
+#include <assert.h>
+using namespace std;
+
 #include <apti18n.h>
     
 #include <sys/stat.h>
@@ -34,6 +43,42 @@
 
 using std::string;
 
+// CNC:2002-07-03
+// VerifyChecksums - Check MD5 and SHA-1 checksums of a file		/*{{{*/
+// ---------------------------------------------------------------------
+/* Returns false only if the checksums fail (the file not existing is not
+   a checksum mismatch) */
+bool VerifyChecksums(string File,unsigned long Size,string MD5)
+{
+   struct stat Buf;
+   
+   if (stat(File.c_str(),&Buf) != 0) 
+      return true;
+
+   if (Buf.st_size != Size)
+   {
+      if (_config->FindB("Acquire::Verbose", false) == true)
+	 cout << "Size of "<<File<<" did not match what's in the checksum list and was redownloaded."<<endl;
+      return false;
+   }
+
+   if (MD5.empty() == false)
+   {
+      MD5Summation md5sum = MD5Summation();
+      FileFd F(File, FileFd::ReadOnly);
+      
+      md5sum.AddFD(F.Fd(), F.Size());
+      if (md5sum.Result().Value() != MD5)
+      {
+         if (_config->FindB("Acquire::Verbose", false) == true)
+	    cout << "MD5Sum of "<<File<<" did not match what's in the checksum list and was redownloaded."<<endl;
+         return false;
+      }
+   }
+   
+   return true;
+}
+                                                                        /*}}}*/
 // Acquire::Item::Item - Constructor					/*{{{*/
 // ---------------------------------------------------------------------
 /* */
@@ -133,9 +178,10 @@ void pkgAcquire::Item::Rename(string From,string To)
 // ---------------------------------------------------------------------
 /* The package file is added to the queue and a second class is 
    instantiated to fetch the revision file */   
-pkgAcqIndex::pkgAcqIndex(pkgAcquire *Owner,
+// CNC:2002-07-03
+pkgAcqIndex::pkgAcqIndex(pkgAcquire *Owner,pkgRepository *Repository,
 			 string URI,string URIDesc,string ShortDesc) :
-                      Item(Owner), RealURI(URI)
+                      Item(Owner), RealURI(URI), Repository(Repository)
 {
    Decompression = false;
    Erase = false;
@@ -144,11 +190,52 @@ pkgAcqIndex::pkgAcqIndex(pkgAcquire *Owner,
    DestFile += URItoFileName(URI);
 
    // Create the item
-   Desc.URI = URI + ".gz";
+   // CNC:2002-07-03
+   Desc.URI = URI + ".bz2";
    Desc.Description = URIDesc;
    Desc.Owner = this;
    Desc.ShortDesc = ShortDesc;
       
+   // CNC:2002-07-03
+   // If we're verifying authentication, check whether the size and
+   // checksums match, if not, delete the cached files and force redownload
+   string MD5Hash;
+   unsigned long Size;
+
+   if (Repository != NULL)
+   {
+      if (Repository->HasRelease() == true)
+      {
+	 if (Repository->FindChecksums(RealURI,Size,MD5Hash) == false)
+	 {
+	    if (Repository->IsAuthenticated() == true)
+	    {
+	       _error->Error(_("%s is not listed in the checksum list for its repository"),
+			     RealURI.c_str());
+	       return;
+	    }
+	    else
+	       _error->Warning("Release file did not contain checksum information for %s",
+			       RealURI.c_str());
+	 }
+
+	 string FinalFile = _config->FindDir("Dir::State::lists");
+	 FinalFile += URItoFileName(RealURI);
+
+	 if (VerifyChecksums(FinalFile,Size,MD5Hash) == false)
+	 {
+	    unlink(FinalFile.c_str());
+	    unlink(DestFile.c_str());
+	 }
+      }
+      else if (Repository->IsAuthenticated() == true)
+      {
+	 _error->Error(_("Release information not available for %s"),
+		       URI.c_str());
+	 return;
+      }
+   }
+
    QueueURI(Desc);
 }
 									/*}}}*/
@@ -181,6 +268,43 @@ void pkgAcqIndex::Done(string Message,unsigned long Size,string MD5,
 
    if (Decompression == true)
    {
+      // CNC:2002-07-03
+      unsigned long FSize;
+      string MD5Hash;
+
+      if (Repository != NULL && Repository->HasRelease() == true &&
+	  Repository->FindChecksums(RealURI,FSize,MD5Hash) == true)
+      {
+	 // We must always get here if the repository is authenticated
+	 
+	 if (FSize != Size)
+	 {
+	    Status = StatError;
+	    ErrorText = _("Size mismatch");
+	    Rename(DestFile,DestFile + ".FAILED");
+	    if (_config->FindB("Acquire::Verbose",false) == true) 
+	       _error->Warning("Size mismatch of index file %s: %ul was supposed to be %ul",
+			       RealURI.c_str(), Size, FSize);
+	    return;
+	 }
+	    
+	 if (MD5.empty() == false && MD5Hash != MD5)
+	 {
+	    Status = StatError;
+	    ErrorText = _("MD5Sum mismatch");
+	    Rename(DestFile,DestFile + ".FAILED");
+	    if (_config->FindB("Acquire::Verbose",false) == true) 
+	       _error->Warning("MD5Sum mismatch of index file %s: %s was supposed to be %s",
+			       RealURI.c_str(), MD5.c_str(), MD5Hash.c_str());
+	    return;
+	 }
+      }
+      else
+      {
+	 // Redundant security check
+	 assert(Repository == NULL || Repository->IsAuthenticated() == false);
+      }
+	 
       // Done, move it into position
       string FinalFile = _config->FindDir("Dir::State::lists");
       FinalFile += URItoFileName(RealURI);
@@ -236,19 +360,29 @@ void pkgAcqIndex::Done(string Message,unsigned long Size,string MD5,
    
    Decompression = true;
    DestFile += ".decomp";
-   Desc.URI = "gzip:" + FileName;
+   // CNC:2002-07-03
+   Desc.URI = "bzip2:" + FileName;
    QueueURI(Desc);
-   Mode = "gzip";
+   // CNC:2002-07-03
+   Mode = "bzip2";
 }
 									/*}}}*/
 
 // AcqIndexRel::pkgAcqIndexRel - Constructor				/*{{{*/
 // ---------------------------------------------------------------------
 /* The Release file is added to the queue */
-pkgAcqIndexRel::pkgAcqIndexRel(pkgAcquire *Owner,
-			    string URI,string URIDesc,string ShortDesc) :
-                      Item(Owner), RealURI(URI)
+// CNC:2002-07-03
+pkgAcqIndexRel::pkgAcqIndexRel(pkgAcquire *Owner,pkgRepository *Repository,
+			       string URI,string URIDesc,string ShortDesc,
+			       bool Master) :
+                      Item(Owner), RealURI(URI), Master(Master),
+		      Repository(Repository)
 {
+   // CNC:2002-07-09
+   assert(Master == false || Repository != NULL);
+   Authentication = false;
+   Erase = false;
+
    DestFile = _config->FindDir("Dir::State::lists") + "partial/";
    DestFile += URItoFileName(URI);
    
@@ -257,6 +391,43 @@ pkgAcqIndexRel::pkgAcqIndexRel(pkgAcquire *Owner,
    Desc.Description = URIDesc;
    Desc.ShortDesc = ShortDesc;
    Desc.Owner = this;
+
+   // CNC:2002-07-09
+   string MD5Hash;
+   unsigned long Size;
+   if (Master == false && Repository != NULL)
+   {
+      if (Repository->HasRelease() == true)
+      {
+	 if (Repository->FindChecksums(RealURI,Size,MD5Hash) == false)
+	 {
+	    if (Repository->IsAuthenticated() == true)
+	    {
+	       _error->Error(_("%s is not listed in the checksum list for its repository"),
+			     RealURI.c_str());
+	       return;
+	    }
+	    else
+	       _error->Warning("Release file did not contain checksum information for %s",
+			       RealURI.c_str());
+	 }
+
+	 string FinalFile = _config->FindDir("Dir::State::lists");
+	 FinalFile += URItoFileName(RealURI);
+
+	 if (VerifyChecksums(FinalFile,Size,MD5Hash) == false)
+	 {
+	    unlink(FinalFile.c_str());
+	    unlink(DestFile.c_str()); // Necessary?
+	 }
+      }
+      else if (Repository->IsAuthenticated() == true)
+      {
+	 _error->Error(_("Release information not available for %s"),
+		       URI.c_str());
+	 return;
+      }
+   }
 
    QueueURI(Desc);
 }
@@ -272,8 +443,12 @@ string pkgAcqIndexRel::Custom600Headers()
    struct stat Buf;
    if (stat(Final.c_str(),&Buf) != 0)
       return "\nIndex-File: true";
-   
-   return "\nIndex-File: true\nLast-Modified: " + TimeRFC1123(Buf.st_mtime);
+
+   // CNC:2002-07-11
+   string LOI = "";
+   if (Master == true)
+      LOI = "\nLocal-Only-IMS: true";
+   return LOI + "\nIndex-File: true\nLast-Modified: " + TimeRFC1123(Buf.st_mtime);
 }
 									/*}}}*/
 // AcqIndexRel::Done - Item downloaded OK				/*{{{*/
@@ -286,6 +461,56 @@ void pkgAcqIndexRel::Done(string Message,unsigned long Size,string MD5,
 {
    Item::Done(Message,Size,MD5,Cfg);
 
+   // CNC:2002-07-03
+   if (Authentication == true) 
+   {
+      if (Repository->IsAuthenticated() == true)
+      {
+	 // Do the fingerprint matching magic
+	 string FingerPrint = LookupTag(Message,"Signature-Fingerprint");
+
+	 if (FingerPrint.empty() == true)
+	 {
+	    Status = StatError;
+	    ErrorText = _("No valid signatures found in Release file");
+	    return;
+	 }
+
+	 // Match fingerprint of Release file
+	 if (Repository->Vendor->FingerPrint != FingerPrint)
+	 {
+	    Status = StatError;
+	    ErrorText = _("Signature fingerprint of Release file does not match (expected ")
+	       +Repository->Vendor->FingerPrint+_(", got ")+FingerPrint+")";
+	    return;
+	 }
+      }
+
+      // Done, move it into position
+      string FinalFile = _config->FindDir("Dir::State::lists");
+      FinalFile += URItoFileName(RealURI);
+      Rename(DestFile,FinalFile);
+      chmod(FinalFile.c_str(),0644);
+
+      /* We restore the original name to DestFile so that the clean operation
+         will work OK */
+      DestFile = _config->FindDir("Dir::State::lists") + "partial/";
+      DestFile += URItoFileName(RealURI);
+      
+      // Remove the compressed version.
+      if (Erase == true)
+	 unlink(DestFile.c_str());
+
+      // Update the hashes and file sizes for this repository
+      if (Repository->ParseRelease(FinalFile) == false && 
+	  Repository->IsAuthenticated() == true)
+      {
+         Status = StatError;
+         ErrorText = _("Could not read checksum list from Release file");
+      }
+      return;
+   }
+   
    string FileName = LookupTag(Message,"Filename");
    if (FileName.empty() == true)
    {
@@ -294,11 +519,23 @@ void pkgAcqIndexRel::Done(string Message,unsigned long Size,string MD5,
       return;
    }
 
+   // CNC:2002-07-11
+   Erase = false;
    Complete = true;
    
    // The files timestamp matches
    if (StringToBool(LookupTag(Message,"IMS-Hit"),false) == true)
+   {
+      // CNC:2002-07-11
+      if (Master == true)
+      {
+	 // We've got a LocalOnly IMS
+	 string FinalFile = _config->FindDir("Dir::State::lists");
+	 FinalFile += URItoFileName(RealURI);
+	 Repository->ParseRelease(FinalFile);
+      }
       return;
+   }
    
    // We have to copy it into place
    if (FileName != DestFile)
@@ -309,12 +546,61 @@ void pkgAcqIndexRel::Done(string Message,unsigned long Size,string MD5,
       return;
    }
    
-   // Done, move it into position
-   string FinalFile = _config->FindDir("Dir::State::lists");
-   FinalFile += URItoFileName(RealURI);
-   Rename(DestFile,FinalFile);
+   // CNC:2002-07-03
+   unsigned long FSize;
+   string MD5Hash;
+   if (Master == false && Repository != NULL
+       && Repository->HasRelease() == true
+       && Repository->FindChecksums(RealURI,FSize,MD5Hash) == true)
+   {
+      if (FSize != Size)
+      {
+	 Status = StatError;
+	 ErrorText = _("Size mismatch");
+	 Rename(DestFile,DestFile + ".FAILED");
+	 if (_config->FindB("Acquire::Verbose",false) == true) 
+	    _error->Warning("Size mismatch of index file %s: %ul was supposed to be %ul",
+			    RealURI.c_str(), Size, FSize);
+	 return;
+      }
+      if (MD5.empty() == false && MD5Hash != MD5)
+      {
+	 Status = StatError;
+	 ErrorText = _("MD5Sum mismatch");
+	 Rename(DestFile,DestFile + ".FAILED");
+	 if (_config->FindB("Acquire::Verbose",false) == true) 
+	    _error->Warning("MD5Sum mismatch of index file %s: %s was supposed to be %s",
+			    RealURI.c_str(), MD5.c_str(), MD5Hash.c_str());
+	 return;
+      }
+   }
+
+   if (Master == false || Repository->IsAuthenticated() == false)
+   {
+      // Done, move it into position
+      string FinalFile = _config->FindDir("Dir::State::lists");
+      FinalFile += URItoFileName(RealURI);
+      Rename(DestFile,FinalFile);
+      chmod(FinalFile.c_str(),0644);
+
+      // extract checksums from the Release file
+      if (Master == true)
+	 Repository->ParseRelease(FinalFile);
+   }
+   else 
+   {
+      if (FileName == DestFile)
+	 Erase = true;
+      else
+	 Local = true;
    
-   chmod(FinalFile.c_str(),0644);
+      // Still have the authentication phase
+      Authentication = true;
+      DestFile += ".auth";
+      Desc.URI = "gpg:" + FileName;
+      QueueURI(Desc);
+      Mode = "gpg";
+   }
 }
 									/*}}}*/
 // AcqIndexRel::Failed - Silence failure messages for missing rel files	/*{{{*/
@@ -325,11 +611,15 @@ void pkgAcqIndexRel::Failed(string Message,pkgAcquire::MethodConfig *Cnf)
    if (Cnf->LocalOnly == true || 
        StringToBool(LookupTag(Message,"Transient-Failure"),false) == false)
    {      
-      // Ignore this
-      Status = StatDone;
-      Complete = false;
-      Dequeue();
-      return;
+      // CNC:2002-07-03
+      if (Master == false || Repository->IsAuthenticated() == false)
+      {
+         // Ignore this
+	 Status = StatDone;
+	 Complete = false;
+	 Dequeue();
+	 return;
+      }
    }
    
    Item::Failed(Message,Cnf);
@@ -486,6 +776,33 @@ bool pkgAcqArchive::QueueNext()
    return false;
 }   
 									/*}}}*/
+
+// CNC:2003-03-19
+#ifdef WITH_LUA
+// ScriptsAcquireDone - Script trigger.					/*{{{*/
+// ---------------------------------------------------------------------
+/* */
+template<class T>
+static void ScriptsAcquireDone(const char *ConfKey,
+			       string &StoreFilename,
+			       string &ErrorText,
+			       T &Status)
+{
+   if (_lua->HasScripts(ConfKey) == true) {
+      _lua->SetGlobal("acquire_filename", StoreFilename.c_str());
+      _lua->SetGlobal("acquire_error", (const char *)NULL);
+      _lua->RunScripts(ConfKey, true);
+      const char *Error = _lua->GetGlobal("acquire_error");
+      if (Error != NULL && *Error != 0) {
+	 Status = pkgAcquire::Item::StatError;
+	 ErrorText = Error;
+      }
+      _lua->ResetGlobals();
+   }
+}
+									/*}}}*/
+#endif
+
 // AcqArchive::Done - Finished fetching					/*{{{*/
 // ---------------------------------------------------------------------
 /* */
@@ -530,6 +847,13 @@ void pkgAcqArchive::Done(string Message,unsigned long Size,string Md5Hash,
    {
       StoreFilename = DestFile = FileName;
       Local = true;
+
+// CNC:2003-03-19
+#ifdef WITH_LUA
+      ScriptsAcquireDone("Scripts::Acquire::Archive::Done",
+			 StoreFilename, ErrorText, Status);
+#endif
+
       return;
    }
    
@@ -540,6 +864,13 @@ void pkgAcqArchive::Done(string Message,unsigned long Size,string Md5Hash,
    
    StoreFilename = DestFile = FinalFile;
    Complete = true;
+
+// CNC:2003-03-19
+#ifdef WITH_LUA
+   ScriptsAcquireDone("Scripts::Acquire::Archive::Done",
+		      StoreFilename, ErrorText, Status);
+#endif
+
 }
 									/*}}}*/
 // AcqArchive::Failed - Failure handler					/*{{{*/
@@ -710,3 +1041,4 @@ void pkgAcqFile::Failed(string Message,pkgAcquire::MethodConfig *Cnf)
    Item::Failed(Message,Cnf);
 }
 									/*}}}*/
+// vim:sts=3:sw=3

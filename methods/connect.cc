@@ -25,6 +25,10 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+// CNC:2003-02-20 - Moved header to fix compilation error when
+// 		    --disable-nls is used.
+#include <apti18n.h>
+
 #include "rfc2553emu.h"
 #include <apti18n.h>
 									/*}}}*/

@@ -15,6 +15,10 @@
 #include <apti18n.h>
 #include <config.h>
 #include <sys/stat.h>
+
+// CNC:2003-03-17
+#include <apt-pkg/luaiface.h>
+
 									/*}}}*/
 
 #define Stringfy_(x) # x
@@ -39,7 +43,8 @@ bool pkgInitConfig(Configuration &Cnf)
       Cnf.Set("APT::Architecture",COMMON_CPU);
    else
       Cnf.Set("APT::Architecture",COMMON_OS "-" COMMON_CPU);
-   Cnf.Set("APT::Build-Essential::", "build-essential");
+   // CNC:2002-09-10
+   //Cnf.Set("APT::Build-Essential::", "build-essential");
    Cnf.Set("Dir","/");
    
    // State   
@@ -64,6 +69,8 @@ bool pkgInitConfig(Configuration &Cnf)
    // Configuration
    Cnf.Set("Dir::Etc","etc/apt/");
    Cnf.Set("Dir::Etc::sourcelist","sources.list");
+   // CNC:2003-03-03
+   Cnf.Set("Dir::Etc::sourceparts","sources.list.d");
    Cnf.Set("Dir::Etc::vendorlist","vendors.list");
    Cnf.Set("Dir::Etc::vendorparts","vendors.list.d");
    Cnf.Set("Dir::Etc::main","apt.conf");
@@ -105,11 +112,26 @@ bool pkgInitConfig(Configuration &Cnf)
    return true;
 }
 									/*}}}*/
+
+// CNC:2003-02-16 - We must do that to force a statically linked libapt-pkg
+// 		    library to include the package systems into the binary.
+#include <apt-pkg/rpmsystem.h>
+//#include <apt-pkg/debsystem.h>
+void ForceLinkage()
+{
+	rpmSystem *rpmsys = &rpmSys;
+	rpmsys->ArchiveSupported("");
+	//debSystem *debsys = &debSys;
+	//depsys->ArchiveSupported("");
+}
+
 // pkgInitSystem - Initialize the _system calss				/*{{{*/
 // ---------------------------------------------------------------------
 /* */
 bool pkgInitSystem(Configuration &Cnf,pkgSystem *&Sys)
 {
+   ForceLinkage(); // CNC:2003-02-16 - See above.
+
    Sys = 0;
    string Label = Cnf.Find("Apt::System","");
    if (Label.empty() == false)
@@ -134,7 +156,12 @@ bool pkgInitSystem(Configuration &Cnf,pkgSystem *&Sys)
       if (Sys == 0)
 	 return _error->Error(_("Unable to determine a suitable system type"));
    }
-   
-   return Sys->Initialize(Cnf);
+
+   // CNC:2003-03-15
+   bool Ret = Sys->Initialize(Cnf);
+#ifdef WITH_LUA
+   _lua->RunScripts("Scripts::Init", false);
+#endif
+   return Ret;
 }
 									/*}}}*/
