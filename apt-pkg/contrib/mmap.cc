@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: mmap.cc,v 1.22 2001/05/27 05:19:30 jgg Exp $
+// $Id: mmap.cc,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
    
    MMap Class - Provides 'real' mmap or a faked mmap using read().

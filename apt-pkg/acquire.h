@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: acquire.h,v 1.29 2001/05/22 04:17:18 jgg Exp $
+// $Id: acquire.h,v 1.2 2003/01/29 13:04:48 niemeyer Exp $
 /* ######################################################################
 
    Acquire - File Acquiration
@@ -145,6 +145,7 @@ class pkgAcquire::Queue
    
    protected:
 
+#ifndef SWIG
    // Queued item
    struct QItem : pkgAcquire::ItemDesc
    {
@@ -159,6 +160,7 @@ class pkgAcquire::Queue
 	 Owner = I.Owner;
       };
    };
+#endif
    
    // Name of the queue
    string Name;

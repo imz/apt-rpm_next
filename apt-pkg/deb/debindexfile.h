@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: debindexfile.h,v 1.3 2001/04/29 05:13:51 jgg Exp $
+// $Id: debindexfile.h,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
 
    Debian Index Files

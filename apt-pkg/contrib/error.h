@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: error.h,v 1.8 2001/05/07 05:06:52 jgg Exp $
+// $Id: error.h,v 1.2 2003/01/29 13:04:48 niemeyer Exp $
 /* ######################################################################
    
    Global Erorr Class - Global error mechanism
@@ -69,9 +69,26 @@ class GlobalError
    Item *List;
    bool PendingFlag;
    void Insert(Item *I);
+
+   // CNC:2003-02-24 - Introduced a stack of errors. This allows one to
+   //		       delay error handling until a later time.
+   struct State
+   {
+      Item *List;
+      bool PendingFlag;
+      State *Next;
+   };
+
+   State *Stack;
    
    public:
 
+   // CNC:2003-02-24 - See above.
+   void PushState();
+   bool PopState();
+   bool PopBackState();
+
+#ifndef SWIG
    // Call to generate an error from a library call.
    bool Errno(const char *Function,const char *Description,...) APT_MFORMAT2;
    bool WarningE(const char *Function,const char *Description,...) APT_MFORMAT2;
@@ -80,6 +97,16 @@ class GlobalError
       ignored by the client. */
    bool Error(const char *Description,...) APT_MFORMAT1;
    bool Warning(const char *Description,...) APT_MFORMAT1;
+#else
+   // Call to generate an error from a library call.
+   bool Errno(const char *Function,const char *Description) APT_MFORMAT2;
+   bool WarningE(const char *Function,const char *Description) APT_MFORMAT2;
+
+   /* A warning should be considered less severe than an error, and may be
+      ignored by the client. */
+   bool Error(const char *Description) APT_MFORMAT1;
+   bool Warning(const char *Description) APT_MFORMAT1;
+#endif
 
    // Simple accessors
    inline bool PendingError() {return PendingFlag;};
@@ -101,3 +128,5 @@ GlobalError *_GetErrorObj();
 #undef APT_MFORMAT2
 
 #endif
+
+// vim:sts=3:sw=3

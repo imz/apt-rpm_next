@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: dpkgpm.h,v 1.8 2001/05/07 05:05:13 jgg Exp $
+// $Id: dpkgpm.h,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
 
    DPKG Package Manager - Provide an interface to dpkg

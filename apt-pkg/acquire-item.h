@@ -45,7 +45,9 @@ class pkgAcquire::Item
    public:
 
    // State of the item
-   enum {StatIdle, StatFetching, StatDone, StatError} Status;
+   /* CNC:2002-11-22
+    * Do not use anonyomus enums, as this breaks SWIG in some cases */
+   enum StatusFlags {StatIdle, StatFetching, StatDone, StatError} Status;
    string ErrorText;
    unsigned long FileSize;
    unsigned long PartialSize;   
@@ -77,6 +79,9 @@ class pkgAcquire::Item
    virtual ~Item();
 };
 
+// CNC:2002-07-03
+class pkgRepository;
+
 // Item class for index files
 class pkgAcqIndex : public pkgAcquire::Item
 {
@@ -86,6 +91,9 @@ class pkgAcqIndex : public pkgAcquire::Item
    bool Erase;
    pkgAcquire::ItemDesc Desc;
    string RealURI;
+
+   // CNC:2002-07-03
+   pkgRepository *Repository;
    
    public:
    
@@ -93,10 +101,11 @@ class pkgAcqIndex : public pkgAcquire::Item
    virtual void Done(string Message,unsigned long Size,string Md5Hash,
 		     pkgAcquire::MethodConfig *Cnf);
    virtual string Custom600Headers();
-   virtual string DescURI() {return RealURI + ".gz";};
+   virtual string DescURI() {return RealURI;}; // CNC:2003-02-14
 
-   pkgAcqIndex(pkgAcquire *Owner,string URI,string URIDesc,
-	       string ShortDesct);
+   // CNC:2002-07-03
+   pkgAcqIndex(pkgAcquire *Owner,pkgRepository *Repository,string URI,
+	       string URIDesc,string ShortDesct);
 };
 
 // Item class for index files
@@ -106,6 +115,12 @@ class pkgAcqIndexRel : public pkgAcquire::Item
    
    pkgAcquire::ItemDesc Desc;
    string RealURI;
+ 
+   // CNC:2002-07-03
+   bool Authentication;
+   bool Master;
+   bool Erase;
+   pkgRepository *Repository;
    
    public:
    
@@ -116,8 +131,9 @@ class pkgAcqIndexRel : public pkgAcquire::Item
    virtual string Custom600Headers();
    virtual string DescURI() {return RealURI;};
    
-   pkgAcqIndexRel(pkgAcquire *Owner,string URI,string URIDesc,
-	       string ShortDesct);
+   // CNC:2002-07-03
+   pkgAcqIndexRel(pkgAcquire *Owner,pkgRepository *Repository,string URI,
+		  string URIDesc,string ShortDesc,bool Master=false);
 };
 
 // Item class for archive files

@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: hashes.cc,v 1.1 2001/03/06 07:15:29 jgg Exp $
+// $Id: hashes.cc,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
 
    Hashes - Simple wrapper around the hash functions

@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: debindexfile.cc,v 1.5 2001/04/29 05:13:51 jgg Exp $
+// $Id: debindexfile.cc,v 1.2 2002/07/25 18:07:18 niemeyer Exp $
 /* ######################################################################
 
    Debian Specific sources.list types and the three sorts of Debian
@@ -134,8 +134,9 @@ string debSourcesIndex::IndexURI(const char *Type) const
 /* */
 bool debSourcesIndex::GetIndexes(pkgAcquire *Owner) const
 {
-   new pkgAcqIndex(Owner,IndexURI("Sources"),Info("Sources"),"Sources");
-   new pkgAcqIndexRel(Owner,IndexURI("Release"),Info("Release"),"Release");
+   // CNC:2002-07-03
+   new pkgAcqIndex(Owner,NULL,IndexURI("Sources"),Info("Sources"),"Sources");
+   new pkgAcqIndexRel(Owner,NULL,IndexURI("Release"),Info("Release"),"Release");
    return true;
 }
 									/*}}}*/
@@ -251,8 +252,9 @@ string debPackagesIndex::IndexURI(const char *Type) const
 /* */
 bool debPackagesIndex::GetIndexes(pkgAcquire *Owner) const
 {
-   new pkgAcqIndex(Owner,IndexURI("Packages"),Info("Packages"),"Packages");
-   new pkgAcqIndexRel(Owner,IndexURI("Release"),Info("Release"),"Release");
+   // CNC:2002-07-03
+   new pkgAcqIndex(Owner,NULL,IndexURI("Packages"),Info("Packages"),"Packages");
+   new pkgAcqIndexRel(Owner,NULL,IndexURI("Release"),Info("Release"),"Release");
    return true;
 }
 									/*}}}*/

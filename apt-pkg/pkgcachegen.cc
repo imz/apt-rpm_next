@@ -104,6 +104,12 @@ bool pkgCacheGenerator::MergeList(ListParser &List,
 {
    List.Owner = this;
 
+   // CNC:2003-02-20 - When --reinstall is used during a cache building
+   //		       process, the algorithm is sligthly changed to
+   //		       order the "better" architectures before, even if
+   //		       they are already in the system.
+   bool ReInstall = _config->FindB("APT::Get::ReInstall", false);
+
    unsigned int Counter = 0;
    while (List.Step() == true)
    {
@@ -116,8 +122,13 @@ bool pkgCacheGenerator::MergeList(ListParser &List,
       if (NewPackage(Pkg,PackageName) == false)
 	 return _error->Error(_("Error occured while processing %s (NewPackage)"),PackageName.c_str());
       Counter++;
-      if (Counter % 100 == 0 && Progress != 0)
-	 Progress->Progress(List.Offset());
+      // CNC:2003-02-16
+      if (Counter % 100 == 0 && Progress != 0) {
+	 if (List.OrderedOffset() == true)
+	    Progress->Progress(List.Offset());
+	 else
+	    Progress->Progress(Counter);
+      }
 
       /* Get a pointer to the version structure. We know the list is sorted
          so we use that fact in the search. Insertion of new versions is
@@ -131,12 +142,22 @@ bool pkgCacheGenerator::MergeList(ListParser &List,
 	 continue;
       }
 
+      // CNC:2002-07-09
+      string Arch = List.Architecture();
+
       pkgCache::VerIterator Ver = Pkg.VersionList();
       map_ptrloc *Last = &Pkg->VersionList;
       int Res = 1;
       for (; Ver.end() == false; Last = &Ver->NextVer, Ver++)
       {
-	 Res = Cache.VS->CmpVersion(Version,Ver.VerStr());
+	 // 2003-02-20 - If the package is already installed, the
+	 //              architecture doesn't matter, unless
+	 //              --reinstall has been used.
+	 if (!ReInstall && List.IsDatabase())
+	    Res = Cache.VS->CmpVersion(Version, Ver.VerStr());
+	 else
+	    Res = Cache.VS->CmpVersionArch(Version,Arch,
+					   Ver.VerStr(),Ver.Arch());
 	 if (Res >= 0)
 	    break;
       }
@@ -168,9 +189,13 @@ bool pkgCacheGenerator::MergeList(ListParser &List,
       // Skip to the end of the same version set.
       if (Res == 0)
       {
+	 // CNC:2003-02-20 - Unless this package is already installed.
+	 if (!List.IsDatabase())
 	 for (; Ver.end() == false; Last = &Ver->NextVer, Ver++)
 	 {
-	    Res = Cache.VS->CmpVersion(Version,Ver.VerStr());
+	    // CNC:2002-07-09
+	    Res = Cache.VS->CmpVersionArch(Version,Arch,
+			    		   Ver.VerStr(),Ver.Arch());
 	    if (Res != 0)
 	       break;
 	 }
@@ -238,17 +263,33 @@ bool pkgCacheGenerator::MergeFileProvides(ListParser &List)
       
       pkgCache::PkgIterator Pkg = Cache.FindPkg(PackageName);
       if (Pkg.end() == true)
+#if 0
+	 // CNC:2003-03-03 - Ignore missing packages. This will happen when
+	 //		     a package is placed in Allow-Duplicated and
+	 //		     then removed, but the source cache is still
+	 //		     counting with it as Allow-Duplicated. No good
+	 //		     way to handle that right now.
 	 return _error->Error(_("Error occured while processing %s (FindPkg)"),
 				PackageName.c_str());
+#else
+	 continue;
+#endif
+
       Counter++;
-      if (Counter % 100 == 0 && Progress != 0)
-	 Progress->Progress(List.Offset());
+      // CNC:2003-02-16
+      if (Counter % 100 == 0 && Progress != 0) {
+	 if (List.OrderedOffset() == true)
+	    Progress->Progress(List.Offset());
+	 else
+	    Progress->Progress(Counter);
+      }
 
       unsigned long Hash = List.VersionHash();
       pkgCache::VerIterator Ver = Pkg.VersionList();
       for (; Ver.end() == false; Ver++)
       {
-	 if (Ver->Hash == Hash && Version.c_str() == Ver.VerStr())
+	 // CNC:2002-07-25
+	 if (Ver->Hash == Hash && strcmp(Version.c_str(), Ver.VerStr()) == 0)
 	 {
 	    if (List.CollectFileProvides(Cache,Ver) == false)
 	       return _error->Error(_("Error occured while processing %s (CollectFileProvides)"),PackageName.c_str());
@@ -256,8 +297,15 @@ bool pkgCacheGenerator::MergeFileProvides(ListParser &List)
 	 }
       }
       
+      // CNC:2003-03-03 - Ignore missing versions. This will happen when
+      //		  a package is placed in Allow-Duplicated and
+      //		  then removed, but the source cache is still
+      //		  counting with it as Allow-Duplicated. No good
+      //		  way to handle that right now.
+#if 0
       if (Ver.end() == true)
 	 _error->Warning(_("Package %s %s was not found while processing file dependencies"),PackageName.c_str(),Version.c_str());
+#endif
    }
 
    return true;
@@ -268,9 +316,18 @@ bool pkgCacheGenerator::MergeFileProvides(ListParser &List)
 /* This creates a new package structure and adds it to the hash table */
 bool pkgCacheGenerator::NewPackage(pkgCache::PkgIterator &Pkg,string Name)
 {
+// CNC:2003-02-17 - Optimized.
+#if 0
    Pkg = Cache.FindPkg(Name);
    if (Pkg.end() == false)
       return true;
+#else
+   pkgCache::Package *P = Cache.FindPackage(Name.c_str());
+   if (P != NULL) {
+      Pkg = pkgCache::PkgIterator(Cache, P);
+      return true;
+   }
+#endif
        
    // Get a structure
    unsigned long Package = Map.Allocate(sizeof(pkgCache::Package));
@@ -550,6 +607,15 @@ static bool CheckValidity(string CacheFile, FileIterator Start,
    if (CacheFile.empty() == true || FileExists(CacheFile) == false)
       return false;
    
+   // CNC:2003-02-20 - When --reinstall is used during a cache building
+   //		       process, the algorithm is sligthly changed to
+   //		       order the "better" architectures before, even if
+   //		       they are already in the system. Thus, we rebuild
+   //		       the cache when it's used.
+   bool ReInstall = _config->FindB("APT::Get::ReInstall", false);
+   if (ReInstall == true)
+      return false;
+
    // Map it
    FileFd CacheF(CacheFile,FileFd::ReadOnly);
    SPtr<MMap> Map = new MMap(CacheF,MMap::Public | MMap::ReadOnly);
@@ -571,8 +637,9 @@ static bool CheckValidity(string CacheFile, FileIterator Start,
     
       if ((*Start)->Exists() == false)
       {
-	 _error->WarningE("stat",_("Couldn't stat source package list %s"),
-			  (*Start)->Describe().c_str());
+	 // CNC:2002-07-04
+	 /*_error->WarningE("stat",_("Couldn't stat source package list %s"),
+	 		  (*Start)->Describe().c_str());*/
 	 continue;
       }
 
@@ -647,21 +714,32 @@ static bool BuildCache(pkgCacheGenerator &Gen,
 	 return false;
    }   
 
-   if (Gen.HasFileDeps() == true)
-   {
-      Progress.Done();
-      TotalSize = ComputeSize(Start, End);
-      CurrentSize = 0;
-      for (I = Start; I != End; I++)
-      {
-	 unsigned long Size = (*I)->Size();
-	 Progress.OverallProgress(CurrentSize,TotalSize,Size,_("Collecting File Provides"));
-	 CurrentSize += Size;
-	 if ((*I)->MergeFileProvides(Gen,Progress) == false)
-	    return false;
-      }
-   }
+   // CNC:2003-03-03 - Code that was here has been moved to its own function.
    
+   return true;
+}
+									/*}}}*/
+// CNC:2003-03-03
+// CollectFileProvides - Merge the file provides into the cache		/*{{{*/
+// ---------------------------------------------------------------------
+/* */
+static bool CollectFileProvides(pkgCacheGenerator &Gen,
+				OpProgress &Progress,
+				unsigned long &CurrentSize,unsigned long TotalSize,
+			        FileIterator Start, FileIterator End)
+{
+   for (FileIterator I = Start; I != End; I++)
+   {
+      if ((*I)->HasPackages() == false || (*I)->Exists() == false)
+	 continue;
+
+      unsigned long Size = (*I)->Size();
+      Progress.OverallProgress(CurrentSize,TotalSize,Size,_("Reading Package Lists"));
+      CurrentSize += Size;
+
+      if ((*I)->MergeFileProvides(Gen,Progress) == false)
+	 return false;
+   }
    return true;
 }
 									/*}}}*/
@@ -707,6 +785,14 @@ bool pkgMakeStatusCache(pkgSourceList &List,OpProgress &Progress,
       return true;
    }
    
+   // CNC:2002-07-03
+#if DYING
+   if (_system->PreProcess(Files.begin(),Files.end(),Progress) == false) 
+   {
+       _error->Error(_("Error pre-processing package lists"));
+       return false;
+   }
+#endif
    /* At this point we know we need to reconstruct the package cache,
       begin. */
    SPtr<FileFd> CacheF;
@@ -739,6 +825,12 @@ bool pkgMakeStatusCache(pkgSourceList &List,OpProgress &Progress,
 	 return false;
 
       TotalSize = ComputeSize(Files.begin()+EndOfSource,Files.end());
+
+      // CNC:2003-03-18
+      // For the file provides collection phase.
+      unsigned long SrcSize = ComputeSize(Files.begin(),
+					  Files.begin()+EndOfSource);
+      TotalSize = TotalSize+(TotalSize+SrcSize);
       
       // Build the status cache
       pkgCacheGenerator Gen(Map.Get(),&Progress);
@@ -747,10 +839,32 @@ bool pkgMakeStatusCache(pkgSourceList &List,OpProgress &Progress,
       if (BuildCache(Gen,Progress,CurrentSize,TotalSize,
 		     Files.begin()+EndOfSource,Files.end()) == false)
 	 return false;
+
+      // CNC:2003-03-18
+      if (Gen.HasFileDeps() == true) {
+	 // There are new file dependencies. Collect over all packages.
+	 Gen.GetCache().HeaderP->HasFileDeps = true;
+	 if (CollectFileProvides(Gen,Progress,CurrentSize,TotalSize,
+				 Files.begin(),Files.end()) == false)
+	    return false;
+      } else if (Gen.GetCache().HeaderP->HasFileDeps == true) {
+	 // Jump entries which are not going to be parsed.
+	 CurrentSize += SrcSize;
+	 // No new file dependencies. Collect over the new packages.
+	 if (CollectFileProvides(Gen,Progress,CurrentSize,TotalSize,
+				 Files.begin()+EndOfSource,Files.end()) == false)
+	    return false;
+      }
    }
    else
    {
       TotalSize = ComputeSize(Files.begin(),Files.end());
+
+      // CNC:2003-03-18
+      // For the file provides collection phase.
+      unsigned long SrcSize = ComputeSize(Files.begin(),
+					  Files.begin()+EndOfSource);
+      TotalSize = (TotalSize*2)+SrcSize;
       
       // Build the source cache
       pkgCacheGenerator Gen(Map.Get(),&Progress);
@@ -759,8 +873,26 @@ bool pkgMakeStatusCache(pkgSourceList &List,OpProgress &Progress,
       if (BuildCache(Gen,Progress,CurrentSize,TotalSize,
 		     Files.begin(),Files.begin()+EndOfSource) == false)
 	 return false;
+
+      // CNC:2003-03-18
+      if (Gen.HasFileDeps() == true) {
+	 // There are file dependencies. Collect over source packages.
+	 Gen.GetCache().HeaderP->HasFileDeps = true;
+	 if (CollectFileProvides(Gen,Progress,CurrentSize,TotalSize,
+		     Files.begin(),Files.begin()+EndOfSource) == false)
+	    return false;
+	 // Reset to check for new file dependencies in the status cache.
+	 Gen.ResetFileDeps();
+      } else {
+	 // Jump entries which are not going to be parsed.
+	 CurrentSize += SrcSize;
+      }
       
       // Write it back
+      // CNC:2003-03-03 - Notice that it is without the file provides. This
+      // is on purpose, since file requires introduced later on the status
+      // cache (database) must be considered when collecting file provides,
+      // even if using the sources cache (above).
       if (Writeable == true && SrcCacheFile.empty() == false)
       {
 	 FileFd SCacheF(SrcCacheFile,FileFd::WriteEmpty);
@@ -787,6 +919,22 @@ bool pkgMakeStatusCache(pkgSourceList &List,OpProgress &Progress,
       if (BuildCache(Gen,Progress,CurrentSize,TotalSize,
 		     Files.begin()+EndOfSource,Files.end()) == false)
 	 return false;
+
+      // CNC:2003-03-18
+      if (Gen.HasFileDeps() == true) {
+	 // There are new file dependencies. Collect over all packages.
+	 Gen.GetCache().HeaderP->HasFileDeps = true;
+	 if (CollectFileProvides(Gen,Progress,CurrentSize,TotalSize,
+				 Files.begin(),Files.end()) == false)
+	    return false;
+      } else if (Gen.GetCache().HeaderP->HasFileDeps == true) {
+	 // Jump entries which are not going to be parsed.
+	 CurrentSize += SrcSize;
+	 // No new file dependencies. Collect over the new packages.
+	 if (CollectFileProvides(Gen,Progress,CurrentSize,TotalSize,
+		     Files.begin()+EndOfSource,Files.end()) == false)
+	    return false;
+      }
    }
 
    if (_error->PendingError() == true)
@@ -803,6 +951,10 @@ bool pkgMakeStatusCache(pkgSourceList &List,OpProgress &Progress,
 	 *OutMap = Map.UnGuard();
       }      
    }
+
+   // CNC:2003-03-07 - Signal to the system so that it can free it's
+   //		       internal caches, if any.
+   _system->CacheBuilt();
    
    return true;
 }
@@ -824,6 +976,10 @@ bool pkgMakeOnlyStatusCache(OpProgress &Progress,DynamicMMap **OutMap)
    unsigned long TotalSize = 0;
    
    TotalSize = ComputeSize(Files.begin()+EndOfSource,Files.end());
+
+   // CNC:2003-03-18
+   // For the file provides collection phase.
+   TotalSize *= 2;
    
    // Build the status cache
    Progress.OverallProgress(0,1,1,_("Reading Package Lists"));
@@ -833,11 +989,25 @@ bool pkgMakeOnlyStatusCache(OpProgress &Progress,DynamicMMap **OutMap)
    if (BuildCache(Gen,Progress,CurrentSize,TotalSize,
 		  Files.begin()+EndOfSource,Files.end()) == false)
       return false;
+
+   // CNC:2003-03-18
+   if (Gen.HasFileDeps() == true) {
+      if (CollectFileProvides(Gen,Progress,CurrentSize,TotalSize,
+			      Files.begin()+EndOfSource,Files.end()) == false)
+	 return false;
+   }
    
    if (_error->PendingError() == true)
       return false;
    *OutMap = Map.UnGuard();
+
+   // CNC:2003-03-07 - Signal to the system so that it can free it's
+   //		       internal caches, if any.
+   _system->CacheBuilt();
+   
    
    return true;
 }
 									/*}}}*/
+
+// vim:sts=3:sw=3

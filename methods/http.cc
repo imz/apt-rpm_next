@@ -25,7 +25,6 @@
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
-#include <apti18n.h>
 #include <apt-pkg/fileutl.h>
 #include <apt-pkg/acquire-method.h>
 #include <apt-pkg/error.h>
@@ -43,6 +42,10 @@
 
 // Internet stuff
 #include <netdb.h>
+
+// CNC:2003-02-20 - Moved header to fix compilation error when
+// 		    --disable-nls is used.
+#include <apti18n.h>
 
 #include "connect.h"
 #include "rfc2553emu.h"
@@ -673,8 +676,12 @@ void HttpMethod::SendReq(FetchItem *Itm,CircleBuf &Out)
    if (Uri.User.empty() == false || Uri.Password.empty() == false)
       Req += string("Authorization: Basic ") + 
           Base64Encode(Uri.User + ":" + Uri.Password) + "\r\n";
-   
-   Req += "User-Agent: Debian APT-HTTP/1.3\r\n\r\n";
+
+   // CNC:2003-01-29
+   string UserAgent = _config->Find("Acquire::http::User-Agent");
+   if (UserAgent.empty() == true) 
+	  UserAgent = "RPM APT-HTTP/1.3";
+   Req += string("User-Agent: ") + UserAgent + "\r\n\r\n";
    
    if (Debug == true)
       cerr << Req << endl;

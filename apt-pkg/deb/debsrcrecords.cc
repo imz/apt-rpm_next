@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: debsrcrecords.cc,v 1.5 2001/11/04 17:09:18 tausq Exp $
+// $Id: debsrcrecords.cc,v 1.2 2002/07/25 18:07:18 niemeyer Exp $
 /* ######################################################################
    
    Debian Source Package Records - Parser implementation for Debian style

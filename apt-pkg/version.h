@@ -1,6 +1,6 @@
 // -*- mode: cpp; mode: fold -*-
 // Description								/*{{{*/
-// $Id: version.h,v 1.8 2001/05/27 05:55:27 jgg Exp $
+// $Id: version.h,v 1.2 2002/10/03 16:46:15 niemeyer Exp $
 /* ######################################################################
 
    Version - Versioning system..
@@ -27,6 +27,9 @@
 #include <apt-pkg/strutl.h>    
 #include <string>
 
+// CNC:2002-07-10
+#include <apt-pkg/pkgcache.h>
+
 using std::string;
 
 class pkgVersioningSystem
@@ -42,6 +45,27 @@ class pkgVersioningSystem
    // Compare versions..
    virtual int DoCmpVersion(const char *A,const char *Aend,
 			  const char *B,const char *Bend) = 0;   
+
+   // CNC:2002-07-08
+   virtual int DoCmpVersionArch(const char *A,const char *Aend,
+		   		const char *AA,const char *AAend,
+				const char *B,const char *Bend,
+				const char *BA,const char *BAend)
+	{return DoCmpVersion(A,Aend,B,Bend);};
+   virtual int CmpVersionArch(string A,string AA,
+		   	      const char *B,const char *BA)
+	{
+	   if (AA.length() == 0 || BA == NULL || *BA == 0)
+	      return DoCmpVersion(A.c_str(),A.c_str()+A.length(),
+				  B,B+strlen(B));
+	   else
+	      return DoCmpVersionArch(A.c_str(),A.c_str()+A.length(),
+				      AA.c_str(),AA.c_str()+AA.length(),
+				      B,B+strlen(B),BA,BA+strlen(BA));
+	};
+   virtual bool CheckDep(const char *PkgVer,pkgCache::DepIterator Dep)
+   	{return CheckDep(PkgVer,Dep->CompareOp,Dep.TargetVer());};
+   
 
    virtual bool CheckDep(const char *PkgVer,int Op,const char *DepVer) = 0;
    virtual int DoCmpReleaseVer(const char *A,const char *Aend,
@@ -60,8 +84,12 @@ class pkgVersioningSystem
    virtual ~pkgVersioningSystem() {};
 };
 
+
 #ifdef APT_COMPATIBILITY
-#include <apt-pkg/debversion.h>
+// CNC:2003-02-21 - We're not compiling the deb subsystem.
+//#include <apt-pkg/debversion.h>
 #endif
 
 #endif
+
+// vim:sts=3:sw=3
