@@ -757,10 +757,30 @@ class rpmSLTypeSrpmDir : public rpmSLTypeGen
    }   
 };
 
+class rpmSLTypeRepomd : public rpmSLTypeGen
+{
+   public:
+
+   bool CreateItem(vector<pkgIndexFile *> &List,
+		   string URI, string Dist, string Section,
+		   pkgSourceList::Vendor const *Vendor) const 
+   {
+      pkgRepository *Rep = GetRepository(URI,Dist,Vendor);
+      List.push_back(new rpmRepomdIndex(URI,Dist,Section,Rep));
+      return true;
+   };
+
+   rpmSLTypeRepomd()
+   {
+      Name = "repomd";
+      Label = "RepoMD tree";
+   }   
+};
 rpmSLTypeRpm _apt_rpmType;
 rpmSLTypeSrpm _apt_rpmSrcType;
 rpmSLTypeRpmDir _apt_rpmDirType;
 rpmSLTypeSrpmDir _apt_rpmSrcDirType;
+rpmSLTypeRepomd _apt_repomdType;
 									/*}}}*/
 // Index File types for rpm						/*{{{*/
 class rpmIFTypeSrc : public pkgIndexFile::Type
@@ -820,6 +840,10 @@ const pkgIndexFile::Type *rpmSingleSrcIndex::GetType() const
 const pkgIndexFile::Type *rpmDatabaseIndex::GetType() const
 {
    return &_apt_DB;
+}
+const pkgIndexFile::Type *rpmRepomdIndex::GetType() const
+{
+   return &_apt_Pkg;
 }
 
 									/*}}}*/

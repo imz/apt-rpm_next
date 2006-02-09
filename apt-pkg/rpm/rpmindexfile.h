@@ -276,4 +276,26 @@ class rpmSingleSrcIndex : public rpmSrcListIndex
 	   rpmSrcListIndex("", "", "", NULL), FilePath(File) {};
 };
 
+class rpmRepomdIndex : public rpmListIndex
+{
+   protected:
+
+   string URI;
+   string Dist;
+   string Section;
+   pkgRepository *Repository;
+
+   public:
+
+   virtual const Type *GetType() const;
+   virtual RPMHandler *CreateHandler() const
+	   { return new RPMFileHandler(IndexPath()); };
+   virtual string MainType() const {return "repomd";}
+
+   rpmRepomdIndex(string URI,string Dist,string Section,
+		   pkgRepository *Repository) :
+	   rpmListIndex(URI,Dist,Section,Repository)
+      {};
+};
+
 #endif
