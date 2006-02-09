@@ -539,7 +539,6 @@ string rpmRepomdIndex::ArchiveURI(string File) const
    RPMPackageData *rpmdata = RPMPackageData::Singleton();
    string Res;
 
-
    if (File.find("/") != string::npos)
       Res += '/' + File;
    else
@@ -572,6 +571,7 @@ string rpmRepomdIndex::ReleaseInfo(string Type) const
       Info += Dist;
    Info += " ";
    Info += Type;
+   //cout << "repomd releaseinfo " << Info << endl;
    return Info;
 };
 
@@ -587,6 +587,7 @@ string rpmRepomdIndex::Info(string Type) const
       Info += Dist + '/' ;
    Info += " ";
    Info += Type;
+   //cout << "repomd info " << Info << endl;
    return Info;
 }
 
@@ -596,8 +597,8 @@ string rpmRepomdIndex::IndexURI(string Type) const
    string Res;
    Res = URI + Dist + "/repodata/";
 
-   Res += Type;
-   // cout << "XXXXX repomd indexuri " << Res << endl;
+   Res += "primary.xml";
+   //cout << "XXXXX repomd indexuri " << Res << endl;
 
    return Res;
 }
@@ -632,6 +633,7 @@ bool rpmRepomdIndex::GetIndexes(pkgAcquire *Owner) const
 
 string rpmRepomdIndex::IndexFile(string Type) const
 {
+   //cout << "XXX indexfile " << _config->FindDir("Dir::State::lists")+URItoFileName(IndexURI(Type)) << endl;
    return _config->FindDir("Dir::State::lists")+URItoFileName(IndexURI(Type));
 };
 
@@ -641,6 +643,61 @@ bool rpmRepomdIndex::Exists() const
    return FileExists(IndexPath());
 }
 
+bool rpmRepomdIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
+{
+   cout << "repomd MERGE" << endl;
+   string PackageFile = IndexPath();
+   RPMHandler *Handler = CreateHandler();
+
+   Prog.SubProgress(0,Info(MainType()));
+   ::URI Tmp(URI);
+   if (Gen.SelectFile(PackageFile,Tmp.Host,*this) == false)
+   {
+      delete Handler;
+      return _error->Error(_("Problem with SelectFile %s"),PackageFile.c_str());
+   }
+
+   // Store the IMS information
+   pkgCache::PkgFileIterator File = Gen.GetCurFile();
+   struct stat St;
+   if (stat(PackageFile.c_str(),&St) != 0)
+   {
+      delete Handler;
+      return _error->Errno("stat",_("Failed to stat %s"), PackageFile.c_str());
+   }
+   File->Size = St.st_size;
+   File->mtime = St.st_mtime;
+
+   rpmListParser Parser(Handler);
+   if (_error->PendingError() == true)
+   {
+      delete Handler;
+      return _error->Error(_("Problem opening %s"),PackageFile.c_str());
+   }
+
+   if (Gen.MergeList(Parser) == false)
+   {
+      delete Handler;
+      return _error->Error(_("Problem with MergeList %s"),PackageFile.c_str());
+   }
+
+   delete Handler;
+
+#if 0
+   // Check the release file
+   string RelFile = ReleasePath();
+   if (FileExists(RelFile) == true)
+   {
+      FileFd Rel(RelFile,FileFd::ReadOnly);
+      if (_error->PendingError() == true)
+	 return false;
+      Parser.LoadReleaseInfo(File,Rel);
+      Rel.Seek(0);
+   }
+#endif
+
+   return true;
+}
 // DatabaseIndex::rpmDatabaseIndex - Constructor			/*{{{*/
 // ---------------------------------------------------------------------
 /* */

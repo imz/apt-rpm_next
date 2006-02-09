@@ -299,6 +299,10 @@ class rpmRepomdIndex : public rpmIndexFile
 
    public:
 
+   // Creates a RPMHandler suitable for usage with this object
+   virtual RPMHandler *CreateHandler() const
+          { return new RPMRepomdHandler(IndexPath()); };
+
    virtual bool GetReleases(pkgAcquire *Owner) const;
 
    // Interface for the Cache Generator
@@ -314,6 +318,8 @@ class rpmRepomdIndex : public rpmIndexFile
    //virtual string ArchiveInfo(pkgCache::VerIterator Ver) const;
    virtual string ArchiveURI(string File) const;
 
+   virtual bool Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const;
+
    rpmRepomdIndex(string URI,string Dist,string Section,
                pkgRepository *Repository) :
                        URI(URI), Dist(Dist), Section(Section),
@@ -326,15 +332,11 @@ class rpmRepomdPkgIndex : public rpmRepomdIndex
 {
    protected:
 
-   virtual string MainType() const {return "repomd.xml";}
+   virtual string MainType() const {return "repomd";}
 
    public:
 
    virtual const Type *GetType() const;
-
-   // Creates a RPMHandler suitable for usage with this object
-   virtual RPMHandler *CreateHandler() const
-          { return new RPMRepomdHandler(IndexPath()); };
 
 
    rpmRepomdPkgIndex(string URI,string Dist,string Section,
