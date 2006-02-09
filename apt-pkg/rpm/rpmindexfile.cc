@@ -533,7 +533,104 @@ string rpmSingleSrcIndex::ArchiveURI(string File) const
    free(cwd);
    return URI;
 }
+
+string rpmRepomdIndex::ArchiveURI(string File) const
+{
+   RPMPackageData *rpmdata = RPMPackageData::Singleton();
+   string Res;
+
+
+   if (File.find("/") != string::npos)
+      Res += '/' + File;
+   else
+      Res += "/RPMS." + Section + '/' + File;
+   cout << "repomd archiveuri " << File << " " << Res << endl;
+
+   return Res;
+}
+
+string rpmRepomdIndex::ReleaseURI(string Type) const
+{
+   RPMPackageData *rpmdata = RPMPackageData::Singleton();
+   string Res;
+   Res = URI + Dist + "/" + Section + "/repodata/" + "repomd.xml";
+
+   cout << "XXXXX repomd releaseuri " << Res << endl;
+
+   return Res;
+}
+
+string rpmRepomdIndex::ReleaseInfo(string Type) const
+{
+   string Info = ::URI::SiteOnly(URI) + ' ';
+   if (Dist[Dist.size() - 1] == '/')
+   {
+      if (Dist != "/")
+	 Info += Dist;
+   }
+   else
+      Info += Dist;
+   Info += " ";
+   Info += Type;
+   return Info;
+};
+
+string rpmRepomdIndex::Info(string Type) const
+{
+   string Info = ::URI::SiteOnly(URI) + ' ';
+   if (Dist[Dist.size() - 1] == '/')
+   {
+      if (Dist != "/")
+	 Info += Dist;
+   }
+   else
+      Info += Dist + '/' + Section;
+   Info += " ";
+   Info += Type;
+   return Info;
+}
+
+string rpmRepomdIndex::IndexURI(string Type) const
+{
+   RPMPackageData *rpmdata = RPMPackageData::Singleton();
+   string Res;
+   Res = URI + Dist + "/repodata/";
+
+   Res += Type + '.' + Section;
+   cout << "XXXXX repomd indexuri " << Res << endl;
+
+   return Res;
+}
 									/*}}}*/
+bool rpmRepomdIndex::GetReleases(pkgAcquire *Owner) const
+{
+   if (!Repository->Acquire)
+      return true;
+   Repository->Acquire = false;
+   new pkgAcqIndexRel(Owner,Repository,ReleaseURI("repomd.xml"),
+                      ReleaseInfo("repomd.xml"), "repomd.xml", true);
+   return true;
+}
+
+bool rpmRepomdIndex::GetIndexes(pkgAcquire *Owner) const
+{
+   new pkgAcqIndex(Owner,Repository,IndexURI("primary.xml"),Info("primary.xml"),
+		   "primary.xml");
+   new pkgAcqIndexRel(Owner,Repository,IndexURI("repomd.xml"),Info("repomd.xml"),
+		      "repomd.xml");
+   return true;
+}
+
+string rpmRepomdIndex::IndexFile(string Type) const
+{
+   return _config->FindDir("Dir::State::lists")+URItoFileName(IndexURI(Type));
+};
+
+
+bool rpmRepomdIndex::Exists() const
+{
+   return FileExists(IndexPath());
+}
 
 // DatabaseIndex::rpmDatabaseIndex - Constructor			/*{{{*/
 // ---------------------------------------------------------------------
@@ -766,7 +863,7 @@ class rpmSLTypeRepomd : public rpmSLTypeGen
 		   pkgSourceList::Vendor const *Vendor) const
    {
       pkgRepository *Rep = GetRepository(URI,Dist,Vendor);
-      List.push_back(new rpmRepomdIndex(URI,Dist,Section,Rep));
+      List.push_back(new rpmRepomdPkgIndex(URI,Dist,Section,Rep));
       return true;
    };
 
@@ -841,7 +938,7 @@ const pkgIndexFile::Type *rpmDatabaseIndex::GetType() const
 {
    return &_apt_DB;
 }
-const pkgIndexFile::Type *rpmRepomdIndex::GetType() const
+const pkgIndexFile::Type *rpmRepomdPkgIndex::GetType() const
 {
    return &_apt_Pkg;
 }

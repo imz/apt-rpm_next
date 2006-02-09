@@ -107,6 +107,7 @@ class rpmPkgListIndex : public rpmListIndex
    protected:
 
    virtual string MainType() const {return "pkglist";}
+   virtual string IndexPath() const {return IndexFile(MainType());};
 
    public:
 
@@ -276,7 +277,7 @@ class rpmSingleSrcIndex : public rpmSrcListIndex
 	   rpmSrcListIndex("", "", "", NULL), FilePath(File) {};
 };
 
-class rpmRepomdIndex : public rpmListIndex
+class rpmRepomdIndex : public rpmIndexFile
 {
    protected:
 
@@ -285,17 +286,61 @@ class rpmRepomdIndex : public rpmListIndex
    string Section;
    pkgRepository *Repository;
 
+   string ReleaseFile(string Type) const;
+   string ReleaseURI(string Type) const;
+   string ReleaseInfo(string Type) const;
+
+   string Info(string Type) const;
+   string IndexFile(string Type) const;
+   string IndexURI(string Type) const;
+
+   virtual string MainType() const = 0;
+   virtual string IndexPath() const {return IndexFile(MainType());};
+
+   public:
+
+   virtual bool GetReleases(pkgAcquire *Owner) const;
+
+   // Interface for the Cache Generator
+   virtual bool Exists() const;
+   virtual unsigned long Size() const {};
+
+   // Interface for acquire
+   virtual string Describe(bool Short) const {};
+   // Interface for acquire
+   virtual bool GetIndexes(pkgAcquire *Owner) const;
+   virtual bool HasPackages() const {return true;};
+
+   //virtual string ArchiveInfo(pkgCache::VerIterator Ver) const;
+   virtual string ArchiveURI(string File) const;
+
+   rpmRepomdIndex(string URI,string Dist,string Section,
+               pkgRepository *Repository) :
+                       URI(URI), Dist(Dist), Section(Section),
+               Repository(Repository)
+       {};
+
+};
+
+class rpmRepomdPkgIndex : public rpmRepomdIndex
+{
+   protected:
+
+   virtual string MainType() const {return "repomd";}
+
    public:
 
    virtual const Type *GetType() const;
-   virtual RPMHandler *CreateHandler() const
-	   { return new RPMFileHandler(IndexPath()); };
-   virtual string MainType() const {return "repomd";}
 
-   rpmRepomdIndex(string URI,string Dist,string Section,
-		   pkgRepository *Repository) :
-	   rpmListIndex(URI,Dist,Section,Repository)
-      {};
+   // Creates a RPMHandler suitable for usage with this object
+   virtual RPMHandler *CreateHandler() const
+          { return new RPMRepomdHandler(IndexPath()); };
+
+
+   rpmRepomdPkgIndex(string URI,string Dist,string Section,
+                     pkgRepository *Repository) :
+          rpmRepomdIndex(URI,Dist,Section,Repository) {};
+
 };
 
 #endif
