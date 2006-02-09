@@ -326,7 +326,7 @@ class rpmRepomdPkgIndex : public rpmRepomdIndex
 {
    protected:
 
-   virtual string MainType() const {return "repomd";}
+   virtual string MainType() const {return "repomd.xml";}
 
    public:
 
