@@ -543,7 +543,7 @@ string rpmRepomdIndex::ArchiveURI(string File) const
    if (File.find("/") != string::npos)
       Res += '/' + File;
    else
-      Res += "/RPMS." + Section + '/' + File;
+      Res += "/RPMS" + '/' + File;
    cout << "repomd archiveuri " << File << " " << Res << endl;
 
    return Res;
@@ -553,7 +553,7 @@ string rpmRepomdIndex::ReleaseURI(string Type) const
 {
    RPMPackageData *rpmdata = RPMPackageData::Singleton();
    string Res;
-   Res = URI + Dist + "/" + Section + "/repodata/" + "repomd.xml";
+   Res = URI + Dist + "/repodata/" + "repomd.xml";
 
    cout << "XXXXX repomd releaseuri " << Res << endl;
    
@@ -584,7 +584,7 @@ string rpmRepomdIndex::Info(string Type) const
 	 Info += Dist;
    }
    else
-      Info += Dist + '/' + Section;   
+      Info += Dist + '/' ;   
    Info += " ";
    Info += Type;
    return Info;
@@ -596,7 +596,7 @@ string rpmRepomdIndex::IndexURI(string Type) const
    string Res;
    Res = URI + Dist + "/repodata/";
 
-   Res += Type + '.' + Section;
+   Res += Type; 
    cout << "XXXXX repomd indexuri " << Res << endl;
 
    return Res;
