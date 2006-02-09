@@ -555,7 +555,7 @@ string rpmRepomdIndex::ReleaseURI(string Type) const
    string Res;
    Res = URI + Dist + "/repodata/" + "repomd.xml";
 
-   cout << "XXXXX repomd releaseuri " << Res << endl;
+   //cout << "XXXXX repomd releaseuri " << Res << endl;
    
    return Res;
 }
@@ -597,7 +597,7 @@ string rpmRepomdIndex::IndexURI(string Type) const
    Res = URI + Dist + "/repodata/";
 
    Res += Type; 
-   cout << "XXXXX repomd indexuri " << Res << endl;
+   // cout << "XXXXX repomd indexuri " << Res << endl;
 
    return Res;
 }
@@ -607,17 +607,26 @@ bool rpmRepomdIndex::GetReleases(pkgAcquire *Owner) const
    if (!Repository->Acquire)
       return true;
    Repository->Acquire = false;
+#if 0
+   // ignore for now - we need to parse the file for checksum and 
+   // optimally for location of other xml files as well
    new pkgAcqIndexRel(Owner,Repository,ReleaseURI("repomd.xml"),
                       ReleaseInfo("repomd.xml"), "repomd.xml", true);
+#endif
    return true;
 }
 
 bool rpmRepomdIndex::GetIndexes(pkgAcquire *Owner) const
 {
-   new pkgAcqIndex(Owner,Repository,IndexURI("primary.xml"),Info("primary.xml"),
-		   "primary.xml");
-   new pkgAcqIndexRel(Owner,Repository,IndexURI("repomd.xml"),Info("repomd.xml"),
-		      "repomd.xml");
+   new pkgAcqIndex(Owner,Repository,IndexURI("primary.xml"),
+	           Info("primary.xml"), "primary.xml");
+// wont be needing these for a while...
+#if 0
+   new pkgAcqIndex(Owner,Repository,IndexURI("filelists.xml"),
+		   Info("filelists.xml"), "filelists.xml");
+   new pkgAcqIndex(Owner,Repository,IndexURI("other.xml"),
+   		   Info("other.xml"), "other.xml");
+#endif
    return true;
 }
 
