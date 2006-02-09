@@ -525,4 +525,23 @@ void RPMDBHandler::Rewind()
 }
 #endif
 
+RPMRepomdHandler::RPMRepomdHandler(string File)
+{
+   cout << "Repomd handler constr." << endl;
+}
+
+bool RPMRepomdHandler::Skip()
+{
+   cout << "Repomd handler skip" << endl;
+}
+
+bool RPMRepomdHandler::Jump(unsigned int Offset)
+{
+   cout << "Repomd handler jump " << Offset << endl;
+}
+
+void RPMRepomdHandler::Rewind()
+{
+   cout << "Repomd handler rewind" << endl;
+}
 // vim:sts=3:sw=3
