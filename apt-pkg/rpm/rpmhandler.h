@@ -160,6 +160,17 @@ class RPMDirHandler : public RPMHandler
    virtual ~RPMDirHandler();
 };
 
+class RPMRepomdHandler : public RPMHandler
+{
+
+   public:
+
+   virtual bool Skip();
+   virtual bool Jump(unsigned int Offset);
+   virtual void Rewind();
+   virtual inline bool IsDatabase() {return false;};
+   RPMRepomdHandler(string File);
+};
 
 // Our Extra RPM tags. These should not be accessed directly. Use
 // the methods in RPMHandler instead.
