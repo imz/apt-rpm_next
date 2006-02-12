@@ -24,6 +24,7 @@
 
 #include <apt-pkg/rpmhandler.h>
 #include <apt-pkg/rpmpackagedata.h>
+#include <apt-pkg/xmlfile.h>
 
 #include <apti18n.h>
 
@@ -527,21 +528,40 @@ void RPMDBHandler::Rewind()
 
 RPMRepomdHandler::RPMRepomdHandler(string File)
 {
-   cout << "Repomd handler constr." << endl;
+   cout << "Repomd handler constr. " << File << endl;
+   FileFd fd(File, FileFd::ReadOnly);
+   Primary = new pkgXMLFile(&fd);
+   if (Primary->SetRecordTag("package"))
+      cout << "setrectag ok" << endl;
+   iOffset = 0;
+   Primary->Step();
 }
 
 bool RPMRepomdHandler::Skip()
 {
-   cout << "Repomd handler skip" << endl;
+   iOffset++;
+   cout << "Repomd handler skip, offset " << iOffset << endl;
+   return Primary->Step();
 }
 
 bool RPMRepomdHandler::Jump(unsigned int Offset)
 {
-   cout << "Repomd handler jump " << Offset << endl;
+   Primary->Reset();
+   while (iOffset < Offset) {
+      Skip();
+   }
+   cout << "Repomd handler jump to " << Offset << " iOffset " << iOffset << endl;
 }
 
 void RPMRepomdHandler::Rewind()
 {
    cout << "Repomd handler rewind" << endl;
+   Primary->Reset();
 }
+
+RPMRepomdHandler::~RPMRepomdHandler()
+{
+   delete Primary;
+}
+
 // vim:sts=3:sw=3
