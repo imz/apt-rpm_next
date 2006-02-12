@@ -16,6 +16,7 @@
 #include <apt-pkg/pkgcachegen.h>
 #include <apt-pkg/rpmhandler.h>
 #include <apt-pkg/rpmmisc.h>
+#include <apt-pkg/xmlfile.h>
 #include <rpm/rpmlib.h>
 #include <map>
 #include <vector>
@@ -88,6 +89,38 @@ class rpmListParser : public pkgCacheGenerator::ListParser
 
    rpmListParser(RPMHandler *Handler);
    ~rpmListParser();
+};
+
+class rpmRepomdParser : public pkgCacheGenerator::ListParser
+{
+   protected:
+
+   RPMHandler *Handler;
+   RPMPackageData *RpmData;
+   pkgXMLFile *Primary;
+
+   string CurrentName;
+   const pkgCache::VerIterator *VI;
+
+   string FindTag(const string Tag);
+   unsigned long UniqFindTagWrite(string Tag);
+   bool ParseDepends(pkgCache::VerIterator Ver, unsigned int Type);
+
+   public:
+
+   virtual string Package();
+   virtual string Version();
+   virtual string Architecture();
+   virtual bool NewVersion(pkgCache::VerIterator Ver);
+   virtual unsigned short VersionHash();
+   virtual bool UsePackage(pkgCache::PkgIterator Pkg,
+			   pkgCache::VerIterator Ver);
+   virtual unsigned long Offset()
+	{return Handler->Offset();};
+   virtual unsigned long Size();
+   virtual bool Step();
+
+   rpmRepomdParser::rpmRepomdParser(RPMHandler *Handler);
 };
 
 #endif

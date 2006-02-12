@@ -44,16 +44,7 @@ subdir = apt-pkg
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/buildlib/tools.m4 \
-	$(top_srcdir)/m4/codeset.m4 $(top_srcdir)/m4/gettext.m4 \
-	$(top_srcdir)/m4/glibc21.m4 $(top_srcdir)/m4/iconv.m4 \
-	$(top_srcdir)/m4/intdiv0.m4 $(top_srcdir)/m4/inttypes-pri.m4 \
-	$(top_srcdir)/m4/inttypes.m4 $(top_srcdir)/m4/inttypes_h.m4 \
-	$(top_srcdir)/m4/lcmessage.m4 $(top_srcdir)/m4/lib-ld.m4 \
-	$(top_srcdir)/m4/lib-link.m4 $(top_srcdir)/m4/lib-prefix.m4 \
-	$(top_srcdir)/m4/progtest.m4 $(top_srcdir)/m4/stdint_h.m4 \
-	$(top_srcdir)/m4/uintmax_t.m4 $(top_srcdir)/m4/ulonglong.m4 \
-	$(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/buildlib/mkinstalldirs
@@ -75,15 +66,16 @@ am_libapt_pkg_la_OBJECTS = contrib/cdromutl.lo contrib/cmndline.lo \
 	contrib/configuration.lo contrib/crc-16.lo contrib/error.lo \
 	contrib/fileutl.lo contrib/hashes.lo contrib/md5.lo \
 	contrib/mmap.lo contrib/progress.lo contrib/sha1.lo \
-	contrib/strutl.lo rpm/rpmhandler.lo rpm/rpmindexfile.lo \
-	rpm/rpmlistparser.lo rpm/rpmpackagedata.lo rpm/rpmpm.lo \
-	rpm/rpmrecords.lo rpm/rpmsrcrecords.lo rpm/rpmsystem.lo \
-	rpm/rpmversion.lo acquire.lo acquire-item.lo acquire-method.lo \
-	acquire-worker.lo algorithms.lo cachefile.lo clean.lo \
-	depcache.lo indexfile.lo init.lo luaiface.lo orderlist.lo \
-	packagemanager.lo pkgcache.lo pkgcachegen.lo pkgrecords.lo \
-	pkgsystem.lo policy.lo repository.lo sourcelist.lo \
-	srcrecords.lo tagfile.lo version.lo versionmatch.lo
+	contrib/strutl.lo contrib/xmlfile.lo rpm/rpmhandler.lo \
+	rpm/rpmindexfile.lo rpm/rpmlistparser.lo rpm/rpmpackagedata.lo \
+	rpm/rpmpm.lo rpm/rpmrecords.lo rpm/rpmsrcrecords.lo \
+	rpm/rpmsystem.lo rpm/rpmversion.lo acquire.lo acquire-item.lo \
+	acquire-method.lo acquire-worker.lo algorithms.lo cachefile.lo \
+	clean.lo depcache.lo indexfile.lo init.lo luaiface.lo \
+	orderlist.lo packagemanager.lo pkgcache.lo pkgcachegen.lo \
+	pkgrecords.lo pkgsystem.lo policy.lo repository.lo \
+	sourcelist.lo srcrecords.lo tagfile.lo version.lo \
+	versionmatch.lo
 libapt_pkg_la_OBJECTS = $(am_libapt_pkg_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/buildlib/depcomp
@@ -152,10 +144,14 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 GENCAT = @GENCAT@
+GLIBC2 = @GLIBC2@
 GLIBC21 = @GLIBC21@
-GLIBC_VER = @GLIBC_VER@
 GMSGFMT = @GMSGFMT@
+HAVE_ASPRINTF = @HAVE_ASPRINTF@
+HAVE_POSIX_PRINTF = @HAVE_POSIX_PRINTF@
+HAVE_SNPRINTF = @HAVE_SNPRINTF@
 HAVE_TIMEGM = @HAVE_TIMEGM@
+HAVE_WPRINTF = @HAVE_WPRINTF@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -165,12 +161,12 @@ INTLBISON = @INTLBISON@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
 INTL_LIBTOOL_SUFFIX_PREFIX = @INTL_LIBTOOL_SUFFIX_PREFIX@
+INTL_MACOSX_LIBS = @INTL_MACOSX_LIBS@
 LDFLAGS = @LDFLAGS@
 LIBICONV = @LIBICONV@
 LIBINTL = @LIBINTL@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
-LIBSTDCPP_VER = @LIBSTDCPP_VER@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LTLIBICONV = @LTLIBICONV@
@@ -288,6 +284,8 @@ libapt_pkg_la_SOURCES = \
 	contrib/strutl.cc \
 	contrib/strutl.h \
 	contrib/system.h \
+	contrib/xmlfile.h \
+	contrib/xmlfile.cc \
 	rpm/rpmhandler.cc \
 	rpm/rpmhandler.h \
 	rpm/rpmindexfile.cc \
@@ -472,6 +470,8 @@ contrib/sha1.lo: contrib/$(am__dirstamp) \
 	contrib/$(DEPDIR)/$(am__dirstamp)
 contrib/strutl.lo: contrib/$(am__dirstamp) \
 	contrib/$(DEPDIR)/$(am__dirstamp)
+contrib/xmlfile.lo: contrib/$(am__dirstamp) \
+	contrib/$(DEPDIR)/$(am__dirstamp)
 rpm/$(am__dirstamp):
 	@$(mkdir_p) rpm
 	@: > rpm/$(am__dirstamp)
@@ -519,6 +519,8 @@ mostlyclean-compile:
 	-rm -f contrib/sha1.lo
 	-rm -f contrib/strutl.$(OBJEXT)
 	-rm -f contrib/strutl.lo
+	-rm -f contrib/xmlfile.$(OBJEXT)
+	-rm -f contrib/xmlfile.lo
 	-rm -f rpm/rpmhandler.$(OBJEXT)
 	-rm -f rpm/rpmhandler.lo
 	-rm -f rpm/rpmindexfile.$(OBJEXT)
@@ -577,6 +579,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@contrib/$(DEPDIR)/progress.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@contrib/$(DEPDIR)/sha1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@contrib/$(DEPDIR)/strutl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@contrib/$(DEPDIR)/xmlfile.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@rpm/$(DEPDIR)/rpmhandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@rpm/$(DEPDIR)/rpmindexfile.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@rpm/$(DEPDIR)/rpmlistparser.Plo@am__quote@

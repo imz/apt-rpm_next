@@ -895,6 +895,161 @@ void rpmListParser::VirtualizePackage(string Name)
    FromPkgI->CurrentState = 0;
 }
 
+rpmRepomdParser::rpmRepomdParser(RPMHandler *Handler)
+	 : Handler(Handler)
+{
+   cout << "construct repomdparser" << endl;
+   RpmData = RPMPackageData::Singleton();
+}
+
+string rpmRepomdParser::FindTag(const string Tag)
+{
+   stringMap data = Primary->GetData();
+   stringMap::const_iterator iter;
+   for (iter=data.begin(); iter != data.end(); iter++) {
+       if (iter->first == Tag) {
+         //cout << iter->first << " " << iter->second << endl;
+         return iter->second;
+      }
+   }
+}
+
+unsigned long rpmRepomdParser::UniqFindTagWrite(string Tag)
+{
+   string data = FindTag(Tag);
+   //cout << "findtag " << Tag << ": " << data << endl;
+   return WriteUniqString(data);
+}
+
+
+string rpmRepomdParser::Package()
+{
+   if (CurrentName.empty() == false)
+      return CurrentName;
+
+   string Name = FindTag("name");
+   CurrentName = Name;
+   return Name;
+
+}
+
+string rpmRepomdParser::Version()
+{
+   string ver = FindTag("version-ver");
+   string rel = FindTag("version-rel");
+   string epoch = FindTag("version-epoch");
+   string verstr = epoch + ':' + ver + '-' + rel;
+   return verstr;
+}
+
+unsigned short rpmRepomdParser::VersionHash()
+{
+   // XXX FIXME: rpmlistparser versionhash for all the things we should do here
+   unsigned long Result = INIT_FCS;
+   string nevra = Package() + Version() + Architecture();
+   Result = AddCRC16(Result, nevra.c_str(), nevra.length());
+   //cout << "versionhash: " << Result << endl;
+   return Result;
+}
+
+bool rpmRepomdParser::Step()
+{
+   //cout << "repomd step()" << endl;
+   Primary = Handler->GetPrimary();
+
+   while (Handler->Skip() == true)
+   {
+      CurrentName = "";
+      string RealName = Package();
+      cout << "stepping " << RealName << " " << Version() << endl;
+      if (RpmData->ArchScore(Architecture().c_str()) > 0) {
+	 return true;
+      } else {
+	 continue;
+      }
+
+   }
+   Primary = NULL;
+   return false;
+}
+
+string rpmRepomdParser::Architecture()
+{
+   string arch = FindTag("arch");
+   return arch;
+}
+
+unsigned long rpmRepomdParser::Size()
+{
+   // XXX: which size are we after here..?
+   string size = FindTag("size-package");
+   return atoi(size.c_str());
+}
+
+
+bool rpmRepomdParser::UsePackage(pkgCache::PkgIterator Pkg,
+				 pkgCache::VerIterator Ver)
+{
+   cout << "use package" << endl;
+   if (Pkg->Section == 0)
+      Pkg->Section = UniqFindTagWrite("group");
+
+   if (_error->PendingError())
+       return false;
+   string PkgName = Pkg.Name();
+   string::size_type HashPos = PkgName.find('#');
+   if (HashPos != string::npos)
+      PkgName = PkgName.substr(0, HashPos);
+   Ver->Priority = RpmData->VerPriority(PkgName);
+   Pkg->Flags |= RpmData->PkgFlags(PkgName);
+   if (HashPos != string::npos && (Pkg->Flags & pkgCache::Flag::Essential))
+      Pkg->Flags = pkgCache::Flag::Important;
+   return true;
+}
+
+bool rpmRepomdParser::NewVersion(pkgCache::VerIterator Ver)
+{
+   cout << "new version" << endl;
+
+   Ver->Section = UniqFindTagWrite("group");
+   Ver->Arch = UniqFindTagWrite("arch");
+   // Archive size
+   Ver->Size = atoi(FindTag("size-package").c_str());
+   // Installed size
+   Ver->InstalledSize = atoi(FindTag("size-installed").c_str());
+
+   if (ParseDepends(Ver,pkgCache::Dep::Depends) == false)
+       return false;
+#if 0
+   if (ParseDepends(Ver,pkgCache::Dep::Conflicts) == false)
+       return false;
+   if (ParseDepends(Ver,pkgCache::Dep::Obsoletes) == false)
+       return false;
+   if (ParseProvides(Ver) == false)
+       return false;
+#endif
+
+   return true;
+}
+
+bool rpmRepomdParser::ParseDepends(pkgCache::VerIterator Ver,
+                                 unsigned int Type)
+
+{
+   stringMap data = Primary->GetData();
+   stringMap::const_iterator iter;
+   for (iter=data.begin(); iter != data.end(); iter++) {
+      if (iter->first == "requires") {
+	 cout << "requires " << iter->first << " " << iter->second << endl;
+         //return iter->second;
+      }
+      cout << "XXX" << iter->first << " " << iter->second << endl;
+      cout << "YYY" << iter;
+   }
+   return true;
+}
+
+
 #endif /* HAVE_RPM */
 
 // vim:sts=3:sw=3
