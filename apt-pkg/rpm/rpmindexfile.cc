@@ -659,6 +659,7 @@ bool rpmRepomdIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
 
    // Store the IMS information
    pkgCache::PkgFileIterator File = Gen.GetCurFile();
+   cout << "merge pkgfile " << PackageFile << endl;
    struct stat St;
    if (stat(PackageFile.c_str(),&St) != 0) 
    {
@@ -668,13 +669,14 @@ bool rpmRepomdIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
    File->Size = St.st_size;
    File->mtime = St.st_mtime;
    
-   rpmListParser Parser(Handler);
+   rpmRepomdParser Parser(Handler);
    if (_error->PendingError() == true) 
    {
       delete Handler;
       return _error->Error(_("Problem opening %s"),PackageFile.c_str());
    }
    
+   cout << "here..." << endl;
    if (Gen.MergeList(Parser) == false)
    {
       delete Handler;

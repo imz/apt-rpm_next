@@ -11,6 +11,7 @@
 #define PKGLIB_RPMHANDLER_H
 
 #include <apt-pkg/fileutl.h>
+#include <apt-pkg/xmlfile.h>
 
 #include <rpm/rpmlib.h>
 #include <rpm/rpmmacro.h>
@@ -39,6 +40,8 @@ class RPMHandler
    virtual bool OrderedOffset() {return true;};
    inline unsigned Size() {return iSize;};
    inline Header GetHeader() {return HeaderP;};
+   // doesn't belong here.. should abstract out the rpm header stuff
+   virtual inline pkgXMLFile *GetPrimary() {};
    virtual bool IsDatabase() = 0;
 
    virtual string FileName() {return "";};
@@ -46,6 +49,7 @@ class RPMHandler
    virtual unsigned long FileSize() {return 1;};
    virtual string MD5Sum() {return "";};
    virtual bool ProvideFileName() {return false;};
+
 
    RPMHandler() : iOffset(0), iSize(0), HeaderP(0) {};
    virtual ~RPMHandler() {};
@@ -163,13 +167,20 @@ class RPMDirHandler : public RPMHandler
 class RPMRepomdHandler : public RPMHandler
 {
 
+   pkgXMLFile *Primary;
+
    public:
+
 
    virtual bool Skip();
    virtual bool Jump(unsigned int Offset);
    virtual void Rewind();
    virtual inline bool IsDatabase() {return false;};
+
+   inline pkgXMLFile *GetPrimary() {return Primary;};
+
    RPMRepomdHandler(string File);
+   virtual ~RPMRepomdHandler();
 };
 
 // Our Extra RPM tags. These should not be accessed directly. Use
