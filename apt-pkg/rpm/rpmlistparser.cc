@@ -1071,16 +1071,22 @@ bool rpmRepomdParser::ParseProvides(pkgCache::VerIterator Ver)
       return true;
 
    for (xmlNode *n = provides->children; n; n = n->next) {
-      char depver[1024], *depname, *ver, *rel, *epoch, *flags;
+      string depver = "";
+      char *ver, *rel, *epoch, *depname, *flags;
 
       if (strcmp((char*)n->name, "entry") != 0)  continue;
       if ((depname = (char*)xmlGetProp(n, (xmlChar*)"name")) == NULL) continue;
 
       if ((flags = (char*)xmlGetProp(n, (xmlChar*)"flags"))) {
-	 ver = (char*)xmlGetProp(n, (xmlChar*)"ver");
-	 rel = (char*)xmlGetProp(n, (xmlChar*)"rel");
 	 epoch = (char*)xmlGetProp(n, (xmlChar*)"epoch");
-	 sprintf(depver, "%s:%s-%s", epoch, ver, rel);
+	 if (epoch) 
+	    depver += string(epoch) + ":";
+	 ver = (char*)xmlGetProp(n, (xmlChar*)"ver");
+	 if (ver)
+	    depver += string(ver);
+	 rel = (char*)xmlGetProp(n, (xmlChar*)"rel");
+	 if (rel)
+	    depver += "-" + string(rel);
       }
       
       if (NewProvides(Ver, depname, depver) == false) {
@@ -1119,8 +1125,8 @@ bool rpmRepomdParser::ParseDepends(pkgCache::VerIterator Ver,
    }
    for (n = dco->children; n; n = n->next) {
       unsigned int Op;
-      string deptype;
-      char depver[1024], *depname, *ver, *rel, *epoch, *flags;
+      string deptype, depver;
+      char *ver, *rel, *epoch, *depname, *flags;
 
       if (strcmp((char*)n->name, "entry") != 0)  continue;
       if ((depname = (char*)xmlGetProp(n, (xmlChar*)"name")) == NULL) continue;
@@ -1131,8 +1137,17 @@ bool rpmRepomdParser::ParseDepends(pkgCache::VerIterator Ver,
 	 ver = (char*)xmlGetProp(n, (xmlChar*)"ver");
 	 rel = (char*)xmlGetProp(n, (xmlChar*)"rel");
 	 epoch = (char*)xmlGetProp(n, (xmlChar*)"epoch");
-	 sprintf(depver, "%s:%s-%s", epoch, ver, rel);
+	 if (epoch) 
+	    depver += string(epoch) + ":";
+	 ver = (char*)xmlGetProp(n, (xmlChar*)"ver");
+	 if (ver)
+	    depver += string(ver);
+	 rel = (char*)xmlGetProp(n, (xmlChar*)"rel");
+	 if (rel)
+	    depver += "-" + string(rel);
+
 	 deptype = flags;
+	 
 	 if (deptype == "EQ")
 	    Op = pkgCache::Dep::Equals;
 	 else if (deptype == "GE")
@@ -1147,6 +1162,7 @@ bool rpmRepomdParser::ParseDepends(pkgCache::VerIterator Ver,
 	 Op = pkgCache::Dep::NoOp;
       }
 	 
+      //cout << "new dependency " << depname << deptype << depver << endl;
       if (NewDepends(Ver,depname,depver,Op,Type) == false) {
 	 cout << "newdeps failed on " << depname << endl;
 	 return false;
