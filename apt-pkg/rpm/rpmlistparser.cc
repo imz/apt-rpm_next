@@ -957,14 +957,14 @@ unsigned short rpmRepomdParser::VersionHash()
 
 bool rpmRepomdParser::Step()
 {
-   //cout << "repomd step()" << Node << endl;
+   // cout << "repomd step()" << Node << endl;
 
    while (Handler->Skip() == true)
    {
       Node = Handler->GetNode();
       CurrentName = "";
       string RealName = Package();
-      //cout << "stepping " << " " << RealName << " " << Version() << endl;
+      // cout << "stepping " << " " << RealName << " " << Version() << endl;
       if (RpmData->ArchScore(Architecture().c_str()) > 0) {
 	 return true;
       } else {
