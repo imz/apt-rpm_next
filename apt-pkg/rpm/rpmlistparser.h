@@ -16,8 +16,10 @@
 #include <apt-pkg/pkgcachegen.h>
 #include <apt-pkg/rpmhandler.h>
 #include <apt-pkg/rpmmisc.h>
-#include <apt-pkg/xmlfile.h>
 #include <rpm/rpmlib.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+
 #include <map>
 #include <vector>
 #include <regex.h>
@@ -97,14 +99,19 @@ class rpmRepomdParser : public pkgCacheGenerator::ListParser
 
    RPMHandler *Handler;
    RPMPackageData *RpmData;
-   pkgXMLFile *Primary;
+   xmlNode *Node;
+
 
    string CurrentName;
    const pkgCache::VerIterator *VI;
 
+   xmlNode *FindNode(const string Name);
+   xmlNode *FindNode(xmlNode *n, const string Name);
    string FindTag(const string Tag);
+
    unsigned long UniqFindTagWrite(string Tag);
    bool ParseDepends(pkgCache::VerIterator Ver, unsigned int Type);
+   bool ParseProvides(pkgCache::VerIterator Ver);
 
    public:
 

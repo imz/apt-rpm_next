@@ -898,19 +898,17 @@ void rpmListParser::VirtualizePackage(string Name)
 rpmRepomdParser::rpmRepomdParser(RPMHandler *Handler)
 	 : Handler(Handler)
 {
-   cout << "construct repomdparser" << endl;
+   //cout << "construct repomdparser" << endl;
    RpmData = RPMPackageData::Singleton();
 }
 
 string rpmRepomdParser::FindTag(const string Tag)
 {
-   stringMap data = Primary->GetData();
-   stringMap::const_iterator iter;
-   for (iter=data.begin(); iter != data.end(); iter++) {
-       if (iter->first == Tag) {
-         //cout << iter->first << " " << iter->second << endl;
-         return iter->second;
-      }
+   xmlNode *n = FindNode(Tag);
+   if (n) {
+      return (char*)xmlNodeGetContent(n);
+   } else {
+      return "";
    }
 }
 
@@ -935,10 +933,15 @@ string rpmRepomdParser::Package()
 
 string rpmRepomdParser::Version()
 {
-   string ver = FindTag("version-ver");
-   string rel = FindTag("version-rel");
-   string epoch = FindTag("version-epoch");
-   string verstr = epoch + ':' + ver + '-' + rel;
+   string ver, rel, epoch;
+   string verstr = "";
+   xmlNode *n = FindNode("version");
+   if (n) {
+	 ver = (char*)xmlGetProp(n, (xmlChar*)"ver");
+	 rel = (char*)xmlGetProp(n, (xmlChar*)"rel");
+	 epoch = (char*)xmlGetProp(n, (xmlChar*)"epoch");
+	 verstr = epoch + ':' + ver + '-' + rel;
+   }
    return verstr;
 }
 
@@ -954,14 +957,14 @@ unsigned short rpmRepomdParser::VersionHash()
 
 bool rpmRepomdParser::Step()
 {
-   //cout << "repomd step()" << endl;
-   Primary = Handler->GetPrimary();
+   //cout << "repomd step()" << Node << endl;
 
    while (Handler->Skip() == true)
    {
+      Node = Handler->GetNode();
       CurrentName = "";
       string RealName = Package();
-      cout << "stepping " << RealName << " " << Version() << endl;
+      //cout << "stepping " << " " << RealName << " " << Version() << endl;
       if (RpmData->ArchScore(Architecture().c_str()) > 0) {
 	 return true;
       } else {
@@ -969,7 +972,7 @@ bool rpmRepomdParser::Step()
       }
 
    }
-   Primary = NULL;
+   Node = NULL;
    return false;
 }
 
@@ -982,15 +985,38 @@ string rpmRepomdParser::Architecture()
 unsigned long rpmRepomdParser::Size()
 {
    // XXX: which size are we after here..?
-   string size = FindTag("size-package");
-   return atoi(size.c_str());
+   string size = "";
+   xmlNode *n = FindNode("size");
+   if (n) {
+      size = (char*)xmlGetProp(n, (xmlChar*)"package");
+   }
+
+   return atol(size.c_str());
 }
 
+xmlNode *rpmRepomdParser::FindNode(xmlNode *n, const string Name)
+{
+   for (n = n->children; n; n = n->next) {
+      if (strcmp((char*)n->name, Name.c_str()) == 0) {
+	 return n;
+      }
+   }
+   return NULL;
+}
+xmlNode *rpmRepomdParser::FindNode(const string Name)
+{
+   for (xmlNode *n = Node->children; n; n = n->next) {
+      if (strcmp((char*)n->name, Name.c_str()) == 0) {
+	 return n;
+      }
+   }
+   return NULL;
+}
 
 bool rpmRepomdParser::UsePackage(pkgCache::PkgIterator Pkg,
 				 pkgCache::VerIterator Ver)
 {
-   cout << "use package" << endl;
+   //cout << "use package" << endl;
    if (Pkg->Section == 0)
       Pkg->Section = UniqFindTagWrite("group");
 
@@ -1009,22 +1035,24 @@ bool rpmRepomdParser::UsePackage(pkgCache::PkgIterator Pkg,
 
 bool rpmRepomdParser::NewVersion(pkgCache::VerIterator Ver)
 {
-   cout << "new version" << endl;
+   //cout << "new version" << endl;
+   xmlNode *n;
 
    Ver->Section = UniqFindTagWrite("group");
    Ver->Arch = UniqFindTagWrite("arch");
-   // Archive size
-   Ver->Size = atoi(FindTag("size-package").c_str());
-   // Installed size
-   Ver->InstalledSize = atoi(FindTag("size-installed").c_str());
+   n = FindNode("size");
+   if (n) {
+      Ver->Size = atol((char*)xmlGetProp(n, (xmlChar*)"package"));
+      Ver->InstalledSize = atol((char*)xmlGetProp(n, (xmlChar*)"installed"));
+   }
 
    if (ParseDepends(Ver,pkgCache::Dep::Depends) == false)
        return false;
-#if 0
    if (ParseDepends(Ver,pkgCache::Dep::Conflicts) == false)
        return false;
    if (ParseDepends(Ver,pkgCache::Dep::Obsoletes) == false)
        return false;
+#if 1
    if (ParseProvides(Ver) == false)
        return false;
 #endif
@@ -1032,20 +1060,99 @@ bool rpmRepomdParser::NewVersion(pkgCache::VerIterator Ver)
    return true;
 }
 
+bool rpmRepomdParser::ParseProvides(pkgCache::VerIterator Ver)
+{
+   xmlNode *format = FindNode("format");
+   xmlNode *provides = FindNode(format, "provides");
+   bool ret = true;
+
+   if (! provides)
+      return true;
+
+   for (xmlNode *n = provides->children; n; n = n->next) {
+      char depver[1024], *depname, *ver, *rel, *epoch, *flags;
+
+      if (strcmp((char*)n->name, "entry") != 0)  continue;
+      if ((depname = (char*)xmlGetProp(n, (xmlChar*)"name")) == NULL) continue;
+
+      if ((flags = (char*)xmlGetProp(n, (xmlChar*)"flags"))) {
+	 ver = (char*)xmlGetProp(n, (xmlChar*)"ver");
+	 rel = (char*)xmlGetProp(n, (xmlChar*)"rel");
+	 epoch = (char*)xmlGetProp(n, (xmlChar*)"epoch");
+	 sprintf(depver, "%s:%s-%s", epoch, ver, rel);
+      }
+
+      if (NewProvides(Ver, depname, depver) == false) {
+	    ret = false;
+	    cout << "adding provides failed on " << depname << endl;
+	    break;
+      }
+   }
+   return ret;
+}
+
+
 bool rpmRepomdParser::ParseDepends(pkgCache::VerIterator Ver,
                                  unsigned int Type)
 
 {
-   stringMap data = Primary->GetData();
-   stringMap::const_iterator iter;
-   for (iter=data.begin(); iter != data.end(); iter++) {
-      if (iter->first == "requires") {
-	 cout << "requires " << iter->first << " " << iter->second << endl;
-         //return iter->second;
-      }
-      cout << "XXX" << iter->first << " " << iter->second << endl;
-      cout << "YYY" << iter;
+   xmlNode *format = FindNode("format");
+   xmlNode *dco;
+
+   xmlNode *n;
+
+   switch (Type) {
+      case pkgCache::Dep::Depends:
+	 dco = FindNode(format, "requires");
+	 break;
+      case pkgCache::Dep::Conflicts:
+	 dco = FindNode(format, "conflicts");
+	 break;
+      case pkgCache::Dep::Obsoletes:
+	 dco = FindNode(format, "obsoletes");
+	 break;
    }
+
+   if (! dco) {
+      return true;
+   }
+   for (n = dco->children; n; n = n->next) {
+      unsigned int Op;
+      string deptype;
+      char depver[1024], *depname, *ver, *rel, *epoch, *flags;
+
+      if (strcmp((char*)n->name, "entry") != 0)  continue;
+      if ((depname = (char*)xmlGetProp(n, (xmlChar*)"name")) == NULL) continue;
+      // XXX FIXME: combine the rpmlib special handling with rpmlistparser
+      if (strncmp(depname, "rpmlib(", 7) == 0) continue;
+
+      if ((flags = (char*)xmlGetProp(n, (xmlChar*)"flags"))) {
+	 ver = (char*)xmlGetProp(n, (xmlChar*)"ver");
+	 rel = (char*)xmlGetProp(n, (xmlChar*)"rel");
+	 epoch = (char*)xmlGetProp(n, (xmlChar*)"epoch");
+	 sprintf(depver, "%s:%s-%s", epoch, ver, rel);
+	 deptype = flags;
+	 if (deptype == "EQ")
+	    Op = pkgCache::Dep::Equals;
+	 else if (deptype == "GE")
+	    Op = pkgCache::Dep::GreaterEq;
+	 else if (deptype == "GT")
+	    Op = pkgCache::Dep::Greater;
+	 else if (deptype == "LE")
+	    Op = pkgCache::Dep::LessEq;
+	 else if (deptype == "LT")
+	    Op = pkgCache::Dep::Less;
+      } else {
+	 Op = pkgCache::Dep::NoOp;
+      }
+
+      if (NewDepends(Ver,depname,depver,Op,Type) == false) {
+	 cout << "newdeps failed on " << depname << endl;
+	 return false;
+      }
+
+   }
+
    return true;
 }
 
