@@ -539,10 +539,10 @@ string rpmRepomdIndex::ArchiveURI(string File) const
    RPMPackageData *rpmdata = RPMPackageData::Singleton();
    string Res;
 
-   cout << Dist << File << endl;
+   //cout << Dist << File << endl;
 
    Res += URI + '/' + Dist + '/' + File;
-   cout << "repomd archiveuri " << " " << Res << endl;
+   //cout << "repomd archiveuri " << " " << Res << endl;
 
    return Res;
 }
@@ -550,7 +550,7 @@ string rpmRepomdIndex::ArchiveURI(string File) const
 pkgCache::PkgFileIterator rpmRepomdIndex::FindInCache(pkgCache &Cache) const
 {
    string FileName = IndexPath();
-   cout << "findincache " << FileName << endl;
+   //cout << "findincache " << FileName << endl;
    pkgCache::PkgFileIterator File = Cache.FileBegin();
    for (; File.end() == false; File++)
    {
@@ -665,7 +665,7 @@ bool rpmRepomdIndex::Exists() const
 
 bool rpmRepomdIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
 {
-   cout << "repomd MERGE" << endl;
+   //cout << "repomd MERGE" << endl;
    string PackageFile = IndexPath();
    RPMHandler *Handler = CreateHandler();
 
@@ -679,7 +679,7 @@ bool rpmRepomdIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
 
    // Store the IMS information
    pkgCache::PkgFileIterator File = Gen.GetCurFile();
-   cout << "merge pkgfile " << PackageFile << endl;
+   //cout << "merge pkgfile " << PackageFile << endl;
    struct stat St;
    if (stat(PackageFile.c_str(),&St) != 0)
    {
