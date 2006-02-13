@@ -971,6 +971,32 @@ class rpmSLTypeRepomd : public rpmSLTypeGen
       return true;
    };
 
+   bool ParseLine(vector<pkgIndexFile *> &List,
+                  pkgSourceList::Vendor const *Vendor,
+                  const char *Buffer,
+                  unsigned long CurLine,string File) const
+   {
+      string URI;
+      string Dist;
+      if (ParseQuoteWord(Buffer,URI) == false)
+	 return _error->Error(_("Malformed line %lu in source list %s (URI)"),CurLine,File.c_str());
+      if (ParseQuoteWord(Buffer,Dist) == false)
+	 return _error->Error(_("Malformed line %lu in source list %s (dist)"),CurLine,File.c_str());
+
+      if (FixupURI(URI) == false)
+	 return _error->Error(_("Malformed line %lu in source list %s (URI parse)"),CurLine,File.c_str());
+
+      Dist = SubstVar(Dist,"$(ARCH)",_config->Find("APT::Architecture"));
+      // PM:2006-02-06
+      Dist = SubstVar(Dist,"$(VERSION)",_config->Find("APT::DistroVersion"));
+
+      if (CreateItem(List,URI,Dist,"",Vendor) == false)
+	 return false;
+
+      return true;
+   };
+
+
    rpmSLTypeRepomd()
    {
       Name = "repomd";
