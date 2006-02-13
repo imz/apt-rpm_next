@@ -315,7 +315,7 @@ class rpmRepomdIndex : public rpmIndexFile
    virtual bool GetIndexes(pkgAcquire *Owner) const;
    virtual bool HasPackages() const {return true;};
 
-   //virtual string ArchiveInfo(pkgCache::VerIterator Ver) const;
+   virtual string ArchiveInfo(pkgCache::VerIterator Ver) const;
    virtual string ArchiveURI(string File) const;
 
    virtual bool Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const;
