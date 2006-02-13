@@ -24,7 +24,8 @@
 
 #include <apt-pkg/rpmhandler.h>
 #include <apt-pkg/rpmpackagedata.h>
-#include <apt-pkg/xmlfile.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 #include <apti18n.h>
 
@@ -110,6 +111,7 @@ string RPMFileHandler::FileName()
    int rc = headerGetEntry(HeaderP, CRPMTAG_FILENAME,
 			   &type, (void**)&str, &count);
    assert(rc != 0);
+   cout << "XXXX fn " << str << endl;
    return str;
 }
 
@@ -120,6 +122,7 @@ string RPMFileHandler::Directory()
    assert(HeaderP != NULL);
    int rc = headerGetEntry(HeaderP, CRPMTAG_DIRECTORY,
 			   &type, (void**)&str, &count);
+   cout << "XXXX dir " << str << endl;
    return (rc?str:"");
 }
 
@@ -528,25 +531,40 @@ void RPMDBHandler::Rewind()
 
 RPMRepomdHandler::RPMRepomdHandler(string File)
 {
-   cout << "Repomd handler constr. " << File << endl;
-   FileFd fd(File, FileFd::ReadOnly);
-   Primary = new pkgXMLFile(&fd);
-   if (Primary->SetRecordTag("package"))
-      cout << "setrectag ok" << endl;
-   iOffset = 0;
-   Primary->Step();
+   //cout << "Repomd handler constr. " << File << endl;
+   Root = NULL;
+
+   Primary = xmlReadFile(File.c_str(), NULL, XML_PARSE_NONET);
+   if ((Root = xmlDocGetRootElement(Primary)) == NULL) {
+      xmlFreeDoc(Primary);
+      cout << "getting root element failed" << endl;
+   }
+   NodeP = Root->children;
+   if (NodeP == NULL)
+      cout << "NodeP is null, ugh..." << endl;
+   
 }
 
 bool RPMRepomdHandler::Skip()
 {
    iOffset++;
-   cout << "Repomd handler skip, offset " << iOffset << endl;
-   return Primary->Step();
+   //cout << "Repomd handler skip, offset " << iOffset << endl;
+   for (NodeP = NodeP->next; NodeP; NodeP = NodeP->next) {
+      //cout << "skip() current  " << NodeP << endl;
+      if (NodeP->type != XML_ELEMENT_NODE || strcmp((char*)NodeP->name, "package") != 0) {
+	 continue;
+      } else {
+	 //cout << "in node " << xmlNodePGetContent(node) << endl;
+	 return true;
+      }
+   } 
+   return false;
+   
 }
 
 bool RPMRepomdHandler::Jump(unsigned int Offset)
 {
-   Primary->Reset();
+   NodeP = Root->children;
    while (iOffset < Offset) {
       Skip();
    }
@@ -556,7 +574,58 @@ bool RPMRepomdHandler::Jump(unsigned int Offset)
 void RPMRepomdHandler::Rewind()
 {
    cout << "Repomd handler rewind" << endl;
-   Primary->Reset();
+   NodeP = Root->children;
+}
+
+xmlNode *RPMRepomdHandler::FindNode(const string Name)
+{
+   for (xmlNode *n = NodeP->children; n; n = n->next) {
+      if (strcmp((char*)n->name, Name.c_str()) == 0) {
+         return n;
+      }
+   }
+   return NULL;
+}
+
+
+string RPMRepomdHandler::FileName()
+{
+   xmlNode *n;
+   if ((n = FindNode("location"))) {
+      cout << "filename: " <<  (char*)xmlGetProp(n, (xmlChar*)"href") << endl;
+      return (char*)xmlGetProp(n, (xmlChar*)"href");
+   } else {
+      return "";
+   }
+}
+
+string RPMRepomdHandler::Directory()
+{
+   cout << "directory.." << endl;
+   // XXX FIXME .. 
+   return "";
+}
+
+string RPMRepomdHandler::MD5Sum()
+{
+   xmlNode *n;
+   cout << "md5sum" << endl;
+   if ((n = FindNode("checksum"))) {
+      cout << "checksum " << (char*)xmlNodeGetContent(n) << endl;
+      return (char*)xmlNodeGetContent(n);
+   } else {
+      return "";
+   }
+}
+
+unsigned long RPMRepomdHandler::FileSize()
+{
+   xmlNode *n;
+   if ((n = FindNode("size"))) {
+      return atol((char*)xmlGetProp(n, (xmlChar*)"package"));
+   } else {
+      return 0;
+   }
 }
 
 RPMRepomdHandler::~RPMRepomdHandler()
