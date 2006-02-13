@@ -926,7 +926,13 @@ string rpmRepomdParser::Package()
       return CurrentName;
 
    string Name = FindTag("name");
+
    CurrentName = Name;
+   if (RpmData->IsMultilibSys() && RpmData->IsCompatArch(Architecture())) {
+	 Name += ".32bit";
+	 CurrentName = Name;
+   }
+
    return Name;
 
 }
