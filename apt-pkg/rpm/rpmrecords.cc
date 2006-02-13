@@ -88,12 +88,17 @@ string rpmRecordParser::FileName()
 /* */
 string rpmRecordParser::Name()
 {
+#if 0
    char *str;
    int_32 count, type;
    assert(HeaderP != NULL);
    int rc = headerGetEntry(HeaderP, RPMTAG_NAME,
 			   &type, (void**)&str, &count);
    return string(rc?str:"");
+#endif
+   string str = Handler->FileName();
+   cout << "recordparse " << str << endl;
+   return str;
 }
 									/*}}}*/
 // RecordParser::MD5Hash - Return the archive hash			/*{{{*/

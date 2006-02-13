@@ -319,6 +319,7 @@ class rpmRepomdIndex : public rpmIndexFile
    virtual string ArchiveURI(string File) const;
 
    virtual bool Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const;
+   virtual pkgCache::PkgFileIterator FindInCache(pkgCache &Cache) const;
 
    rpmRepomdIndex(string URI,string Dist,string Section,
                pkgRepository *Repository) :

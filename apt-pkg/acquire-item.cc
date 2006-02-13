@@ -662,9 +662,11 @@ pkgAcqArchive::pkgAcqArchive(pkgAcquire *Owner,pkgSourceList *Sources,
    if (Vf.end() != true)
    {
       // If this fails to get a file name we will bomb out below.
+      cout << "parsing recs " << Version.ParentPkg().Name() << endl;
       pkgRecords::Parser &Parse = Recs->Lookup(Vf);
       if (_error->PendingError() == true)
 	 return;
+      cout << "parse ok" << Parse.FileName() << endl;
 
       // Generate the final file name as: package_version_arch.foo
       StoreFilename = QuoteString(Version.ParentPkg().Name(),"_:") + '_' +
@@ -765,6 +767,7 @@ bool pkgAcqArchive::QueueNext()
       // Create the item
       Local = false;
       Desc.URI = Index->ArchiveURI(PkgFile);
+      cout << "archiveuri " << Desc.URI << endl;
       Desc.Description = Index->ArchiveInfo(Version);
       Desc.Owner = this;
       Desc.ShortDesc = Version.ParentPkg().Name();

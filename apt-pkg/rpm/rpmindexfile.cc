@@ -539,15 +539,35 @@ string rpmRepomdIndex::ArchiveURI(string File) const
    RPMPackageData *rpmdata = RPMPackageData::Singleton();
    string Res;
 
-   if (File.find("/") != string::npos)
-      Res += '/' + File;
-   else
-      Res += "/RPMS" + '/' + File;
-   cout << "repomd archiveuri " << File << " " << Res << endl;
+   cout << Dist << File << endl;
+
+   Res += URI + '/' + Dist + '/' + File;
+   cout << "repomd archiveuri " << " " << Res << endl;
 
    return Res;
 }
 
+pkgCache::PkgFileIterator rpmRepomdIndex::FindInCache(pkgCache &Cache) const
+{
+   string FileName = IndexPath();
+   cout << "findincache " << FileName << endl;
+   pkgCache::PkgFileIterator File = Cache.FileBegin();
+   for (; File.end() == false; File++)
+   {
+      if (FileName != File.FileName())
+	 continue;
+
+      struct stat St;
+      if (stat(File.FileName(),&St) != 0)
+	 return pkgCache::PkgFileIterator(Cache);
+
+      if ((unsigned)St.st_size != File->Size || St.st_mtime != File->mtime)
+	 return pkgCache::PkgFileIterator(Cache);
+      return File;
+   }
+
+   return File;
+}
 string rpmRepomdIndex::ReleaseURI(string Type) const
 {
    RPMPackageData *rpmdata = RPMPackageData::Singleton();
