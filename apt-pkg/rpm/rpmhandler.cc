@@ -17,6 +17,7 @@
 #include <utime.h>
 #include <unistd.h>
 #include <assert.h>
+#include <libgen.h>
 
 #include <apt-pkg/error.h>
 #include <apt-pkg/configuration.h>
@@ -531,7 +532,8 @@ void RPMDBHandler::Rewind()
 
 RPMRepomdHandler::RPMRepomdHandler(string File)
 {
-   //cout << "Repomd handler constr. " << File << endl;
+   cout << "Repomd handler constr. " << File << endl;
+   ID = File;
    Root = NULL;
 
    Primary = xmlReadFile(File.c_str(), NULL, XML_PARSE_NONET);
@@ -547,13 +549,14 @@ RPMRepomdHandler::RPMRepomdHandler(string File)
 
 bool RPMRepomdHandler::Skip()
 {
-   iOffset++;
+   //iOffset++;
    //cout << "Repomd handler skip, offset " << iOffset << endl;
    for (NodeP = NodeP->next; NodeP; NodeP = NodeP->next) {
       //cout << "skip() current  " << NodeP << endl;
       if (NodeP->type != XML_ELEMENT_NODE || strcmp((char*)NodeP->name, "package") != 0) {
 	 continue;
       } else {
+	 iOffset++;
 	 //cout << "in node " << xmlNodePGetContent(node) << endl;
 	 return true;
       }
@@ -565,15 +568,26 @@ bool RPMRepomdHandler::Skip()
 bool RPMRepomdHandler::Jump(unsigned int Offset)
 {
    NodeP = Root->children;
-   while (iOffset < Offset) {
-      Skip();
+   iOffset = 0;
+   for (NodeP = NodeP->next; NodeP; NodeP = NodeP->next) {
+      if (iOffset+1 == Offset) {
+	 return Skip();
+      }
+      if (NodeP->type != XML_ELEMENT_NODE || 
+	  strcmp((char*)NodeP->name, "package") != 0) {
+	 continue;
+      } else {
+	 iOffset++;
+	 cout << "at offset " << iOffset << " of " << Offset << endl;
+      }
    }
-   cout << "Repomd handler jump to " << Offset << " iOffset " << iOffset << endl;
+   return false;
 }
 
 void RPMRepomdHandler::Rewind()
 {
    cout << "Repomd handler rewind" << endl;
+   iOffset = 0;
    NodeP = Root->children;
 }
 
@@ -593,7 +607,7 @@ string RPMRepomdHandler::FileName()
    xmlNode *n;
    if ((n = FindNode("location"))) {
       cout << "filename: " <<  (char*)xmlGetProp(n, (xmlChar*)"href") << endl;
-      return (char*)xmlGetProp(n, (xmlChar*)"href");
+      return basename((char*)xmlGetProp(n, (xmlChar*)"href"));
    } else {
       return "";
    }
@@ -601,13 +615,18 @@ string RPMRepomdHandler::FileName()
 
 string RPMRepomdHandler::Directory()
 {
-   cout << "directory.." << endl;
-   // XXX FIXME .. 
-   return "";
+   xmlNode *n;
+   char *dir = "";
+   if ((n = FindNode("location"))) {
+      dir = dirname((char*)xmlGetProp(n, (xmlChar*)"href"));
+   }
+   cout << "Directory: " << dir << endl;
+   return dir;
 }
 
 string RPMRepomdHandler::MD5Sum()
 {
+#if 0
    xmlNode *n;
    cout << "md5sum" << endl;
    if ((n = FindNode("checksum"))) {
@@ -616,12 +635,18 @@ string RPMRepomdHandler::MD5Sum()
    } else {
       return "";
    }
+#endif
+
+   // we'll ignore the md5sums for now since repomd only carries
+   // shasums..
+   return "";
 }
 
 unsigned long RPMRepomdHandler::FileSize()
 {
    xmlNode *n;
    if ((n = FindNode("size"))) {
+      cout << "filesize: " << atol((char*)xmlGetProp(n, (xmlChar*)"package")) << endl;
       return atol((char*)xmlGetProp(n, (xmlChar*)"package"));
    } else {
       return 0;
