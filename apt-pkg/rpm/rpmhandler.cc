@@ -650,7 +650,7 @@ unsigned long RPMRepomdHandler::FileSize()
 
 RPMRepomdHandler::~RPMRepomdHandler()
 {
-   delete Primary;
+   xmlFreeDoc(Primary);
 }
 
 // vim:sts=3:sw=3
