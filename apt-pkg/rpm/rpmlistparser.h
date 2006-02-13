@@ -112,6 +112,7 @@ class rpmRepomdParser : public pkgCacheGenerator::ListParser
    unsigned long UniqFindTagWrite(string Tag);
    bool ParseDepends(pkgCache::VerIterator Ver, unsigned int Type);
    bool ParseProvides(pkgCache::VerIterator Ver);
+   bool ParseFileProvides(pkgCache::VerIterator Ver); 
 
    public:
  

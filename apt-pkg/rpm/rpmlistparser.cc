@@ -1052,10 +1052,11 @@ bool rpmRepomdParser::NewVersion(pkgCache::VerIterator Ver)
        return false;
    if (ParseDepends(Ver,pkgCache::Dep::Obsoletes) == false)
        return false;
-#if 1
    if (ParseProvides(Ver) == false)
        return false;
-#endif
+
+   if (ParseFileProvides(Ver) == false)
+      return false;
 
    return true; 
 }
@@ -1153,6 +1154,21 @@ bool rpmRepomdParser::ParseDepends(pkgCache::VerIterator Ver,
 
    }
 
+   return true;
+}
+
+// FIXME: use the new collectfileprovides system instead, but that needs
+// rpmrecords to handle the xml files as well -> code reorg needed
+bool rpmRepomdParser::ParseFileProvides(pkgCache::VerIterator Ver)
+{
+   xmlNode *format = FindNode("format");
+   for (xmlNode *n = format->children; n; n = n->next) {
+      if (strcmp((char*)n->name, "file") != 0)  continue;
+      if (!NewProvides(Ver, (char*)xmlNodeGetContent(n), "")) {
+	 cout << "failed to add fileprovide" << endl;
+	 return false;
+      }
+   }
    return true;
 }
 
