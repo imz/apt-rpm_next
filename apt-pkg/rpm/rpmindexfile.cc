@@ -547,6 +547,23 @@ string rpmRepomdIndex::ArchiveURI(string File) const
    return Res;
 }
 
+string rpmRepomdIndex::ArchiveInfo(pkgCache::VerIterator Ver) const
+{
+   string Res = ::URI::SiteOnly(URI) + ' ';
+   if (Dist[Dist.size() - 1] == '/')
+   {
+      if (Dist != "/")
+	 Res += Dist;
+   }
+   else
+      Res += Dist + '/';
+   
+   Res += " ";
+   Res += Ver.ParentPkg().Name();
+   Res += " ";
+   Res += Ver.VerStr();
+   return Res;
+}
 pkgCache::PkgFileIterator rpmRepomdIndex::FindInCache(pkgCache &Cache) const
 {
    string FileName = IndexPath();
