@@ -112,7 +112,6 @@ string RPMFileHandler::FileName()
    int rc = headerGetEntry(HeaderP, CRPMTAG_FILENAME,
 			   &type, (void**)&str, &count);
    assert(rc != 0);
-   cout << "XXXX fn " << str << endl;
    return str;
 }
 
@@ -123,7 +122,6 @@ string RPMFileHandler::Directory()
    assert(HeaderP != NULL);
    int rc = headerGetEntry(HeaderP, CRPMTAG_DIRECTORY,
 			   &type, (void**)&str, &count);
-   cout << "XXXX dir " << str << endl;
    return (rc?str:"");
 }
 
@@ -532,7 +530,7 @@ void RPMDBHandler::Rewind()
 
 RPMRepomdHandler::RPMRepomdHandler(string File)
 {
-   cout << "Repomd handler constr. " << File << endl;
+   //cout << "Repomd handler constr. " << File << endl;
    ID = File;
    Root = NULL;
 
@@ -578,7 +576,7 @@ bool RPMRepomdHandler::Jump(unsigned int Offset)
 	 continue;
       } else {
 	 iOffset++;
-	 cout << "at offset " << iOffset << " of " << Offset << endl;
+	 //cout << "at offset " << iOffset << " of " << Offset << endl;
       }
    }
    return false;
@@ -586,7 +584,7 @@ bool RPMRepomdHandler::Jump(unsigned int Offset)
 
 void RPMRepomdHandler::Rewind()
 {
-   cout << "Repomd handler rewind" << endl;
+   //cout << "Repomd handler rewind" << endl;
    iOffset = 0;
    NodeP = Root->children;
 }
@@ -606,7 +604,6 @@ string RPMRepomdHandler::FileName()
 {
    xmlNode *n;
    if ((n = FindNode("location"))) {
-      cout << "filename: " <<  (char*)xmlGetProp(n, (xmlChar*)"href") << endl;
       return basename((char*)xmlGetProp(n, (xmlChar*)"href"));
    } else {
       return "";
@@ -620,7 +617,6 @@ string RPMRepomdHandler::Directory()
    if ((n = FindNode("location"))) {
       dir = dirname((char*)xmlGetProp(n, (xmlChar*)"href"));
    }
-   cout << "Directory: " << dir << endl;
    return dir;
 }
 
@@ -646,7 +642,6 @@ unsigned long RPMRepomdHandler::FileSize()
 {
    xmlNode *n;
    if ((n = FindNode("size"))) {
-      cout << "filesize: " << atol((char*)xmlGetProp(n, (xmlChar*)"package")) << endl;
       return atol((char*)xmlGetProp(n, (xmlChar*)"package"));
    } else {
       return 0;
