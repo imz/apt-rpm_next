@@ -676,7 +676,6 @@ bool rpmRepomdIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
       return _error->Error(_("Problem opening %s"),PackageFile.c_str());
    }
    
-   cout << "here..." << endl;
    if (Gen.MergeList(Parser) == false)
    {
       delete Handler;

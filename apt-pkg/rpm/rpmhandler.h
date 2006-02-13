@@ -11,7 +11,8 @@
 #define PKGLIB_RPMHANDLER_H
 
 #include <apt-pkg/fileutl.h>
-#include <apt-pkg/xmlfile.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 #include <rpm/rpmlib.h>
 #include <rpm/rpmmacro.h>
@@ -26,6 +27,7 @@ class RPMHandler
    unsigned int iSize;
    Header HeaderP;
    string ID;
+   xmlNode *NodeP;
 
    public:
 
@@ -41,7 +43,7 @@ class RPMHandler
    inline unsigned Size() {return iSize;};
    inline Header GetHeader() {return HeaderP;};
    // doesn't belong here.. should abstract out the rpm header stuff
-   virtual inline pkgXMLFile *GetPrimary() {};
+   xmlNode *GetNode() {return NodeP;};
    virtual bool IsDatabase() = 0;
 
    virtual string FileName() {return "";};
@@ -167,7 +169,10 @@ class RPMDirHandler : public RPMHandler
 class RPMRepomdHandler : public RPMHandler
 {
 
-   pkgXMLFile *Primary;
+   xmlDocPtr Primary;
+   xmlNode *Root;
+
+   xmlNode *FindNode(const string Name);
 
    public:
 
@@ -177,7 +182,10 @@ class RPMRepomdHandler : public RPMHandler
    virtual void Rewind();
    virtual inline bool IsDatabase() {return false;};
 
-   inline pkgXMLFile *GetPrimary() {return Primary;};
+   virtual string FileName();
+   virtual string Directory();
+   virtual unsigned long FileSize();
+   virtual string MD5Sum();
 
    RPMRepomdHandler(string File);
    virtual ~RPMRepomdHandler();
