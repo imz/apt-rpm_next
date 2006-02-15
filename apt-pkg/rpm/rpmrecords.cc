@@ -88,17 +88,7 @@ string rpmRecordParser::FileName()
 /* */
 string rpmRecordParser::Name()
 {
-#if 0
-   char *str;
-   int_32 count, type;
-   assert(HeaderP != NULL);
-   int rc = headerGetEntry(HeaderP, RPMTAG_NAME,
-			   &type, (void**)&str, &count);
-   return string(rc?str:"");
-#endif
-   string str = Handler->FileName();
-   cout << "recordparse " << str << endl;
-   return str;
+   return Handler->Name();
 }
 									/*}}}*/
 // RecordParser::MD5Hash - Return the archive hash			/*{{{*/
@@ -114,12 +104,7 @@ string rpmRecordParser::MD5Hash()
 /* */
 string rpmRecordParser::Maintainer()
 {
-   char *str;
-   int_32 count, type;
-   assert(HeaderP != NULL);
-   int rc = headerGetEntry(HeaderP, RPMTAG_PACKAGER,
-			   &type, (void**)&str, &count);
-   return string(rc?str:"");
+   return Handler->Packager();
 }
 									/*}}}*/
 // RecordParser::ShortDesc - Return a 1 line description		/*{{{*/
@@ -127,15 +112,7 @@ string rpmRecordParser::Maintainer()
 /* */
 string rpmRecordParser::ShortDesc()
 {
-   char *str;
-   int_32 count, type;
-   assert(HeaderP != NULL);
-   int rc = headerGetEntry(HeaderP, RPMTAG_SUMMARY,
-			   &type, (void**)&str, &count);
-   if (rc != 1)
-      return string();
-   else
-      return string(str,0,string(str).find('\n'));
+   return Handler->Summary();
 }
 									/*}}}*/
 // RecordParser::LongDesc - Return a longer description			/*{{{*/
@@ -143,14 +120,13 @@ string rpmRecordParser::ShortDesc()
 /* */
 string rpmRecordParser::LongDesc()
 {
+   return Handler->Description();
+// XXX FIXME: is all this stuff *really* necessary?
+#if 0
    char *str, *ret, *x, *y;
    int_32 count, type;
    int len;
-   assert(HeaderP != NULL);
-   int rc = headerGetEntry(HeaderP, RPMTAG_DESCRIPTION,
-			   &type, (void**)&str, &count);
-   if (rc != 1)
-      return "";
+   str = Handler->Description(); // typecast problems...
 
    // Count size plus number of newlines
    for (x = str, len = 0; *x; x++, len++)
@@ -178,6 +154,7 @@ string rpmRecordParser::LongDesc()
    free(ret);
 
    return Ret;
+#endif
 }
 									/*}}}*/
 // RecordParser::SourcePkg - Return the source package name if any	/*{{{*/
@@ -296,37 +273,35 @@ void rpmRecordParser::GetRec(const char *&Start,const char *&Stop)
 
    BufUsed = 0;
 
-   assert(HeaderP != NULL);
+   BufCatTag("Package: ", Handler->Name().c_str());
 
-   headerGetEntry(HeaderP, RPMTAG_NAME, &type, (void **)&str, &count);
-   BufCatTag("Package: ", str);
+   BufCatTag("\nSection: ", Handler->Group().c_str());
 
-   headerGetEntry(HeaderP, RPMTAG_GROUP, &type, (void **)&str, &count);
-   BufCatTag("\nSection: ", str);
-
-   headerGetEntry(HeaderP, RPMTAG_SIZE, &type, (void **)&numv, &count);
-   snprintf(buf, sizeof(buf), "%d", numv[0]);
+   snprintf(buf, sizeof(buf), "%d", Handler->InstalledSize());
    BufCatTag("\nInstalled Size: ", buf);
 
-   str = NULL;
-   headerGetEntry(HeaderP, RPMTAG_PACKAGER, &type, (void **)&str, &count);
-   if (!str)
-       headerGetEntry(HeaderP, RPMTAG_VENDOR, &type, (void **)&str, &count);
-   BufCatTag("\nMaintainer: ", str);
+   BufCatTag("\nPackager: ", Handler->Packager().c_str());
+   BufCatTag("\nMaintainer: ", Handler->Vendor().c_str());
 
    BufCat("\nVersion: ");
-   headerGetEntry(HeaderP, RPMTAG_VERSION, &type, (void **)&str, &count);
-   if (headerGetEntry(HeaderP, RPMTAG_EPOCH, &type, (void **)&numv, &count)==1)
-       snprintf(buf, sizeof(buf), "%i:%s-", numv[0], str);
-   else
-       snprintf(buf, sizeof(buf), "%s-", str);
-   BufCat(buf);
-   headerGetEntry(HeaderP, RPMTAG_RELEASE, &type, (void **)&str, &count);
-   BufCat(str);
+   // XXX FIXME: handle the epoch madness somewhere central instead of
+   // figuring it out on every damn occasion separately
+
+   string e, v, r, verstr;
+   e = Handler->Epoch();
+   v = Handler->Version();
+   r = Handler->Release();
+
+   verstr = v + "-" + r;
+   if (e.empty() == false)
+      verstr = e + ":" + verstr;
+   BufCat(verstr.c_str());
 
 //   headerGetEntry(HeaderP, RPMTAG_DISTRIBUTION, &type, (void **)&str, &count);
 //   fprintf(f, "Distribution: %s\n", str);
 
+// XXX FIXME: handle dependencies in handler as well
+#if 0
    headerGetEntry(HeaderP, RPMTAG_REQUIRENAME, &type, (void **)&strv, &count);
    assert(type == RPM_STRING_ARRAY_TYPE || count == 0);
 
@@ -412,9 +387,9 @@ void rpmRecordParser::GetRec(const char *&Start,const char *&Stop)
 	 BufCatDep(strv[i], strv2[i], numv[i]);
       }
    }
+#endif
 
-   headerGetEntry(HeaderP, RPMTAG_ARCH, &type, (void **)&str, &count);
-   BufCatTag("\nArchitecture: ", str);
+   BufCatTag("\nArchitecture: ", Handler->Arch().c_str());
 
    snprintf(buf, sizeof(buf), "%d", Handler->FileSize());
    BufCatTag("\nSize: ", buf);
@@ -423,11 +398,10 @@ void rpmRecordParser::GetRec(const char *&Start,const char *&Stop)
 
    BufCatTag("\nFilename: ", Handler->FileName().c_str());
 
-   headerGetEntry(HeaderP, RPMTAG_SUMMARY, &type, (void **)&str, &count);
+   BufCatTag("\nSummary: ", Handler->Summary().c_str());
    BufCatTag("\nDescription: ", str);
    BufCat("\n");
-   headerGetEntry(HeaderP, RPMTAG_DESCRIPTION, &type, (void **)&str, &count);
-   BufCatDescr(str);
+   BufCatDescr(Handler->Description().c_str());
    BufCat("\n");
 
    Start = Buffer;

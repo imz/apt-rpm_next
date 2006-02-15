@@ -38,6 +38,17 @@
 #define rpmxxInitIterator(a,b,c,d) rpmdbInitIterator(a,b,c,d)
 #endif
 
+string RPMHandler::GetTag(rpmTag Tag)
+{
+   char *str;
+   int_32 count, type;
+   assert(HeaderP != NULL);
+   int rc = headerGetEntry(HeaderP, Tag,
+			   &type, (void**)&str, &count);
+   return string(rc?str:"");
+}
+
+
 RPMFileHandler::RPMFileHandler(string File)
 {
    ID = File;
@@ -106,44 +117,22 @@ void RPMFileHandler::Rewind()
 
 string RPMFileHandler::FileName()
 {
-   char *str;
-   int_32 count, type;
-   assert(HeaderP != NULL);
-   int rc = headerGetEntry(HeaderP, CRPMTAG_FILENAME,
-			   &type, (void**)&str, &count);
-   assert(rc != 0);
-   return str;
+   return GetTag(CRPMTAG_FILENAME);
 }
 
 string RPMFileHandler::Directory()
 {
-   char *str;
-   int_32 count, type;
-   assert(HeaderP != NULL);
-   int rc = headerGetEntry(HeaderP, CRPMTAG_DIRECTORY,
-			   &type, (void**)&str, &count);
-   return (rc?str:"");
+   return GetTag(CRPMTAG_DIRECTORY);
 }
 
 unsigned long RPMFileHandler::FileSize()
 {
-   int_32 count, type;
-   int_32 *num;
-   int rc = headerGetEntry(HeaderP, CRPMTAG_FILESIZE,
-			   &type, (void**)&num, &count);
-   assert(rc != 0);
-   return (unsigned long)num[0];
+   return atol(GetTag(CRPMTAG_FILESIZE).c_str());
 }
 
 string RPMFileHandler::MD5Sum()
 {
-   char *str;
-   int_32 count, type;
-   assert(HeaderP != NULL);
-   int rc = headerGetEntry(HeaderP, CRPMTAG_MD5,
-			   &type, (void**)&str, &count);
-   assert(rc != 0);
-   return str;
+   return GetTag(CRPMTAG_MD5);
 }
 
 bool RPMSingleFileHandler::Skip()
@@ -599,6 +588,63 @@ xmlNode *RPMRepomdHandler::FindNode(const string Name)
    return NULL;
 }
 
+string RPMRepomdHandler::GetTag(string Tag)
+{
+   xmlNode *n = FindNode(Tag);
+   if (n) {
+      return (char*)xmlNodeGetContent(n);
+   } else {
+      return "";
+   }
+}
+
+string RPMRepomdHandler::GetTag(xmlNode *Node, string Tag)
+{
+   if (Node) {
+      return (char*)xmlNodeGetContent(Node);
+   } else {
+      return "";
+   }
+}
+
+string RPMRepomdHandler::GetProp(xmlNode *Node, char *Prop)
+{
+   if (Node) {
+      return (char*)xmlGetProp(Node, (xmlChar*)Prop);
+   } else {
+      return "";
+   }
+}
+
+string RPMRepomdHandler::Group()
+{
+   xmlNode *n = FindNode("format");
+   return GetTag(n, "group");
+}
+
+string RPMRepomdHandler::Vendor()
+{
+   xmlNode *n = FindNode("format");
+   return GetTag(n, "vendor");
+}
+
+string RPMRepomdHandler::Release()
+{
+   xmlNode *n = FindNode("version");
+   return GetProp(n, "rel");
+}
+
+string RPMRepomdHandler::Version()
+{
+   xmlNode *n = FindNode("version");
+   return GetProp(n, "ver");
+}
+
+string RPMRepomdHandler::Epoch()
+{
+   xmlNode *n = FindNode("version");
+   return GetProp(n, "epoch");
+}
 
 string RPMRepomdHandler::FileName()
 {
@@ -648,6 +694,15 @@ unsigned long RPMRepomdHandler::FileSize()
    }
 }
 
+unsigned long RPMRepomdHandler::InstalledSize()
+{
+   xmlNode *n;
+   if ((n = FindNode("size"))) {
+      return atol((char*)xmlGetProp(n, (xmlChar*)"installed"));
+   } else {
+      return 0;
+   }
+}
 RPMRepomdHandler::~RPMRepomdHandler()
 {
    xmlFreeDoc(Primary);
