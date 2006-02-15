@@ -411,20 +411,7 @@ void rpmRecordParser::GetRec(const char *&Start,const char *&Stop)
 
 bool rpmRecordParser::HasFile(const char *File)
 {
-   if (*File == '\0')
-      return false;
-   char **names = NULL;
-   int_32 count = 0;
-   rpmHeaderGetEntry(HeaderP, RPMTAG_OLDFILENAMES,
-		     NULL, (void **) &names, &count);
-   while (count--) 
-   {
-      char *name = names[count];
-      if (strcmp(name, File) == 0)
-	 return true;
-   }
-   free(names);
-   return false;
+   return Handler->HasFile(File);
 }
 
 #endif /* HAVE_RPM */

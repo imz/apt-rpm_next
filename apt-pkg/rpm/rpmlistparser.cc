@@ -1171,6 +1171,8 @@ bool rpmRepomdParser::ParseDepends(pkgCache::VerIterator Ver,
 
 // FIXME: use the new collectfileprovides system instead, but that needs
 // rpmrecords to handle the xml files as well -> code reorg needed
+// We don't really need this since Handler->HasFile() can find it anyhow
+// but .. lets see
 bool rpmRepomdParser::ParseFileProvides(pkgCache::VerIterator Ver)
 {
    xmlNode *format = FindNode("format");

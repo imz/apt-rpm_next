@@ -80,6 +80,8 @@ class RPMHandler
    virtual string Summary() {return GetTag(RPMTAG_SUMMARY);};
    virtual string Description() {return GetTag(RPMTAG_DESCRIPTION);};
 
+   virtual bool HasFile(const char *File);
+
    virtual unsigned long InstalledSize() {return atol(GetTag(RPMTAG_SIZE).c_str());};
 
    RPMHandler() : iOffset(0), iSize(0), HeaderP(0) {};
@@ -218,6 +220,7 @@ class RPMRepomdHandler : public RPMHandler
    virtual string FileName();
    virtual string Directory();
    virtual unsigned long FileSize();
+   virtual unsigned long InstalledSize();
    virtual string MD5Sum();
 
    virtual string Name() {return GetTag("name");};
@@ -232,7 +235,7 @@ class RPMRepomdHandler : public RPMHandler
    virtual string Summary() {return GetTag("summary");};
    virtual string Description() {return GetTag("description");};
 
-   virtual unsigned long InstalledSize();
+   virtual bool HasFile(const char *File);
 
    RPMRepomdHandler(string File);
    virtual ~RPMRepomdHandler();
