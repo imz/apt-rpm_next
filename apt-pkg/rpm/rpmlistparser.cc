@@ -108,19 +108,19 @@ string rpmListParser::Package()
    }
 #endif
 
-   char *str;
+   string Name = Handler->Name();
    int type, count;
    
    Duplicated = false;
    
-   if (headerGetEntry(header, RPMTAG_NAME, &type, (void**)&str, &count) != 1) 
+   
+   if (Name.empty() == true)
    {
       _error->Error(_("Corrupt pkglist: no RPMTAG_NAME in header entry"));
       return "";
    } 
 
    bool IsDup = false;
-   string Name = str;
 
    if (RpmData->IsMultilibSys() && RpmData->IsCompatArch(Architecture())) {
 	 Name += ".32bit";	 
@@ -176,12 +176,7 @@ string rpmListParser::Architecture()
    if (VI != NULL)
       return VI->Arch();
 #endif
-
-   int type, count;
-   char *arch;
-   int res;
-   res = headerGetEntry(header, RPMTAG_ARCH, &type, (void **)&arch, &count);
-   return string(res?arch:"");
+   return Handler->Arch();
 }
                                                                         /*}}}*/
 // ListParser::Version - Return the version string			/*{{{*/
@@ -815,11 +810,7 @@ bool rpmListParser::LoadReleaseInfo(pkgCache::PkgFileIterator FileI,
 
 unsigned long rpmListParser::Size() 
 {
-   uint_32 *size;
-   int type, count;
-   if (headerGetEntry(header, RPMTAG_SIZE, &type, (void **)&size, &count)!=1)
-       return 1;
-   return (size[0]+512)/1024;
+   return (Handler->InstalledSize()+512)/1024;
 }
 
 // This is a slightly complex operation. It must take a package, and
@@ -925,7 +916,7 @@ string rpmRepomdParser::Package()
    if (CurrentName.empty() == false)
       return CurrentName;
 
-   string Name = FindTag("name");
+   string Name = Handler->Name();
 
    CurrentName = Name;
    if (RpmData->IsMultilibSys() && RpmData->IsCompatArch(Architecture())) {
@@ -984,8 +975,7 @@ bool rpmRepomdParser::Step()
 
 string rpmRepomdParser::Architecture()
 {
-   string arch = FindTag("arch");
-   return arch;
+   return Handler->Arch();
 }
 
 unsigned long rpmRepomdParser::Size()
