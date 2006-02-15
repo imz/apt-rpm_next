@@ -48,6 +48,24 @@ string RPMHandler::GetTag(rpmTag Tag)
    return string(rc?str:"");
 }
 
+bool RPMHandler::HasFile(const char *File)
+{
+   if (*File == '\0')
+      return false;
+   char **names = NULL;
+   int_32 count = 0;
+   rpmHeaderGetEntry(HeaderP, RPMTAG_OLDFILENAMES,
+                     NULL, (void **) &names, &count);
+   while (count--)
+   {
+      char *name = names[count];
+      if (strcmp(name, File) == 0)
+         return true;
+   }
+   free(names);
+   return false;
+}
+
 
 RPMFileHandler::RPMFileHandler(string File)
 {
@@ -703,6 +721,32 @@ unsigned long RPMRepomdHandler::InstalledSize()
       return 0;
    }
 }
+
+bool RPMRepomdHandler::HasFile(const char *File)
+{
+   if (*File == '\0')
+      return false;
+
+   bool inprimary = false;
+   bool found = false;
+
+   xmlNode *format = FindNode("format");
+   for (xmlNode *n = format->children; n; n = n->next) {
+      if (strcmp((char*)n->name, "file") != 0)
+	 continue;
+      if (strcmp(File, (char*)xmlNodeGetContent(n)) == 0) {
+	 cout << "file in primary: " << File << endl;
+	 inprimary = true;
+	 break;
+      }
+   }
+   // XXX FIXME: should plunge into filelist.xml if not found
+   // in primary.xml
+   found = inprimary;
+   return found;
+
+}
+
 RPMRepomdHandler::~RPMRepomdHandler()
 {
    xmlFreeDoc(Primary);
