@@ -42,6 +42,8 @@ rpmSrcRecordParser::rpmSrcRecordParser(string File,pkgIndexFile const *Index)
       Handler = new RPMDirHandler(File);
    else if (flExtension(File) == "rpm")
       Handler = new RPMSingleFileHandler(File);
+   else if (flExtension(File) == "xml")
+      Handler = new RPMRepomdHandler(File);
    else
       Handler = new RPMFileHandler(File);
 }
