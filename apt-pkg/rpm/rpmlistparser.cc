@@ -191,35 +191,18 @@ string rpmListParser::Version()
       return VI->VerStr();
 #endif
 
-   char *ver, *rel;
-   int_32 *ser;
-   bool has_epoch = false;
-   int type, count;
-   string str;
-   str.reserve(10);
-
-   if (headerGetEntry(header, RPMTAG_EPOCH, &type, (void **)&ser, &count) == 1
-       && count > 0) 
-      has_epoch = true;
+   string epoch, ver, rel, verstr;
    
-   headerGetEntry(header, RPMTAG_VERSION, &type, (void **)&ver, &count);
-   headerGetEntry(header, RPMTAG_RELEASE, &type, (void **)&rel, &count);
+   epoch = Handler->Epoch();
+   ver = Handler->Version();
+   rel = Handler->Release();
 
-   if (has_epoch == true) {
-      char buf[32];
-      snprintf(buf, sizeof(buf), "%i", ser[0]);
-      str += buf;
-      str += ":";
-      str += ver;
-      str += "-";
-      str += rel;
-   }
-   else {
-      str += ver;
-      str += "-";
-      str += rel;
-   }
-   return str;
+   if (epoch.empty() == true)
+      verstr = ver + "-" + rel;
+   else
+      verstr = epoch + ":" + ver + "-" + rel;
+
+   return verstr;
 }
                                                                         /*}}}*/
 // ListParser::NewVersion - Fill in the version structure		/*{{{*/
