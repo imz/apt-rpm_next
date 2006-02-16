@@ -62,6 +62,7 @@ unsigned long RPMHandler::GetITag(rpmTag Tag)
 			   &type, (void**)&num, &count);
    return rc?num[0]:0;
 }
+
 string RPMHandler::GetSTag(rpmTag Tag)
 {
    char *str;
@@ -71,6 +72,7 @@ string RPMHandler::GetSTag(rpmTag Tag)
 			   &type, (void**)&str, &count);
    return string(rc?str:"");
 }
+
 bool RPMHandler::HasFile(const char *File)
 {
    if (*File == '\0')
