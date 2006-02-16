@@ -44,7 +44,8 @@ class RPMHandler
    string ID;
    xmlNode *NodeP;
 
-   string GetTag(rpmTag Tag);
+   string GetSTag(rpmTag Tag);
+   unsigned long GetITag(rpmTag Tag);
 
    public:
 
@@ -69,21 +70,21 @@ class RPMHandler
    virtual string MD5Sum() {return "";};
    virtual bool ProvideFileName() {return false;};
 
-   virtual string Name() {return GetTag(RPMTAG_NAME);};
-   virtual string Arch() {return GetTag(RPMTAG_ARCH);};
-   //virtual string Epoch() {return GetTag(RPMTAG_EPOCH);};
+   virtual string Name() {return GetSTag(RPMTAG_NAME);};
+   virtual string Arch() {return GetSTag(RPMTAG_ARCH);};
+   //virtual string Epoch() {return GetSTag(RPMTAG_EPOCH);};
    virtual string Epoch();
-   virtual string Version() {return GetTag(RPMTAG_VERSION);};
-   virtual string Release() {return GetTag(RPMTAG_RELEASE);};
-   virtual string Group() {return GetTag(RPMTAG_GROUP);};
-   virtual string Packager() {return GetTag(RPMTAG_PACKAGER);};
-   virtual string Vendor() {return GetTag(RPMTAG_VENDOR);};
-   virtual string Summary() {return GetTag(RPMTAG_SUMMARY);};
-   virtual string Description() {return GetTag(RPMTAG_DESCRIPTION);};
+   virtual string Version() {return GetSTag(RPMTAG_VERSION);};
+   virtual string Release() {return GetSTag(RPMTAG_RELEASE);};
+   virtual string Group() {return GetSTag(RPMTAG_GROUP);};
+   virtual string Packager() {return GetSTag(RPMTAG_PACKAGER);};
+   virtual string Vendor() {return GetSTag(RPMTAG_VENDOR);};
+   virtual string Summary() {return GetSTag(RPMTAG_SUMMARY);};
+   virtual string Description() {return GetSTag(RPMTAG_DESCRIPTION);};
+   virtual unsigned long InstalledSize() {return GetITag(RPMTAG_SIZE);};
 
    virtual bool HasFile(const char *File);
 
-   virtual unsigned long InstalledSize() {return atol(GetTag(RPMTAG_SIZE).c_str());};
 
    RPMHandler() : iOffset(0), iSize(0), HeaderP(0) {};
    virtual ~RPMHandler() {};
@@ -205,9 +206,10 @@ class RPMRepomdHandler : public RPMHandler
    xmlNode *Root;
 
    xmlNode *FindNode(const string Name);
+   xmlNode *FindNode(xmlNode *Node, const string Name);
 
-   string GetTag(string Tag);
-   string GetTag(xmlNode *Node, string Tag);
+   string FindTag(xmlNode *Node, const string Tag);
+   string GetContent(xmlNode *Node, string Tag);
    string GetProp(xmlNode *Node, char *Prop);
 
    public:
@@ -224,17 +226,17 @@ class RPMRepomdHandler : public RPMHandler
    virtual unsigned long InstalledSize();
    virtual string MD5Sum();
 
-   virtual string Name() {return GetTag("name");};
-   virtual string Arch() {return GetTag("arch");};
+   virtual string Name() {return FindTag(NodeP, "name");};
+   virtual string Arch() {return FindTag(NodeP, "arch");};
    virtual string Epoch();
    virtual string Version();
    virtual string Release();
 
    virtual string Group();
-   virtual string Packager() {return GetTag("packager");};
+   virtual string Packager() {return FindTag(NodeP, "packager");};
    virtual string Vendor();
-   virtual string Summary() {return GetTag("summary");};
-   virtual string Description() {return GetTag("description");};
+   virtual string Summary() {return FindTag(NodeP, "summary");};
+   virtual string Description() {return FindTag(NodeP, "description");};
 
    virtual bool HasFile(const char *File);
 
