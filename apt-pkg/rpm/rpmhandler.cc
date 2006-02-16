@@ -38,6 +38,21 @@
 #define rpmxxInitIterator(a,b,c,d) rpmdbInitIterator(a,b,c,d)
 #endif
 
+string RPMHandler::Epoch()
+{
+   char str[512];
+   int_32 count, type, *epoch;
+   assert(HeaderP != NULL);
+   int rc = headerGetEntry(HeaderP, RPMTAG_EPOCH,
+			   &type, (void**)&epoch, &count);
+   if (rc == 1 && count > 0) {
+      snprintf(str, sizeof(str), "%i", epoch[0]);
+      return str;
+   } else { 
+      return string(rc?str:"");
+   }
+}
+
 string RPMHandler::GetTag(rpmTag Tag)
 {
    char *str;
@@ -47,7 +62,6 @@ string RPMHandler::GetTag(rpmTag Tag)
 			   &type, (void**)&str, &count);
    return string(rc?str:"");
 }
-
 bool RPMHandler::HasFile(const char *File)
 {
    if (*File == '\0')

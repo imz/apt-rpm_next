@@ -281,7 +281,7 @@ void rpmRecordParser::GetRec(const char *&Start,const char *&Stop)
    BufCatTag("\nInstalled Size: ", buf);
 
    BufCatTag("\nPackager: ", Handler->Packager().c_str());
-   BufCatTag("\nMaintainer: ", Handler->Vendor().c_str());
+   //BufCatTag("\nVendor: ", Handler->Vendor().c_str());
    
    BufCat("\nVersion: ");
    // XXX FIXME: handle the epoch madness somewhere central instead of
@@ -292,9 +292,11 @@ void rpmRecordParser::GetRec(const char *&Start,const char *&Stop)
    v = Handler->Version();
    r = Handler->Release();
    
-   verstr = v + "-" + r;
    if (e.empty() == false)
-      verstr = e + ":" + verstr;
+      verstr = e + ":" + v + "-" + r;
+   else
+      verstr = v + "-" + r;
+      
    BufCat(verstr.c_str());
 
 //   headerGetEntry(HeaderP, RPMTAG_DISTRIBUTION, &type, (void **)&str, &count);
@@ -399,7 +401,7 @@ void rpmRecordParser::GetRec(const char *&Start,const char *&Stop)
    BufCatTag("\nFilename: ", Handler->FileName().c_str());
 
    BufCatTag("\nSummary: ", Handler->Summary().c_str());
-   BufCatTag("\nDescription: ", str);
+   BufCat("\nDescription: ");
    BufCat("\n");
    BufCatDescr(Handler->Description().c_str());
    BufCat("\n");
