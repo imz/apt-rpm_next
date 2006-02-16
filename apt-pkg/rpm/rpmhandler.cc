@@ -53,7 +53,16 @@ string RPMHandler::Epoch()
    }
 }
 
-string RPMHandler::GetTag(rpmTag Tag)
+unsigned long RPMHandler::GetITag(rpmTag Tag)
+{
+   char *str;
+   int_32 count, type, *num;
+   assert(HeaderP != NULL);
+   int rc = headerGetEntry(HeaderP, Tag,
+			   &type, (void**)&num, &count);
+   return rc?num[0]:0;
+}
+string RPMHandler::GetSTag(rpmTag Tag)
 {
    char *str;
    int_32 count, type;
@@ -149,22 +158,22 @@ void RPMFileHandler::Rewind()
 
 string RPMFileHandler::FileName()
 {
-   return GetTag(CRPMTAG_FILENAME);
+   return GetSTag(CRPMTAG_FILENAME);
 }
 
 string RPMFileHandler::Directory()
 {
-   return GetTag(CRPMTAG_DIRECTORY);
+   return GetSTag(CRPMTAG_DIRECTORY);
 }
 
 unsigned long RPMFileHandler::FileSize()
 {
-   return atol(GetTag(CRPMTAG_FILESIZE).c_str());
+   return GetITag(CRPMTAG_FILESIZE);
 }
 
 string RPMFileHandler::MD5Sum()
 {
-   return GetTag(CRPMTAG_MD5);
+   return GetSTag(CRPMTAG_MD5);
 }
 
 bool RPMSingleFileHandler::Skip()
@@ -620,9 +629,19 @@ xmlNode *RPMRepomdHandler::FindNode(const string Name)
    return NULL;
 }
 
-string RPMRepomdHandler::GetTag(string Tag)
+xmlNode *RPMRepomdHandler::FindNode(xmlNode *Node, const string Name)
 {
-   xmlNode *n = FindNode(Tag);
+   for (xmlNode *n = Node->children; n; n = n->next) {
+      if (strcmp((char*)n->name, Name.c_str()) == 0) {
+         return n;
+      }
+   }
+   return NULL;
+}
+
+string RPMRepomdHandler::FindTag(xmlNode *Node, string Tag)
+{
+   xmlNode *n = FindNode(Node, Tag);
    if (n) {
       return (char*)xmlNodeGetContent(n);
    } else {
@@ -630,7 +649,7 @@ string RPMRepomdHandler::GetTag(string Tag)
    }
 }
 
-string RPMRepomdHandler::GetTag(xmlNode *Node, string Tag)
+string RPMRepomdHandler::GetContent(xmlNode *Node, string Tag)
 {
    if (Node) {
       return (char*)xmlNodeGetContent(Node);
@@ -651,13 +670,13 @@ string RPMRepomdHandler::GetProp(xmlNode *Node, char *Prop)
 string RPMRepomdHandler::Group()
 {
    xmlNode *n = FindNode("format");
-   return GetTag(n, "group");
+   return FindTag(n, "group");
 }
 
 string RPMRepomdHandler::Vendor()
 {
    xmlNode *n = FindNode("format");
-   return GetTag(n, "vendor");
+   return FindTag(n, "vendor");
 }
 
 string RPMRepomdHandler::Release()
