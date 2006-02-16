@@ -360,8 +360,17 @@ void pkgAcqIndex::Done(string Message,unsigned long Size,string MD5,
 
    Decompression = true;
    DestFile += ".decomp";
-   // CNC:2002-07-03
-   Desc.URI = "gzip:" + FileName;
+   // PM:2006-02-16
+   // XXX FIXME: the compression extension should really be per repo format
+   // as repomd uses gzip and apt by default bz2 and...
+   if (_config->Find("Acquire::ComprExtension") == ".gz") {
+      Desc.URI = "gzip:" + FileName;
+   } else if (_config->Find("Acquire::ComprExtension") == ".bz2") {
+      Desc.URI = "bzip2:" + FileName;
+   } else {
+      _error->Warning(_("Uknown compression extension, trying uncompressed"));
+      Desc.URI = FileName;
+   }
    QueueURI(Desc);
    // CNC:2002-07-03
    Mode = "gzip";
