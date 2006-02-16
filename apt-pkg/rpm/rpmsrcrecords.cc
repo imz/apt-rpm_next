@@ -31,6 +31,8 @@
 #include <rpm/rpmds.h>
 #endif
 
+using namespace std;
+
 // SrcRecordParser::rpmSrcRecordParser - Constructor			/*{{{*/
 // ---------------------------------------------------------------------
 /* */
@@ -65,6 +67,12 @@ rpmSrcRecordParser::~rpmSrcRecordParser()
    reused by the next Binaries function call. */
 const char **rpmSrcRecordParser::Binaries()
 {
+   return NULL;
+
+// WTF is this ?!? If we're looking for sources why would be interested
+// in binaries? Maybe there's an inner Zen to this all but
+// apt-cache showsrc seems to work without just fine so disabled for now...
+#if 0
    int i = 0;
    char **bins;
    int type, count;
@@ -78,6 +86,7 @@ const char **rpmSrcRecordParser::Binaries()
       StaticBinList[i] = bins[i];
    StaticBinList[i] = 0;
    return StaticBinList;
+#endif
 }
 									/*}}}*/
 // SrcRecordParser::Files - Return a list of files for this source	/*{{{*/
@@ -127,48 +136,21 @@ bool rpmSrcRecordParser::Jump(unsigned long Off)
 
 string rpmSrcRecordParser::Package() const
 {
-   char *str;
-   int_32 count, type;
-   int rc = headerGetEntry(HeaderP, RPMTAG_NAME,
-			   &type, (void**)&str, &count);
-   return string(rc?str:"");
+   return Handler->Name();
 }
 
 string rpmSrcRecordParser::Version() const
 {
-   char *version, *release;
-   int_32 *epoch;
-   int type, count;
-   int rc;
+   string e, v, r, verstr;
+   e = Handler->Epoch();
+   v = Handler->Version();
+   r = Handler->Release();
 
-   rc = headerGetEntry(HeaderP, RPMTAG_VERSION,
-		       &type, (void **)&version, &count);
-   if (rc != 1)
-   {
-      _error->Error(_("error parsing source list %s"), "(RPMTAG_VERSION)");
-      return "";
-   }
-   rc = headerGetEntry(HeaderP, RPMTAG_RELEASE,
-		       &type, (void **)&release, &count);
-   if (rc != 1)
-   {
-      _error->Error(_("error parsing source list %s"), "(RPMTAG_RELEASE)");
-      return "";
-   }
-
-   rc = headerGetEntry(HeaderP, RPMTAG_EPOCH,
-			   &type, (void **)&epoch, &count);
-   string ret;
-   if (rc == 1 && count > 0)
-   {
-      char buf[32];
-      sprintf(buf, "%i", *epoch);
-      ret = string(buf)+":"+string(version)+"-"+string(release);
-   }
+   if (e.empty() == false)
+      verstr = e + ":" + v + "-" + r;
    else
-      ret = string(version)+"-"+string(release);
-
-   return ret;
+      verstr = v + "-" + r;
+   return verstr;
 }
 
 
@@ -177,20 +159,12 @@ string rpmSrcRecordParser::Version() const
 /* */
 string rpmSrcRecordParser::Maintainer() const
 {
-   char *str;
-   int_32 count, type;
-   int rc = headerGetEntry(HeaderP, RPMTAG_PACKAGER,
-			   &type, (void**)&str, &count);
-   return string(rc?str:"");
+   return Handler->Packager();
 }
 
 string rpmSrcRecordParser::Section() const
 {
-   char *str;
-   int_32 count, type;
-   int rc = headerGetEntry(HeaderP, RPMTAG_GROUP,
-			   &type, (void**)&str, &count);
-   return string(rc?str:"");
+   return Handler->Group();
 }
 
 unsigned long rpmSrcRecordParser::Offset()
@@ -198,13 +172,13 @@ unsigned long rpmSrcRecordParser::Offset()
     return Handler->Offset();
 }
 
-void rpmSrcRecordParser::BufCat(char *text)
+void rpmSrcRecordParser::BufCat(const char *text)
 {
    if (text != NULL)
       BufCat(text, text+strlen(text));
 }
 
-void rpmSrcRecordParser::BufCat(char *begin, char *end)
+void rpmSrcRecordParser::BufCat(const char *begin, const char *end)
 {
    unsigned len = end - begin;
 
@@ -224,13 +198,13 @@ void rpmSrcRecordParser::BufCat(char *begin, char *end)
    BufUsed += len;
 }
 
-void rpmSrcRecordParser::BufCatTag(char *tag, char *value)
+void rpmSrcRecordParser::BufCatTag(const char *tag, const char *value)
 {
    BufCat(tag);
    BufCat(value);
 }
 
-void rpmSrcRecordParser::BufCatDep(char *pkg, char *version, int flags)
+void rpmSrcRecordParser::BufCatDep(const char *pkg, const char *version, int flags)
 {
    char buf[16];
    char *ptr = (char*)buf;
@@ -267,9 +241,9 @@ void rpmSrcRecordParser::BufCatDep(char *pkg, char *version, int flags)
    }
 }
 
-void rpmSrcRecordParser::BufCatDescr(char *descr)
+void rpmSrcRecordParser::BufCatDescr(const char *descr)
 {
-   char *begin = descr;
+   const char *begin = descr;
 
    while (*descr)
    {
@@ -290,112 +264,61 @@ void rpmSrcRecordParser::BufCatDescr(char *descr)
 // -----------------------------------------------
 string rpmSrcRecordParser::AsStr()
 {
-   // FIXME: This method is leaking memory from headerGetEntry().
    int type, type2, type3, count;
    char *str;
    char **strv;
    char **strv2;
-   int num;
    int_32 *numv;
    char buf[32];
 
    BufUsed = 0;
 
-   headerGetEntry(HeaderP, RPMTAG_NAME, &type, (void **)&str, &count);
-   BufCatTag("Package: ", str);
+   BufCatTag("Package: ", Handler->Name().c_str());
 
-   headerGetEntry(HeaderP, RPMTAG_GROUP, &type, (void **)&str, &count);
-   BufCatTag("\nSection: ", str);
+   BufCatTag("\nSection: ", Handler->Group().c_str());
 
-   headerGetEntry(HeaderP, RPMTAG_SIZE, &type, (void **)&numv, &count);
-   snprintf(buf, sizeof(buf), "%d", numv[0]);
+   snprintf(buf, sizeof(buf), "%d", Handler->InstalledSize());
    BufCatTag("\nInstalled Size: ", buf);
 
-   str = NULL;
-   headerGetEntry(HeaderP, RPMTAG_PACKAGER, &type, (void **)&str, &count);
-   if (!str)
-       headerGetEntry(HeaderP, RPMTAG_VENDOR, &type, (void **)&str, &count);
-   BufCatTag("\nMaintainer: ", str);
+   BufCatTag("\nPackager: ", Handler->Packager().c_str());
+   //BufCatTag("\nVendor: ", Handler->Vendor().c_str());
 
    BufCat("\nVersion: ");
-   headerGetEntry(HeaderP, RPMTAG_VERSION, &type, (void **)&str, &count);
-   if (headerGetEntry(HeaderP, RPMTAG_EPOCH, &type, (void **)&numv, &count)==1)
-       snprintf(buf, sizeof(buf), "%i:%s-", numv[0], str);
+   // XXX FIXME: handle the epoch madness somewhere central instead of
+   // figuring it out on every damn occasion separately
+
+   string e, v, r, verstr;
+   e = Handler->Epoch();
+   v = Handler->Version();
+   r = Handler->Release();
+
+   if (e.empty() == false)
+      verstr = e + ":" + v + "-" + r;
    else
-       snprintf(buf, sizeof(buf), "%s-", str);
-   BufCat(buf);
-   headerGetEntry(HeaderP, RPMTAG_RELEASE, &type, (void **)&str, &count);
-   BufCat(str);
+      verstr = v + "-" + r;
 
-   headerGetEntry(HeaderP, RPMTAG_REQUIRENAME, &type, (void **)&strv, &count);
-   assert(type == RPM_STRING_ARRAY_TYPE || count == 0);
+   BufCat(verstr.c_str());
 
-   headerGetEntry(HeaderP, RPMTAG_REQUIREVERSION, &type2, (void **)&strv2, &count);
-   headerGetEntry(HeaderP, RPMTAG_REQUIREFLAGS, &type3, (void **)&numv, &count);
+//   headerGetEntry(HeaderP, RPMTAG_DISTRIBUTION, &type, (void **)&str, &count);//   fprintf(f, "Distribution: %s\n", str);
 
-   if (count > 0)
-   {
-      int i, j;
+// XXX FIXME: handle dependencies in handler as well
+// XXX missing the BIIIIIIIIG if 0 section wrt dependencies
+// .. here
+// ..
 
-      for (j = i = 0; i < count; i++)
-      {
-	 if ((numv[i] & RPMSENSE_PREREQ))
-	 {
-	    if (j == 0)
-		BufCat("\nPre-Depends: ");
-	    else
-		BufCat(", ");
-	    BufCatDep(strv[i], strv2[i], numv[i]);
-	    j++;
-	 }
-      }
+   BufCatTag("\nArchitecture: ", Handler->Arch().c_str());
 
-      for (j = 0, i = 0; i < count; i++)
-      {
-	 if (!(numv[i] & RPMSENSE_PREREQ))
-	 {
-	    if (j == 0)
-		BufCat("\nDepends: ");
-	    else
-		BufCat(", ");
-	    BufCatDep(strv[i], strv2[i], numv[i]);
-	    j++;
-	 }
-      }
-   }
-
-   headerGetEntry(HeaderP, RPMTAG_CONFLICTNAME, &type, (void **)&strv, &count);
-   assert(type == RPM_STRING_ARRAY_TYPE || count == 0);
-
-   headerGetEntry(HeaderP, RPMTAG_CONFLICTVERSION, &type2, (void **)&strv2, &count);
-   headerGetEntry(HeaderP, RPMTAG_CONFLICTFLAGS, &type3, (void **)&numv, &count);
-
-   if (count > 0)
-   {
-      BufCat("\nConflicts: ");
-      for (int i = 0; i < count; i++)
-      {
-	 if (i > 0)
-	     BufCat(", ");
-	 BufCatDep(strv[i], strv2[i], numv[i]);
-      }
-   }
-
-   headerGetEntry(HeaderP, CRPMTAG_FILESIZE, &type, (void **)&num, &count);
-   snprintf(buf, sizeof(buf), "%d", num);
+   snprintf(buf, sizeof(buf), "%d", Handler->FileSize());
    BufCatTag("\nSize: ", buf);
 
-   headerGetEntry(HeaderP, CRPMTAG_MD5, &type, (void **)&str, &count);
-   BufCatTag("\nMD5Sum: ", str);
+   BufCatTag("\nMD5Sum: ", Handler->MD5Sum().c_str());
 
-   headerGetEntry(HeaderP, CRPMTAG_FILENAME, &type, (void **)&str, &count);
-   BufCatTag("\nFilename: ", str);
+   BufCatTag("\nFilename: ", Handler->FileName().c_str());
 
-   headerGetEntry(HeaderP, RPMTAG_SUMMARY, &type, (void **)&str, &count);
-   BufCatTag("\nDescription: ", str);
+   BufCatTag("\nSummary: ", Handler->Summary().c_str());
+   BufCat("\nDescription: ");
    BufCat("\n");
-   headerGetEntry(HeaderP, RPMTAG_DESCRIPTION, &type, (void **)&str, &count);
-   BufCatDescr(str);
+   BufCatDescr(Handler->Description().c_str());
    BufCat("\n");
 
    return string(Buffer, BufUsed);
