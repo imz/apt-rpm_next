@@ -296,6 +296,7 @@ class rpmRepomdIndex : public rpmIndexFile
 
    virtual string MainType() const = 0;
    virtual string IndexPath() const {return IndexFile(MainType());};
+   virtual string ReleasePath() const;
 
    public:
 

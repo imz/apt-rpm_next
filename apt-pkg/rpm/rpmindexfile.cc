@@ -30,7 +30,7 @@
 #include <apt-pkg/error.h>
 #include <apt-pkg/strutl.h>
 #include <apt-pkg/acquire-item.h>
-#include <apt-pkg/repository.h>
+#include <apt-pkg/repomd.h>
 
 #include <apti18n.h>
 
@@ -645,12 +645,10 @@ bool rpmRepomdIndex::GetReleases(pkgAcquire *Owner) const
    if (!Repository->Acquire)
       return true;
    Repository->Acquire = false;
-#if 0
    // ignore for now - we need to parse the file for checksum and 
    // optimally for location of other xml files as well
    new pkgAcqIndexRel(Owner,Repository,ReleaseURI("repomd.xml"),
                       ReleaseInfo("repomd.xml"), "repomd.xml", true);
-#endif
    return true;
 }
 
@@ -679,6 +677,12 @@ bool rpmRepomdIndex::Exists() const
 {
    return FileExists(IndexPath());
 }
+
+string rpmRepomdIndex::ReleasePath() const
+{
+   return _config->FindDir("Dir::State::lists")+URItoFileName(ReleaseURI("release.xml"));
+}
+
 
 bool rpmRepomdIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
 {
@@ -721,18 +725,12 @@ bool rpmRepomdIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
    
    delete Handler;
 
-#if 0
    // Check the release file
    string RelFile = ReleasePath();
    if (FileExists(RelFile) == true)
    {
-      FileFd Rel(RelFile,FileFd::ReadOnly);
-      if (_error->PendingError() == true)
-	 return false;
-      Parser.LoadReleaseInfo(File,Rel);
-      Rel.Seek(0);
+      Parser.LoadReleaseInfo(File,RelFile);
    }
-#endif
 
    return true;
 }
@@ -871,6 +869,7 @@ class rpmSLTypeGen : public pkgSourceList::Type
       else
 	 BaseURI = URI + Dist + '/';
 
+      //cout << "XXXX GetRepo " << URI << " " << Dist << " " << BaseURI << endl;
       Rep = new pkgRepository(URI,Dist,Vendor,BaseURI);
       RepList.push_back(Rep);
       return Rep;
@@ -961,6 +960,29 @@ class rpmSLTypeSrpmDir : public rpmSLTypeGen
 class rpmSLTypeRepomd : public rpmSLTypeGen
 {
    public:
+
+   pkgRepository *GetRepository(string URI,string Dist,
+				const pkgSourceList::Vendor *Vendor) const
+   {
+      pkgRepository *Rep = FindRepository(URI,Dist,Vendor);
+      if (Rep != NULL)
+	 return Rep;
+
+      string BaseURI;
+      if (Dist[Dist.size() - 1] == '/')
+      {
+	 if (Dist != "/")
+	    BaseURI = URI + Dist;
+	 else 
+	    BaseURI = URI + '/';
+      }
+      else
+	 BaseURI = URI + Dist + '/';
+
+      Rep = new repomdRepository(URI,Dist,Vendor,BaseURI);
+      RepList.push_back(Rep);
+      return Rep;
+   }
 
    bool CreateItem(vector<pkgIndexFile *> &List,
 		   string URI, string Dist, string Section,
