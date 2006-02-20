@@ -101,6 +101,9 @@ class rpmRepomdParser : public pkgCacheGenerator::ListParser
    RPMPackageData *RpmData;
    xmlNode *Node;
 
+   string Primary;
+   string Filelist;
+   string Other;
 
    string CurrentName;
    const pkgCache::VerIterator *VI;
@@ -123,6 +126,8 @@ class rpmRepomdParser : public pkgCacheGenerator::ListParser
    virtual unsigned short VersionHash();
    virtual bool UsePackage(pkgCache::PkgIterator Pkg,
 			   pkgCache::VerIterator Ver);
+   bool LoadReleaseInfo(pkgCache::PkgFileIterator FileI,string File);
+
    virtual unsigned long Offset()
 	{return Handler->Offset();};
    virtual unsigned long Size();

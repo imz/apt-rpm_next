@@ -24,6 +24,7 @@
 #include <apt-pkg/strutl.h>
 #include <apt-pkg/crc-16.h>
 #include <apt-pkg/tagfile.h>
+#include <apt-pkg/error.h>
 
 #include <apti18n.h>
 
@@ -891,6 +892,45 @@ unsigned long rpmRepomdParser::UniqFindTagWrite(string Tag)
    string data = FindTag(Tag);
    //cout << "findtag " << Tag << ": " << data << endl;
    return WriteUniqString(data);
+}
+
+bool rpmRepomdParser::LoadReleaseInfo(pkgCache::PkgFileIterator FileI,
+                                   string File)
+{
+   xmlDocPtr RepoMD = NULL;
+   xmlNode *Root = NULL;
+
+   //cout << "Load repomd release " << endl;
+   RepoMD = xmlReadFile(File.c_str(), NULL, XML_PARSE_NONET);
+   if ((Root = xmlDocGetRootElement(RepoMD)) == NULL) {
+      xmlFreeDoc(RepoMD);
+      return _error->Error(_("could not open Release file '%s'"),File.c_str());
+   }
+
+   /* Parse primary, filelists and other location from here */
+   for (xmlNode *n = Root->children; n; n = n->next) {
+      if (n->type == XML_ELEMENT_NODE && strcmp((char*)n->name, "data") == 0) {
+        string type = (char*)xmlGetProp(n, (xmlChar*)"type");
+        if (type == "primary") {
+           xmlNode *loc = FindNode(n, "location");
+           if (loc) {
+              Primary = (char*)xmlGetProp(loc, (xmlChar*)"href");
+             //cout << "found primary " << Primary << endl;
+           }
+       } else if (type == "filelists") {
+           xmlNode *loc = FindNode(n, "location");
+           if (loc) {
+              Filelist = (char*)xmlGetProp(loc, (xmlChar*)"href");
+              //cout << "found filelist " << Filelist << endl;
+           }
+        }
+      }
+
+      //cout << "XXXX " << n->name << endl;
+   }
+
+   xmlFreeDoc(RepoMD);
+   return true;
 }
 
 

@@ -38,11 +38,12 @@ class pkgRepository
 
    bool Acquire;
 
-   bool ParseRelease(string File);
-   bool HasRelease() const { return GotRelease; }
+   // PM 2006-21-02 make these methods virtual
+   virtual bool ParseRelease(string File);
+   virtual bool HasRelease() const { return GotRelease; }
 
-   bool IsAuthenticated() const { return !FingerPrint.empty(); };
-   bool FindChecksums(string URI,unsigned long &Size, string &MD5);
+   virtual bool IsAuthenticated() const { return !FingerPrint.empty(); };
+   virtual bool FindChecksums(string URI,unsigned long &Size, string &MD5);
 
    pkgRepository(string URI,string Dist, const pkgSourceList::Vendor *Vendor,
 		 string RootURI)
