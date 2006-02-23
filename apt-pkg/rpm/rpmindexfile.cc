@@ -1009,7 +1009,6 @@ class rpmSLTypeRepomd : public rpmSLTypeGen
 	 return _error->Error(_("Malformed line %lu in source list %s (URI parse)"),CurLine,File.c_str());
       
       Dist = SubstVar(Dist,"$(ARCH)",_config->Find("APT::Architecture"));
-      // PM:2006-02-06
       Dist = SubstVar(Dist,"$(VERSION)",_config->Find("APT::DistroVersion"));
 
       if (CreateItem(List,URI,Dist,"",Vendor) == false)
