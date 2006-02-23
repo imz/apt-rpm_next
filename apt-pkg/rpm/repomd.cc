@@ -24,33 +24,52 @@
 
 using namespace std;
 
-// Repository::ParseRelease - Parse Release file for checksums		/*{{{*/
-// ---------------------------------------------------------------------
-/* */
+xmlNode *FindNode(xmlNode *Node, const string Name)
+{
+   for (xmlNode *n = Node->children; n; n = n->next) {
+      if (strcmp((char*)n->name, Name.c_str()) == 0) {
+         return n;
+      }
+   }
+   return NULL;
+}
+
+
+// Parse repomd.xml file for checksums
 bool repomdRepository::ParseRelease(string File)
 {
-   //cout << "parsing repomd repository release " << File << endl;
    RepoMD = xmlReadFile(File.c_str(), NULL, XML_PARSE_NONET);
    if ((Root = xmlDocGetRootElement(RepoMD)) == NULL) {
       xmlFreeDoc(RepoMD);
       return _error->Error(_("could not open Release file '%s'"),File.c_str());
    }
-   //cout << "opened repomd ok" << endl;
+
+   for (xmlNode *Node = Root->children; Node; Node = Node->next) {
+      if (Node->type != XML_ELEMENT_NODE ||
+	  strcmp((char*)Node->name, "data") != 0)
+	 continue;
+
+      string Hash = "";
+      string Path = "";
+      string Type = "";
+      string Timestamp = "";
+
+      xmlNode *n = FindNode(Node, "checksum");
+      if (n)
+	 Hash = (char*)xmlNodeGetContent(n);
+	 Type = (char*)xmlGetProp(n, (xmlChar*)"type");
+      n = FindNode(Node, "location");
+      if (n)
+	 Path = (char*)xmlGetProp(n, (xmlChar*)"href");
+
+      IndexChecksums[Path].MD5 = Hash;
+      IndexChecksums[Path].Size = 0;
+   }
 
    GotRelease = true;
 
+   xmlFreeDoc(RepoMD);
    return true;
 }
 
-// Repository::FindChecksums - Get checksum info for file		/*{{{*/
-// ---------------------------------------------------------------------
-/* */
-bool repomdRepository::FindChecksums(string URI,unsigned long &Size, string &MD5)
-{
-   cout << "XXX findchecks " << URI << endl;
-   string Path = string(URI,RootURI.size());
-   return true;
-}
-									/*}}}*/
-									/*}}}*/
 // vim:sts=3:sw=3
