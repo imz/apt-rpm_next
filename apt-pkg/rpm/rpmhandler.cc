@@ -572,9 +572,10 @@ RPMRepomdHandler::RPMRepomdHandler(string File)
       cout << "getting root element failed" << endl;
    }
    NodeP = Root->children;
+   iSize = atoi((char*)xmlGetProp(Root, (xmlChar*)"packages"));
+
    if (NodeP == NULL)
       cout << "NodeP is null, ugh..." << endl;
-
 }
 
 bool RPMRepomdHandler::Skip()
