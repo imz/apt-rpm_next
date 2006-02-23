@@ -77,7 +77,6 @@ bool pkgInitConfig(Configuration &Cnf)
    Cnf.Set("Dir::Etc::parts","apt.conf.d");
    Cnf.Set("Dir::Etc::preferences","preferences");
    Cnf.Set("Dir::Bin::methods",LIBDIR "/apt/methods");
-   Cnf.Set("Acquire::ComprExtension", ".gz");
 	      
    bool Res = true;
    

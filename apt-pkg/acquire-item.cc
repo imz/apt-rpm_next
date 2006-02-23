@@ -191,7 +191,7 @@ pkgAcqIndex::pkgAcqIndex(pkgAcquire *Owner,pkgRepository *Repository,
 
    // Create the item
    // CNC:2002-07-03
-   Desc.URI = URI + _config->Find("Acquire::ComprExtension", ".gz");
+   Desc.URI = URI + "." + Repository->GetComprMethod();
    Desc.Description = URIDesc;
    Desc.Owner = this;
    Desc.ShortDesc = ShortDesc;
@@ -360,20 +360,18 @@ void pkgAcqIndex::Done(string Message,unsigned long Size,string MD5,
    
    Decompression = true;
    DestFile += ".decomp";
-   // PM:2006-02-16
-   // XXX FIXME: the compression extension should really be per repo format
-   // as repomd uses gzip and apt by default bz2 and...
-   if (_config->Find("Acquire::ComprExtension") == ".gz") {
+   // LORG:2006-02-23 compression is a feature of repository type
+   if (Repository->GetComprMethod() == "gz") {
       Desc.URI = "gzip:" + FileName;
-   } else if (_config->Find("Acquire::ComprExtension") == ".bz2") {
+      Mode = "gzip";
+   } else if (Repository->GetComprMethod() == "bz2") {
       Desc.URI = "bzip2:" + FileName;
+      Mode = "bzip2";
    } else {
       _error->Warning(_("Uknown compression extension, trying uncompressed"));
       Desc.URI = FileName;
    }
    QueueURI(Desc);
-   // CNC:2002-07-03
-   Mode = "gzip";
 }
 									/*}}}*/
 
