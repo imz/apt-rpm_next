@@ -29,7 +29,10 @@ class repomdRepository : public pkgRepository
    
    repomdRepository(string URI,string Dist, const pkgSourceList::Vendor *Vendor,
 		 string RootURI)
-      : pkgRepository(URI, Dist, Vendor, RootURI) {};
+      : pkgRepository(URI, Dist, Vendor, RootURI) 
+   {
+      ComprMethod = "gz";
+   };
 
 };
 
