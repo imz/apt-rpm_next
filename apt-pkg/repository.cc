@@ -87,7 +87,6 @@ bool pkgRepository::ParseRelease(string File)
 bool pkgRepository::FindChecksums(string URI,unsigned long &Size, string &MD5)
 {
    string Path = string(URI,RootURI.size());
-   cout << "pkgrepo findcheck " << URI<< endl;
    if (IndexChecksums.find(Path) == IndexChecksums.end())
       return false;
    Size = IndexChecksums[Path].Size;

@@ -11,6 +11,7 @@
 #include <libxml/tree.h>
 #include <apt-pkg/repository.h>
 
+using namespace std;
 
 class repomdRepository : public pkgRepository
 {
@@ -22,16 +23,16 @@ class repomdRepository : public pkgRepository
 
    public:   
 
-   virtual bool HasRelease() { return GotRelease; };
    virtual bool IsAuthenticated() const { return false; };
    virtual bool ParseRelease(string File);
-   virtual bool FindChecksums(string URI,unsigned long &Size, string &MD5);
    
    repomdRepository(string URI,string Dist, const pkgSourceList::Vendor *Vendor,
 		 string RootURI)
       : pkgRepository(URI, Dist, Vendor, RootURI) 
    {
       ComprMethod = "gz";
+      // repomd always has a "release" file
+      GotRelease = true;
    };
 
 };
