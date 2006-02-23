@@ -157,7 +157,7 @@ bool pkgInitSystem(Configuration &Cnf,pkgSystem *&Sys)
 	 return _error->Error(_("Unable to determine a suitable system type"));
    }
 
-   // PM:2006-02-06
+   // LORG:2006-02-06
    if (Cnf.Find("APT::DistroVersion", "").empty()) {
 	Cnf.Set("APT::DistroVersion", Sys->DistroVer(Cnf));
    }
