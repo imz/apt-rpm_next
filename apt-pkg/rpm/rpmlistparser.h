@@ -133,7 +133,7 @@ class rpmRepomdParser : public pkgCacheGenerator::ListParser
    virtual unsigned long Size();
    virtual bool Step();
 
-   rpmRepomdParser::rpmRepomdParser(RPMHandler *Handler);
+   rpmRepomdParser(RPMHandler *Handler);
 };
 
 #endif
