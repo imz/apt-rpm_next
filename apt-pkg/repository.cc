@@ -34,7 +34,6 @@ using namespace std;
 /* */
 bool pkgRepository::ParseRelease(string File)
 {
-   cout << "pkgrepo parserelease " << File << endl;
    // Open the stream for reading
    FileFd F(File, FileFd::ReadOnly);
    if (_error->PendingError())
