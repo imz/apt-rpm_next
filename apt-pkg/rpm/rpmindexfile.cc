@@ -567,7 +567,6 @@ string rpmRepomdIndex::ArchiveInfo(pkgCache::VerIterator Ver) const
 pkgCache::PkgFileIterator rpmRepomdIndex::FindInCache(pkgCache &Cache) const
 {
    string FileName = IndexPath();
-   //cout << "findincache " << FileName << endl;
    pkgCache::PkgFileIterator File = Cache.FileBegin();
    for (; File.end() == false; File++)
    {
@@ -664,6 +663,17 @@ bool rpmRepomdIndex::GetIndexes(pkgAcquire *Owner) const
    		   Info("other.xml"), "other.xml");
 #endif
    return true;
+}
+
+string rpmRepomdIndex::Describe(bool Short) const
+{
+   char S[300];
+   if (Short == true)
+      snprintf(S,sizeof(S),"%s",Info(MainType()).c_str());
+   else
+      snprintf(S,sizeof(S),"%s (%s)",Info(MainType()).c_str(),
+         IndexFile(MainType()).c_str());
+   return S;
 }
 
 string rpmRepomdIndex::IndexFile(string Type) const
