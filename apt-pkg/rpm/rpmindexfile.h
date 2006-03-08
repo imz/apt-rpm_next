@@ -311,7 +311,7 @@ class rpmRepomdIndex : public rpmIndexFile
    virtual unsigned long Size() const {};
 
    // Interface for acquire
-   virtual string Describe(bool Short) const {};
+   virtual string Describe(bool Short) const;
    // Interface for acquire
    virtual bool GetIndexes(pkgAcquire *Owner) const;
    virtual bool HasPackages() const {return true;};
