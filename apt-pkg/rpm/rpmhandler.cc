@@ -731,7 +731,6 @@ string RPMRepomdHandler::SHA1Sum()
 {
    xmlNode *n;
    if ((n = FindNode("checksum"))) {
-      cout << "checksum " << (char*)xmlNodeGetContent(n) << endl;
       return (char*)xmlNodeGetContent(n);
    } else {
       return "";
