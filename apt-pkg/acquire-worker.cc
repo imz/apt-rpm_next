@@ -303,8 +303,17 @@ bool pkgAcquire::Worker::RunMessages()
 	       _error->Warning("Bizarre Error - File size is not what the server reported %s %lu",
 			       LookupTag(Message,"Size","0").c_str(),TotalSize);
 
+	    // LORG:2006-03-09
+	    // XXX FIXME: hardcoding SHA here breaks old style repos..
+	    // should get it from something that knows what it wants, sigh
+#if 1
+	    Owner->Done(Message,atoi(LookupTag(Message,"Size","0").c_str()),
+			LookupTag(Message,"SHA1-Hash"),Config);
+#else
 	    Owner->Done(Message,atoi(LookupTag(Message,"Size","0").c_str()),
 			LookupTag(Message,"MD5-Hash"),Config);
+#endif
+	    
 	    ItemDone();
 	    
 	    // Log that we are done
