@@ -55,7 +55,10 @@ bool VerifyChecksums(string File,unsigned long Size,string MD5)
    if (stat(File.c_str(),&Buf) != 0) 
       return true;
 
-   if (Buf.st_size != Size)
+   // LORG:2006-03-09
+   // XXX hack alert: repomd doesn't have index sizes so ignore it and
+   // rely on checksum
+   if (Size > 0 && Buf.st_size != Size)
    {
       if (_config->FindB("Acquire::Verbose", false) == true)
 	 cout << "Size of "<<File<<" did not match what's in the checksum list and was redownloaded."<<endl;
@@ -277,7 +280,10 @@ void pkgAcqIndex::Done(string Message,unsigned long Size,string MD5,
       {
 	 // We must always get here if the repository is authenticated
 	 
-	 if (FSize != Size)
+	 // LORG:2006-03-09
+	 // XXX hack alert: repomd doesn't know index sizes so it returns
+	 // zero for them, don't check but rely on checksums instead
+	 if (FSize > 0 && FSize != Size)
 	 {
 	    Status = StatError;
 	    ErrorText = _("Size mismatch");

@@ -68,6 +68,7 @@ class RPMHandler
    virtual string Directory() {return "";};
    virtual unsigned long FileSize() {return 1;};
    virtual string MD5Sum() {return "";};
+   virtual string SHA1Sum() {return "";};
    virtual bool ProvideFileName() {return false;};
 
    virtual string Name() {return GetSTag(RPMTAG_NAME);};
@@ -225,6 +226,7 @@ class RPMRepomdHandler : public RPMHandler
    virtual unsigned long FileSize();
    virtual unsigned long InstalledSize();
    virtual string MD5Sum();
+   virtual string SHA1Sum();
 
    virtual string Name() {return FindTag(NodeP, "name");};
    virtual string Arch() {return FindTag(NodeP, "arch");};

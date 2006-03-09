@@ -17,7 +17,6 @@ class repomdRepository : public pkgRepository
 {
    protected:
 
-   bool GotRelease;
    xmlDocPtr RepoMD;
    xmlNode *Root;
 
