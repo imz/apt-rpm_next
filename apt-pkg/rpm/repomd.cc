@@ -53,20 +53,26 @@ bool repomdRepository::ParseRelease(string File)
       string Path = "";
       string Type = "";
       string Timestamp = "";
+      xmlNode *n = NULL;
 
-      xmlNode *n = FindNode(Node, "open-checksum");
-      if (n)
-	 Hash = (char*)xmlNodeGetContent(n);
-	 Type = (char*)xmlGetProp(n, (xmlChar*)"type");
       n = FindNode(Node, "location");
       if (n)
 	 Path = (char*)xmlGetProp(n, (xmlChar*)"href");
 
+      n = NULL;
       if (flExtension(Path) == "gz") {
 	 Path = Path.substr(0, Path.size()-3);
+	 n = FindNode(Node, "open-checksum");
+      } else {
+	 n = FindNode(Node, "checksum");
+      }
+      if (n) {
+	 Hash = (char*)xmlNodeGetContent(n);
+	 Type = (char*)xmlGetProp(n, (xmlChar*)"type");
       }
       IndexChecksums[Path].MD5 = Hash;
       IndexChecksums[Path].Size = 0;
+      CheckMethod = Type;
    }
 
    GotRelease = true;

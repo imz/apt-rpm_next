@@ -29,6 +29,7 @@ class pkgRepository
 
    bool GotRelease;
    string ComprMethod;
+   string CheckMethod;
 
    public:
 
@@ -47,6 +48,7 @@ class pkgRepository
    virtual bool FindChecksums(string URI,unsigned long &Size, string &MD5);
    // LORG:2006-02-23
    virtual string GetComprMethod() {return ComprMethod;};
+   virtual string GetCheckMethod() {return CheckMethod;};
 
    pkgRepository(string URI,string Dist, const pkgSourceList::Vendor *Vendor,
 		 string RootURI)
@@ -55,6 +57,7 @@ class pkgRepository
    {
       if (Vendor) FingerPrint = Vendor->FingerPrint;
       ComprMethod = "bz2";
+      CheckMethod = "md5";
    };
 
 };
