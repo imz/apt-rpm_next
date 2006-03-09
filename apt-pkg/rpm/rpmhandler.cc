@@ -722,22 +722,21 @@ string RPMRepomdHandler::Directory()
 
 string RPMRepomdHandler::MD5Sum()
 {
-#if 0
+   // XXX FIXME the method should be an abstract Checksum type using
+   // md5 / sha1 appropriately, for now relying on hacks elsewhere..
+   return SHA1Sum();
+}
+
+string RPMRepomdHandler::SHA1Sum()
+{
    xmlNode *n;
-   cout << "md5sum" << endl;
    if ((n = FindNode("checksum"))) {
       cout << "checksum " << (char*)xmlNodeGetContent(n) << endl;
       return (char*)xmlNodeGetContent(n);
    } else {
       return "";
    }
-#endif
-
-   // we'll ignore the md5sums for now since repomd only carries
-   // shasums..
-   return "";
 }
-
 unsigned long RPMRepomdHandler::FileSize()
 {
    xmlNode *n;
