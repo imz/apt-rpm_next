@@ -630,12 +630,11 @@ string rpmRepomdIndex::Info(string Type) const
 string rpmRepomdIndex::IndexURI(string Type) const
 {
    RPMPackageData *rpmdata = RPMPackageData::Singleton();
-   string Res;
-   Res = URI + Dist + "/repodata/";
-
-   Res += "primary.xml";
-   //cout << "XXXXX repomd indexuri " << Res << endl;
-
+   string Res = URI + Dist;
+   if (Dist[Dist.size() - 1] != '/') {
+	 Res += "/";
+   }
+   Res += "repodata/primary.xml";
    return Res;
 }
 									/*}}}*/

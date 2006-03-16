@@ -91,7 +91,6 @@ bool RPMHandler::HasFile(const char *File)
    return false;
 }
 
-
 RPMFileHandler::RPMFileHandler(string File)
 {
    ID = File;
@@ -769,7 +768,7 @@ bool RPMRepomdHandler::HasFile(const char *File)
       if (strcmp((char*)n->name, "file") != 0)
 	 continue;
       if (strcmp(File, (char*)xmlNodeGetContent(n)) == 0) {
-	 cout << "file in primary: " << File << endl;
+	 //cout << "file in primary: " << File << endl;
 	 inprimary = true;
 	 break;
       }
