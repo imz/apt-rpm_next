@@ -99,6 +99,11 @@ string rpmRecordParser::MD5Hash()
    return Handler->MD5Sum();
 }
 									/*}}}*/
+string rpmRecordParser::SHA1Hash()
+{
+   return Handler->SHA1Sum();
+}
+
 // RecordParser::Maintainer - Return the maintainer email		/*{{{*/
 // ---------------------------------------------------------------------
 /* */
