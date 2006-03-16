@@ -72,7 +72,11 @@ bool repomdRepository::ParseRelease(string File)
       }
       IndexChecksums[Path].MD5 = Hash;
       IndexChecksums[Path].Size = 0;
-      CheckMethod = Type;
+      if (Type == "sha") {
+	 CheckMethod = "SHA1-Hash";
+      } else {
+	 CheckMethod = "MDA5-Hash";
+      }
    }
    
    GotRelease = true;

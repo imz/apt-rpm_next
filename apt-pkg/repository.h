@@ -57,7 +57,7 @@ class pkgRepository
    {
       if (Vendor) FingerPrint = Vendor->FingerPrint;
       ComprMethod = "bz2";
-      CheckMethod = "md5";
+      CheckMethod = "MD5-Hash";
    };
 
 };
