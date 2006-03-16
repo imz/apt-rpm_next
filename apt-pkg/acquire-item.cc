@@ -68,7 +68,7 @@ bool VerifyChecksums(string File,unsigned long Size,string MD5, string method)
 
    if (MD5.empty() == false)
    {
-      if (method == "md5") {
+      if (method == "MD5-Hash") {
 	 MD5Summation md5sum = MD5Summation();
 	 FileFd F(File, FileFd::ReadOnly);
 
@@ -79,7 +79,7 @@ bool VerifyChecksums(string File,unsigned long Size,string MD5, string method)
 	       cout << "MD5Sum of "<<File<<" did not match what's in the checksum list and was redownloaded."<<endl;
 	    return false;
 	 }
-      } else if (method == "sha") {
+      } else if (method == "SHA1-Hash") {
 	 SHA1Summation sha1sum = SHA1Summation();
 	 FileFd F(File, FileFd::ReadOnly);
 
@@ -257,6 +257,11 @@ pkgAcqIndex::pkgAcqIndex(pkgAcquire *Owner,pkgRepository *Repository,
    QueueURI(Desc);
 }
 									/*}}}*/
+string pkgAcqIndex::ChecksumType()
+{
+   return Repository->GetCheckMethod();
+}
+
 // AcqIndex::Custom600Headers - Insert custom request headers		/*{{{*/
 // ---------------------------------------------------------------------
 /* The only header we use is the last-modified header. */
