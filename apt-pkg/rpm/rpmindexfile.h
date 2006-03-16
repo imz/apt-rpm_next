@@ -312,9 +312,9 @@ class rpmRepomdIndex : public rpmIndexFile
 
    // Interface for acquire
    virtual string Describe(bool Short) const;
-   // Interface for acquire
    virtual bool GetIndexes(pkgAcquire *Owner) const;
    virtual bool HasPackages() const {return true;};
+   virtual string ChecksumType() {return "SHA1-Hash";};
 
    virtual string ArchiveInfo(pkgCache::VerIterator Ver) const;
    virtual string ArchiveURI(string File) const;

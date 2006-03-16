@@ -671,6 +671,8 @@ pkgAcqArchive::pkgAcqArchive(pkgAcquire *Owner,pkgSourceList *Sources,
 {
    Retries = _config->FindI("Acquire::Retries",0);
 
+   ChkType = "";
+
    if (Version.Arch() == 0)
    {
       _error->Error(_("I wasn't able to locate a file for the %s package. "
@@ -737,7 +739,15 @@ bool pkgAcqArchive::QueueNext()
 	 return false;
 
       string PkgFile = Parse.FileName();
-      MD5 = Parse.MD5Hash();
+      // LORG:2006-03-16
+      // Repomd uses SHA checksums for packages wheras others use MD5..
+      ChkType = Index->ChecksumType();
+      if (Index->ChecksumType() == "SHA1-Hash") {
+	 MD5 = Parse.SHA1Hash();
+      } else {
+	 MD5 = Parse.MD5Hash();
+      }
+
       if (PkgFile.empty() == true)
 	 return _error->Error(_("The package index files are corrupted. No Filename: "
 			      "field for package %s."),
