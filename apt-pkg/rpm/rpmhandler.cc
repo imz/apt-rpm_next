@@ -22,6 +22,7 @@
 #include <apt-pkg/error.h>
 #include <apt-pkg/configuration.h>
 #include <apt-pkg/md5.h>
+#include <apt-pkg/crc-16.h>
 
 #include <apt-pkg/rpmhandler.h>
 #include <apt-pkg/rpmpackagedata.h>
@@ -33,6 +34,7 @@
 #if RPM_VERSION >= 0x040100
 #include <rpm/rpmts.h>
 #include <rpm/rpmdb.h>
+#include <rpm/rpmds.h>
 #define rpmxxInitIterator(a,b,c,d) rpmtsInitIterator(a,(rpmTag)b,c,d)
 #else
 #define rpmxxInitIterator(a,b,c,d) rpmdbInitIterator(a,b,c,d)
@@ -90,6 +92,331 @@ bool RPMHandler::HasFile(const char *File)
    free(names);
    return false;
 }
+
+bool RPMHandler::InternalDep(const char *name, const char *ver, int_32 flag)
+{
+   if (strncmp(name, "rpmlib(", sizeof("rpmlib(")-1) == 0) {
+#if RPM_VERSION >= 0x040404
+     rpmds rpmlibProv = NULL;
+     rpmds ds = rpmdsSingle(RPMTAG_PROVIDENAME,
+			    name, ver?ver:NULL, flag);
+     rpmdsRpmlib(&rpmlibProv, NULL);
+     int res = rpmdsSearch(rpmlibProv, ds) >= 0;
+     rpmdsFree(ds);
+     rpmdsFree(rpmlibProv);
+#elif RPM_VERSION >= 0x040100
+      rpmds ds = rpmdsSingle(RPMTAG_PROVIDENAME,
+			     name, ver?ver:NULL, flag);
+      int res = rpmCheckRpmlibProvides(ds);
+      rpmdsFree(ds);
+#else
+      int res = rpmCheckRpmlibProvides(name, ver?ver:NULL,
+				       flag);
+#endif
+      if (res)
+	 return true;
+   }
+
+#if RPM_VERSION >= 0x040404
+   // uhhuh, any of these changing would require full cache rebuild...
+   if (strncmp(name, "getconf(", sizeof("getconf(")-1) == 0)
+   {
+     rpmds getconfProv = NULL;
+     rpmds ds = rpmdsSingle(RPMTAG_PROVIDENAME,
+			    name, ver?ver:NULL, flag);
+     rpmdsGetconf(&getconfProv, NULL);
+     int res = rpmdsSearch(getconfProv, ds);
+     rpmdsFree(ds);
+     rpmdsFree(getconfProv);
+     if (res)
+	 return true;
+   }
+
+   if (strncmp(name, "cpuinfo(", sizeof("cpuinfo(")-1) == 0)
+   {
+     rpmds cpuinfoProv = NULL;
+     rpmds ds = rpmdsSingle(RPMTAG_PROVIDENAME,
+			    name, ver?ver:NULL, flag);
+     rpmdsCpuinfo(&cpuinfoProv, NULL);
+     int res = rpmdsSearch(cpuinfoProv, ds);
+     rpmdsFree(ds);
+     rpmdsFree(cpuinfoProv);
+     if (res)
+	 return true;
+   }
+
+   if (strncmp(name, "sysinfo(", sizeof("sysinfo(")-1) == 0)
+   {
+     rpmds sysinfoProv = NULL;
+     rpmds ds = rpmdsSingle(RPMTAG_PROVIDENAME,
+			    name, ver?ver:NULL, flag);
+     rpmdsCpuinfo(&sysinfoProv, NULL);
+     int res = rpmdsSearch(sysinfoProv, ds);
+     rpmdsFree(ds);
+     rpmdsFree(sysinfoProv);
+     if (res)
+	 return true;
+   }
+
+   if (strncmp(name, "uname(", sizeof("uname(")-1) == 0)
+   {
+     rpmds unameProv = NULL;
+     rpmds ds = rpmdsSingle(RPMTAG_PROVIDENAME,
+			    name, ver?ver:NULL, flag);
+     rpmdsUname(&unameProv, NULL);
+     int res = rpmdsSearch(unameProv, ds);
+     rpmdsFree(ds);
+     rpmdsFree(unameProv);
+     if (res)
+	 return true;
+   }
+
+   if (strlen(name) > 5 && name[strlen(name)-1] == ')' &&
+       ((strchr("Rr_", name[0]) != NULL &&
+	 strchr("Ww_", name[1]) != NULL &&
+	 strchr("Xx_", name[2]) != NULL &&
+	 name[3] == '(') ||
+	 strncmp(name, "exists(", sizeof("exists(")-1) == 0 ||
+	 strncmp(name, "executable(", sizeof("executable(")-1) == 0 ||
+	 strncmp(name, "readable(", sizeof("readable(")-1) == 0 ||
+	 strncmp(name, "writable(", sizeof("writable(")-1)== 0 ))
+   {
+      int res = rpmioAccess(name, NULL, X_OK);
+      if (res == 0)
+	 return true;
+   }
+
+   /* TODO
+    * - /etc/rpm/sysinfo provides
+    * - macro probe provides
+    * - actually implement soname() and access() dependencies
+    */
+   if (strncmp(name, "soname(", sizeof("soname(")-1) == 0)
+   {
+      cout << "FIXME, ignoring soname() dependency: " << name << endl;
+      return true;
+   }
+#endif
+   return false;
+}
+
+bool RPMHandler::Depends(unsigned int Type, vector<Dependency*> &Deps)
+{
+   char **namel = NULL;
+   char **verl = NULL;
+   int *flagl = NULL;
+   int res, type, count;
+
+   switch (Type)
+   {
+   case pkgCache::Dep::Depends:
+      res = headerGetEntry(HeaderP, RPMTAG_REQUIRENAME, &type,
+                           (void **)&namel, &count);
+      if (res != 1)
+          return true;
+      res = headerGetEntry(HeaderP, RPMTAG_REQUIREVERSION, &type,
+                           (void **)&verl, &count);
+      res = headerGetEntry(HeaderP, RPMTAG_REQUIREFLAGS, &type,
+                           (void **)&flagl, &count);
+      break;
+
+   case pkgCache::Dep::Obsoletes:
+      res = headerGetEntry(HeaderP, RPMTAG_OBSOLETENAME, &type,
+                           (void **)&namel, &count);
+      if (res != 1)
+          return true;
+      res = headerGetEntry(HeaderP, RPMTAG_OBSOLETEVERSION, &type,
+                           (void **)&verl, &count);
+      res = headerGetEntry(HeaderP, RPMTAG_OBSOLETEFLAGS, &type,
+                           (void **)&flagl, &count);
+      break;
+   case pkgCache::Dep::Conflicts:
+      res = headerGetEntry(HeaderP, RPMTAG_CONFLICTNAME, &type,
+                           (void **)&namel, &count);
+      if (res != 1)
+          return true;
+      res = headerGetEntry(HeaderP, RPMTAG_CONFLICTVERSION, &type,
+                           (void **)&verl, &count);
+      res = headerGetEntry(HeaderP, RPMTAG_CONFLICTFLAGS, &type,
+                           (void **)&flagl, &count);
+      break;
+#if RPM_VERSION >= 0x040403
+   case pkgCache::Dep::Suggests:
+      res = headerGetEntry(HeaderP, RPMTAG_SUGGESTSNAME, &type,
+                           (void **)&namel, &count);
+      if (res != 1)
+          return true;
+      res = headerGetEntry(HeaderP, RPMTAG_SUGGESTSVERSION, &type,
+                           (void **)&verl, &count);
+      res = headerGetEntry(HeaderP, RPMTAG_SUGGESTSFLAGS, &type,
+                           (void **)&flagl, &count);
+      break;
+#if 0 // Enhances is not even known to apt, sigh...
+   case pkgCache::Dep::Enhances:
+      res = headerGetEntry(HeaderP, RPMTAG_ENHANCESNAME, &type,
+                           (void **)&namel, &count);
+      if (res != 1)
+          return true;
+      res = headerGetEntry(HeaderP, RPMTAG_ENHANCESVERSION, &type,
+                           (void **)&verl, &count);
+      res = headerGetEntry(HeaderP, RPMTAG_ENHANCESFLAGS, &type,
+                           (void **)&flagl, &count);
+      break;
+#endif
+#endif
+   }
+
+   unsigned int Op = 0;
+   bool DepMode = false;
+   if (Type == pkgCache::Dep::Depends)
+      DepMode = true;
+
+   for (int i = 0; i < count; i++) {
+
+      if (InternalDep(namel[i], verl[i] ? verl[i]:"", flagl[i]) == true) {
+	 continue;
+      }
+      if (DepMode == true) {
+         if (flagl[i] & RPMSENSE_PREREQ)
+            Type = pkgCache::Dep::PreDepends;
+#if RPM_VERSION >= 0x040403
+         else if (flagl[i] & RPMSENSE_MISSINGOK)
+            Type = pkgCache::Dep::Suggests;
+#endif
+         else
+            Type = pkgCache::Dep::Depends;
+      }
+
+      Dependency *Dep = new Dependency;
+      Dep->Name = namel[i];
+      Dep->Version = verl[i] ? verl[i]:"";
+      if (!verl[i]) {
+         Op = pkgCache::Dep::NoOp;
+      } else {
+         if (flagl[i] & RPMSENSE_LESS) {
+            if (flagl[i] & RPMSENSE_EQUAL)
+                Op = pkgCache::Dep::LessEq;
+            else
+                Op = pkgCache::Dep::Less;
+         } else if (flagl[i] & RPMSENSE_GREATER) {
+            if (flagl[i] & RPMSENSE_EQUAL)
+                Op = pkgCache::Dep::GreaterEq;
+            else
+                Op = pkgCache::Dep::Greater;
+         } else if (flagl[i] & RPMSENSE_EQUAL) {
+            Op = pkgCache::Dep::Equals;
+	 }
+      }
+      Dep->Op = Op;
+      Dep->Type = Type;
+      Deps.push_back(Dep);
+   }
+   free(namel);
+   free(verl);
+   return true;
+
+}
+
+bool RPMHandler::Provides(vector<Dependency*> &Provs)
+{
+   int type, count;
+   char **namel = NULL;
+   char **verl = NULL;
+   int res;
+
+   res = headerGetEntry(HeaderP, RPMTAG_PROVIDENAME, &type,
+                        (void **)&namel, &count);
+   if (res != 1)
+       return true;
+
+   res = headerGetEntry(HeaderP, RPMTAG_PROVIDEVERSION, &type,
+                        (void **)&verl, NULL);
+
+   if (res != 1)
+      verl = NULL;
+
+   for (int i = 0; i < count; i++) {
+      Dependency *Dep = new Dependency;
+      Dep->Name = namel[i];
+      if (verl)
+	 Dep->Version = *verl[i] ? verl[i]:"";
+      else
+	 Dep->Version = "";
+      Provs.push_back(Dep);
+   }
+   return true;
+
+}
+
+bool RPMHandler::FileProvides(vector<string> &FileProvs)
+{
+   const char **names = NULL;
+   int_32 count = 0;
+   bool ret = true;
+   rpmHeaderGetEntry(HeaderP, RPMTAG_OLDFILENAMES,
+                     NULL, (void **) &names, &count);
+   while (count--) {
+      FileProvs.push_back(names[count]);
+   }
+   free(names);
+   return ret;
+
+}
+
+unsigned short RPMHandler::VersionHash()
+{
+   int Sections[] = {
+          RPMTAG_VERSION,
+          RPMTAG_RELEASE,
+          RPMTAG_ARCH,
+          RPMTAG_REQUIRENAME,
+          RPMTAG_OBSOLETENAME,
+          RPMTAG_CONFLICTNAME,
+          0
+   };
+   unsigned long Result = INIT_FCS;
+
+   for (const int *sec = Sections; *sec != 0; sec++)
+   {
+      char *Str;
+      int Len;
+      int type, count;
+      int res;
+      char **strings = NULL;
+
+      res = headerGetEntry(HeaderP, *sec, &type, (void **)&strings, &count);
+      if (res != 1)
+         continue;
+
+      switch (type)
+      {
+      case RPM_STRING_ARRAY_TYPE:
+         //qsort(strings, count, sizeof(char*), compare);
+         while (count-- > 0)
+         {
+            Str = strings[count];
+            Len = strlen(Str);
+            /* Suse patch.rpm hack. */
+            if (Len == 17 && *Str == 'r' && *sec == RPMTAG_REQUIRENAME &&
+                strcmp(Str, "rpmlib(PatchRPMs)") == 0)
+               continue;
+
+            Result = AddCRC16(Result,Str,Len);
+         }
+         free(strings);
+         break;
+
+      case RPM_STRING_TYPE:
+         Str = (char*)strings;
+         Len = strlen(Str);
+         Result = AddCRC16(Result,Str,Len);
+         break;
+      }
+   }
+
+   return Result;
+}
+
 
 RPMFileHandler::RPMFileHandler(string File)
 {
@@ -779,6 +1106,141 @@ bool RPMRepomdHandler::HasFile(const char *File)
    return found;
 
 }
+
+bool RPMRepomdHandler::Depends(unsigned int Type, vector<Dependency*> &Deps)
+{
+   xmlNode *format = FindNode("format");
+   xmlNode *dco;
+
+   xmlNode *n;
+
+   switch (Type) {
+      case pkgCache::Dep::Depends:
+         dco = FindNode(format, "requires");
+         break;
+      case pkgCache::Dep::Conflicts:
+         dco = FindNode(format, "conflicts");
+         break;
+      case pkgCache::Dep::Obsoletes:
+         dco = FindNode(format, "obsoletes");
+         break;
+   }
+
+   if (! dco) {
+      return true;
+   }
+   for (n = dco->children; n; n = n->next) {
+      unsigned int Op;
+      string deptype, depver;
+      char *ver, *rel, *epoch, *depname, *flags, *pre;
+      if ((depname = (char*)xmlGetProp(n, (xmlChar*)"name")) == NULL) continue;
+
+      if ((flags = (char*)xmlGetProp(n, (xmlChar*)"flags"))) {
+         ver = (char*)xmlGetProp(n, (xmlChar*)"ver");
+         rel = (char*)xmlGetProp(n, (xmlChar*)"rel");
+         epoch = (char*)xmlGetProp(n, (xmlChar*)"epoch");
+         if (epoch)
+            depver += string(epoch) + ":";
+         ver = (char*)xmlGetProp(n, (xmlChar*)"ver");
+         if (ver)
+            depver += string(ver);
+         rel = (char*)xmlGetProp(n, (xmlChar*)"rel");
+         if (rel)
+            depver += "-" + string(rel);
+
+         deptype = flags;
+
+         if (deptype == "EQ")
+            Op = pkgCache::Dep::Equals;
+         else if (deptype == "GE")
+            Op = pkgCache::Dep::GreaterEq;
+         else if (deptype == "GT")
+            Op = pkgCache::Dep::Greater;
+         else if (deptype == "LE")
+            Op = pkgCache::Dep::LessEq;
+         else if (deptype == "LT")
+            Op = pkgCache::Dep::Less;
+      } else {
+         Op = pkgCache::Dep::NoOp;
+      }
+      // XXX FIXME: Op isn't right here.. convert to rpm dep flag
+      if (InternalDep(depname, depver.c_str(), Op) == true) {
+	 continue;
+      }
+      if (Type == pkgCache::Dep::Depends) {
+	 pre = (char*)xmlGetProp(n, (xmlChar*)"pre");
+	 if (pre) {
+	    Type = pkgCache::Dep::PreDepends;
+	 }
+      }
+      Dependency *Dep = new Dependency;
+      Dep->Name = depname;
+      Dep->Version = depver;
+      Dep->Op = Op;
+      Dep->Type = Type;
+      Deps.push_back(Dep);
+   }
+   return true;
+}
+
+bool RPMRepomdHandler::Provides(vector<Dependency*> &Provs)
+{
+   xmlNode *format = FindNode("format");
+   xmlNode *provides = FindNode(format, "provides");
+   bool ret = true;
+
+   if (! provides)
+      return true;
+
+   for (xmlNode *n = provides->children; n; n = n->next) {
+      string depver = "";
+      char *ver, *rel, *epoch, *depname, *flags;
+
+      if (strcmp((char*)n->name, "entry") != 0)  continue;
+
+      Dependency *Dep = new Dependency;
+      if ((depname = (char*)xmlGetProp(n, (xmlChar*)"name")) == NULL) continue;
+
+      if ((flags = (char*)xmlGetProp(n, (xmlChar*)"flags"))) {
+         epoch = (char*)xmlGetProp(n, (xmlChar*)"epoch");
+         if (epoch)
+            depver += string(epoch) + ":";
+         ver = (char*)xmlGetProp(n, (xmlChar*)"ver");
+         if (ver)
+            depver += string(ver);
+         rel = (char*)xmlGetProp(n, (xmlChar*)"rel");
+         if (rel)
+            depver += "-" + string(rel);
+
+      }
+      Dep->Name = depname;
+      Dep->Version = depver;
+      Provs.push_back(Dep);
+   }
+   return true;
+}
+
+bool RPMRepomdHandler::FileProvides(vector<string> &FileProvs)
+{
+   xmlNode *format = FindNode("format");
+   for (xmlNode *n = format->children; n; n = n->next) {
+      if (strcmp((char*)n->name, "file") != 0)  continue;
+      FileProvs.push_back((char*)xmlNodeGetContent(n));
+   }
+   return true;
+}
+
+unsigned short RPMRepomdHandler::VersionHash()
+{
+   // XXX FIXME: rpmlistparser versionhash for all the things we should do here
+   unsigned long Result = INIT_FCS;
+   string nevra = Name() + Version() + Arch();
+   Result = AddCRC16(Result, nevra.c_str(), nevra.length());
+   //cout << "versionhash: " << Result << endl;
+   return Result;
+}
+
+
 
 RPMRepomdHandler::~RPMRepomdHandler()
 {

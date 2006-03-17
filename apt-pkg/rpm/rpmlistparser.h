@@ -33,7 +33,6 @@ class rpmListParser : public pkgCacheGenerator::ListParser
 {
    RPMHandler *Handler;
    RPMPackageData *RpmData;
-   Header header;
 
    string CurrentName;
    const pkgCache::VerIterator *VI;
@@ -48,7 +47,6 @@ class rpmListParser : public pkgCacheGenerator::ListParser
 
    bool Duplicated;
 
-   unsigned long UniqFindTagWrite(int Tag);
    bool ParseStatus(pkgCache::PkgIterator Pkg,pkgCache::VerIterator Ver);
    bool ParseDepends(pkgCache::VerIterator Ver,
 		     char **namel, char **verl, int_32 *flagl,
@@ -93,47 +91,21 @@ class rpmListParser : public pkgCacheGenerator::ListParser
    ~rpmListParser();
 };
 
-class rpmRepomdParser : public pkgCacheGenerator::ListParser
+class rpmRepomdParser : public rpmListParser
 {
    protected:
-
-   RPMHandler *Handler;
-   RPMPackageData *RpmData;
-   xmlNode *Node;
 
    string Primary;
    string Filelist;
    string Other;
 
-   string CurrentName;
-   const pkgCache::VerIterator *VI;
-
-   xmlNode *FindNode(const string Name);
    xmlNode *FindNode(xmlNode *n, const string Name);
-   string FindTag(const string Tag);
-
-   unsigned long UniqFindTagWrite(string Tag);
-   bool ParseDepends(pkgCache::VerIterator Ver, unsigned int Type);
-   bool ParseProvides(pkgCache::VerIterator Ver);
-   bool ParseFileProvides(pkgCache::VerIterator Ver);
 
    public:
 
-   virtual string Package();
-   virtual string Version();
-   virtual string Architecture();
-   virtual bool NewVersion(pkgCache::VerIterator Ver);
-   virtual unsigned short VersionHash();
-   virtual bool UsePackage(pkgCache::PkgIterator Pkg,
-			   pkgCache::VerIterator Ver);
    bool LoadReleaseInfo(pkgCache::PkgFileIterator FileI,string File);
 
-   virtual unsigned long Offset()
-	{return Handler->Offset();};
-   virtual unsigned long Size();
-   virtual bool Step();
-
-   rpmRepomdParser(RPMHandler *Handler);
+   rpmRepomdParser(RPMHandler *Handler) : rpmListParser(Handler) {};
 };
 
 #endif
