@@ -19,6 +19,8 @@
 
 #include <config.h>
 
+#include <vector>
+
 // Our Extra RPM tags. These should not be accessed directly. Use
 // the methods in RPMHandler instead.
 #define CRPMTAG_FILENAME          (rpmTag)1000000
@@ -34,6 +36,17 @@
 #define CRPMTAG_UPDATE_DATE       (rpmTag)1000022
 #define CRPMTAG_UPDATE_URL        (rpmTag)1000023
 
+using namespace std;
+
+struct Dependency
+{
+   string Name;
+   string Version;
+   unsigned int Op;
+   unsigned int Type;
+};
+
+
 class RPMHandler
 {
    protected:
@@ -46,6 +59,7 @@ class RPMHandler
 
    string GetSTag(rpmTag Tag);
    unsigned long GetITag(rpmTag Tag);
+
 
    public:
 
@@ -83,6 +97,12 @@ class RPMHandler
    virtual string Summary() {return GetSTag(RPMTAG_SUMMARY);};
    virtual string Description() {return GetSTag(RPMTAG_DESCRIPTION);};
    virtual unsigned long InstalledSize() {return GetITag(RPMTAG_SIZE);};
+
+   bool InternalDep(const char *name, const char *ver, int_32 flag);
+   virtual bool Depends(unsigned int Type, vector<Dependency*> &Deps);
+   virtual bool Provides(vector<Dependency*> &Provs);
+   virtual bool FileProvides(vector<string> &FileProvs);
+   virtual unsigned short VersionHash();
 
    virtual bool HasFile(const char *File);
 
@@ -241,6 +261,10 @@ class RPMRepomdHandler : public RPMHandler
    virtual string Description() {return FindTag(NodeP, "description");};
 
    virtual bool HasFile(const char *File);
+   virtual bool Depends(unsigned int Type, vector<Dependency*> &Deps);
+   virtual bool Provides(vector<Dependency*> &Provs);
+   virtual bool FileProvides(vector<string> &FileProvs);
+   virtual unsigned short VersionHash();
 
    RPMRepomdHandler(string File);
    virtual ~RPMRepomdHandler();
