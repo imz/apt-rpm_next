@@ -196,40 +196,35 @@ void rpmSrcRecordParser::BufCatTag(const char *tag, const char *value)
    BufCat(value);
 }
 
-void rpmSrcRecordParser::BufCatDep(const char *pkg, const char *version, int flags)
+void rpmSrcRecordParser::BufCatDep(Dependency *Dep)
 {
-   char buf[16];
-   char *ptr = (char*)buf;
+   string buf;
 
-   BufCat(pkg);
-   if (*version) 
+   BufCat(Dep->Name.c_str());
+   if (Dep->Version.empty() == false) 
    {
-      int c = 0;
-      *ptr++ = ' ';
-      *ptr++ = '(';
-      if (flags & RPMSENSE_LESS)
-      {
-	 *ptr++ = '<';
-	 c = '<';
+      BufCat(" ");
+      switch (Dep->Op) {
+	 case pkgCache::Dep::Less:
+	    buf += "<";
+	    break;
+	 case pkgCache::Dep::LessEq:
+	    buf += "<=";
+	    break;
+	 case pkgCache::Dep::Equals: 
+	    buf += "=";
+	    break;
+	 case pkgCache::Dep::Greater:
+	    buf += ">";
+	    break;
+	 case pkgCache::Dep::GreaterEq:
+	    buf += ">=";
+	    break;
       }
-      if (flags & RPMSENSE_GREATER) 
-      {
-	 *ptr++ = '>';
-	 c = '>';
-      }
-      if (flags & RPMSENSE_EQUAL) 
-      {
-	 *ptr++ = '=';
-      }/* else {
-	 if (c)
-	   fputc(c, f);
-      }*/
-      *ptr++ = ' ';
-      *ptr = '\0';
 
-      BufCat(buf);
-      BufCat(version);
-      BufCat(")");
+      BufCat(buf.c_str());
+      BufCat(" ");
+      BufCat(Dep->Version.c_str());
    }
 }
 
@@ -291,12 +286,37 @@ string rpmSrcRecordParser::AsStr()
 
    BufCat(verstr.c_str());
 
-//   headerGetEntry(HeaderP, RPMTAG_DISTRIBUTION, &type, (void **)&str, &count);//   fprintf(f, "Distribution: %s\n", str);
+   vector<Dependency*> Deps, Conflicts;
+   vector<Dependency*>::iterator I;
+   bool start = true;
 
-// XXX FIXME: handle dependencies in handler as well
-// XXX missing the BIIIIIIIIG if 0 section wrt dependencies 
-// .. here
-// ..
+   Handler->Depends(pkgCache::Dep::Depends, Deps);
+   I = Deps.begin();
+   if (I != Deps.end()) {
+      BufCat("\nBuild-Depends: ");
+   }
+   for (; I != Deps.end(); I++) {
+      if ((*I)->Type != pkgCache::Dep::PreDepends)
+	 continue;
+      if (start) {
+	 start = false;
+      } else {
+	 BufCat(", ");
+      }
+      BufCatDep(*I);
+   }
+
+   // Doesn't do anything yet, build conflicts aren't recorded yet...
+   Handler->Depends(pkgCache::Dep::Conflicts, Conflicts);
+   I = Conflicts.begin();
+   if (I != Conflicts.end()) {
+      BufCat("\nConflicts: ");
+      BufCatDep(*I);
+   }
+   for (; I != Conflicts.end(); I++) {
+      BufCat(", ");
+      BufCatDep(*I);
+   }
 
    BufCatTag("\nArchitecture: ", Handler->Arch().c_str());
 
