@@ -31,8 +31,6 @@ class rpmRecordParser : public pkgRecords::Parser
    RPMHandler *Handler;
    bool IsDatabase;
 
-   Header HeaderP;
-
    char *Buffer;
    unsigned BufSize;
    unsigned BufUsed;
@@ -61,8 +59,6 @@ class rpmRecordParser : public pkgRecords::Parser
    virtual string LongDesc();
    virtual string Name();
    
-   inline Header GetRecord() { return HeaderP; };
-
    // The record in raw text, in standard Debian format
    virtual void GetRec(const char *&Start,const char *&Stop);
 

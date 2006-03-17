@@ -55,7 +55,6 @@ class RPMHandler
    unsigned int iSize;
    Header HeaderP;
    string ID;
-   xmlNode *NodeP;
 
    string GetSTag(rpmTag Tag);
    unsigned long GetITag(rpmTag Tag);
@@ -73,9 +72,6 @@ class RPMHandler
    inline unsigned Offset() {return iOffset;};
    virtual bool OrderedOffset() {return true;};
    inline unsigned Size() {return iSize;};
-   inline Header GetHeader() {return HeaderP;};
-   // doesn't belong here.. should abstract out the rpm header stuff
-   xmlNode *GetNode() {return NodeP;};
    virtual bool IsDatabase() = 0;
 
    virtual string FileName() {return "";};
@@ -225,6 +221,7 @@ class RPMRepomdHandler : public RPMHandler
 
    xmlDocPtr Primary;
    xmlNode *Root;
+   xmlNode *NodeP;
 
    xmlNode *FindNode(const string Name);
    xmlNode *FindNode(xmlNode *Node, const string Name);
