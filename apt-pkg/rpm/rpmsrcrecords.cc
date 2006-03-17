@@ -342,112 +342,29 @@ string rpmSrcRecordParser::AsStr()
 bool rpmSrcRecordParser::BuildDepends(vector<pkgSrcRecords::Parser::BuildDepRec> &BuildDeps,
 				      bool ArchOnly)
 {
-   // FIXME: This method is leaking memory from headerGetEntry().
-   int RpmTypeTag[] = {RPMTAG_REQUIRENAME,
-		       RPMTAG_REQUIREVERSION,
-		       RPMTAG_REQUIREFLAGS,
-		       RPMTAG_CONFLICTNAME,
-		       RPMTAG_CONFLICTVERSION,
-		       RPMTAG_CONFLICTFLAGS};
-   int BuildType[] = {pkgSrcRecords::Parser::BuildDepend,
-		      pkgSrcRecords::Parser::BuildConflict};
    BuildDepRec rec;
-
    BuildDeps.clear();
 
-// XXXX FIXME .. get the deps from Handler
-#if 0
-   for (unsigned char Type = 0; Type != 2; Type++)
-   {
-      char **namel = NULL;
-      char **verl = NULL;
-      int *flagl = NULL;
-      int res, type, count;
+   vector<Dependency*> Deps, Conflicts;
+   Handler->Depends(pkgCache::Dep::Depends, Deps);
 
-      res = headerGetEntry(HeaderP, RpmTypeTag[0+Type*3], &type,
-			 (void **)&namel, &count);
-      if (res != 1)
-	 return true;
-      res = headerGetEntry(HeaderP, RpmTypeTag[1+Type*3], &type,
-			 (void **)&verl, &count);
-      res = headerGetEntry(HeaderP, RpmTypeTag[2+Type*3], &type,
-			 (void **)&flagl, &count);
-
-      for (int i = 0; i < count; i++)
-      {
-#if RPM_VERSION >= 0x040404
-         if (namel[i][0] == 'g' && strncmp(namel[i], "getconf", 7) == 0)
-         {
-            rpmds getconfProv = NULL;
-            rpmds ds = rpmdsSingle(RPMTAG_PROVIDENAME,
-                                   namel[i], verl?verl[i]:NULL, flagl[i]);
-            rpmdsGetconf(&getconfProv, NULL);
-            int res = rpmdsSearch(getconfProv, ds) >= 0;
-            rpmdsFree(ds);
-            rpmdsFree(getconfProv);
-            if (res) continue;
-         }
-#endif
-	 if (strncmp(namel[i], "rpmlib", 6) == 0)
-	 {
-#if RPM_VERSION >= 0x040404
-	    rpmds rpmlibProv = NULL;
-	    rpmds ds = rpmdsSingle(RPMTAG_PROVIDENAME,
-				   namel[i], verl?verl[i]:NULL, flagl[i]);
-	    rpmdsRpmlib(&rpmlibProv, NULL);
-	    int res = rpmdsSearch(rpmlibProv, ds) >= 0;
-	    rpmdsFree(ds);
-	    rpmdsFree(rpmlibProv);
-#elif RPM_VERSION >= 0x040100
-	    rpmds ds = rpmdsSingle(RPMTAG_PROVIDENAME,
-				   namel[i], verl?verl[i]:NULL, flagl[i]);
-	    int res = rpmCheckRpmlibProvides(ds);
-	    rpmdsFree(ds);
-#else
-	    int res = rpmCheckRpmlibProvides(namel[i], verl?verl[i]:NULL,
-					     flagl[i]);
-#endif
-	    if (res) continue;
-	 }
-
-	 if (verl)
-	 {
-	    if (!*verl[i])
-	       rec.Op = pkgCache::Dep::NoOp;
-	    else
-	    {
-	       if (flagl[i] & RPMSENSE_LESS)
-	       {
-		  if (flagl[i] & RPMSENSE_EQUAL)
-		      rec.Op = pkgCache::Dep::LessEq;
-		  else
-		      rec.Op = pkgCache::Dep::Less;
-	       }
-	       else if (flagl[i] & RPMSENSE_GREATER)
-	       {
-		  if (flagl[i] & RPMSENSE_EQUAL)
-		      rec.Op = pkgCache::Dep::GreaterEq;
-		  else
-		      rec.Op = pkgCache::Dep::Greater;
-	       }
-	       else if (flagl[i] & RPMSENSE_EQUAL)
-		  rec.Op = pkgCache::Dep::Equals;
-	    }
-
-	    rec.Version = verl[i];
-	 }
-	 else
-	 {
-	    rec.Op = pkgCache::Dep::NoOp;
-	    rec.Version = "";
-	 }
-
-	 rec.Type = BuildType[Type];
-	 rec.Package = namel[i];
-	 BuildDeps.push_back(rec);
-      }
+   for (vector<Dependency*>::iterator I = Deps.begin(); I != Deps.end(); I++) {
+      rec.Package = (*I)->Name;
+      rec.Version = (*I)->Version;
+      rec.Op = (*I)->Op;
+      rec.Type = pkgSrcRecords::Parser::BuildDepend;
+      BuildDeps.push_back(rec);
    }
-#endif
+
+   Handler->Depends(pkgCache::Dep::Conflicts, Conflicts);
+
+   for (vector<Dependency*>::iterator I = Conflicts.begin(); I != Conflicts.end(); I++) {
+      rec.Package = (*I)->Name;
+      rec.Version = (*I)->Version;
+      rec.Op = (*I)->Op;
+      rec.Type = pkgSrcRecords::Parser::BuildConflict;
+      BuildDeps.push_back(rec);
+   }
    return true;
 }
 									/*}}}*/
