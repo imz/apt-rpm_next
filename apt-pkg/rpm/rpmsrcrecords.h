@@ -17,6 +17,7 @@
 
 #include <apt-pkg/srcrecords.h>
 #include <apt-pkg/fileutl.h>
+#include <apt-pkg/rpmhandler.h>
 #include <rpm/rpmlib.h>
 
 
@@ -35,7 +36,7 @@ class rpmSrcRecordParser : public pkgSrcRecords::Parser
    void BufCat(const char *text);
    void BufCat(const char *begin, const char *end);
    void BufCatTag(const char *tag, const char *value);
-   void BufCatDep(const char *pkg, const char *version, int flags);
+   void BufCatDep(Dependency *Dep);
    void BufCatDescr(const char *descr);
 
 public:
