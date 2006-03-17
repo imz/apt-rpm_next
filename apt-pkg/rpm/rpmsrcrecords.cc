@@ -37,7 +37,7 @@ using namespace std;
 // ---------------------------------------------------------------------
 /* */
 rpmSrcRecordParser::rpmSrcRecordParser(string File,pkgIndexFile const *Index)
-    : Parser(Index), HeaderP(0), Buffer(0), BufSize(0), BufUsed(0)
+    : Parser(Index), Buffer(0), BufSize(0), BufUsed(0)
 {
    struct stat Buf;
    if (stat(File.c_str(),&Buf) == 0 && S_ISDIR(Buf.st_mode))
@@ -95,8 +95,6 @@ const char **rpmSrcRecordParser::Binaries()
    a complete source package */
 bool rpmSrcRecordParser::Files(vector<pkgSrcRecords::File> &List)
 {
-   assert(HeaderP != NULL);
-    
    List.clear();
    
    pkgSrcRecords::File F;
@@ -120,18 +118,12 @@ bool rpmSrcRecordParser::Restart()
 
 bool rpmSrcRecordParser::Step() 
 {
-   if (Handler->Skip() == false)
-       return false;
-   HeaderP = Handler->GetHeader();
-   return true;
+   return Handler->Skip();
 }
 
 bool rpmSrcRecordParser::Jump(unsigned long Off)
 {
-   if (!Handler->Jump(Off))
-       return false;
-   HeaderP = Handler->GetHeader();
-   return true;
+   return Handler->Jump(Off);
 }
 
 string rpmSrcRecordParser::Package() const
@@ -343,6 +335,8 @@ bool rpmSrcRecordParser::BuildDepends(vector<pkgSrcRecords::Parser::BuildDepRec>
 
    BuildDeps.clear();
 
+// XXXX FIXME .. get the deps from Handler
+#if 0
    for (unsigned char Type = 0; Type != 2; Type++)
    {
       char **namel = NULL;
@@ -433,6 +427,7 @@ bool rpmSrcRecordParser::BuildDepends(vector<pkgSrcRecords::Parser::BuildDepRec>
 	 BuildDeps.push_back(rec);
       }
    }
+#endif
    return true;
 }
 									/*}}}*/

@@ -31,7 +31,7 @@ using namespace std;
 // ---------------------------------------------------------------------
 /* */
 rpmRecordParser::rpmRecordParser(string File, pkgCache &Cache)
-   : Handler(0), HeaderP(0), Buffer(0), BufSize(0), BufUsed(0)
+   : Handler(0), Buffer(0), BufSize(0), BufUsed(0)
 {
    if (File == RPMDBHandler::DataPath(false)) {
       IsDatabase = true;
@@ -67,9 +67,7 @@ rpmRecordParser::~rpmRecordParser()
 /* */
 bool rpmRecordParser::Jump(pkgCache::VerFileIterator const &Ver)
 {
-   Handler->Jump(Ver->Offset);
-   HeaderP = Handler->GetHeader();
-   return (HeaderP != NULL);
+   return Handler->Jump(Ver->Offset);
 }
 									/*}}}*/
 // RecordParser::FileName - Return the archive filename on the site	/*{{{*/
