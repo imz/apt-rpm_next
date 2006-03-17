@@ -338,10 +338,12 @@ bool RPMHandler::Provides(vector<Dependency*> &Provs)
    for (int i = 0; i < count; i++) {
       Dependency *Dep = new Dependency;
       Dep->Name = namel[i];
-      if (verl)
+      if (verl) {
 	 Dep->Version = *verl[i] ? verl[i]:"";
-      else
+	 Dep->Op = pkgCache::Dep::Equals;
+      } else {
 	 Dep->Version = "";
+      }
       Provs.push_back(Dep);
    }
    return true;
@@ -1215,6 +1217,8 @@ bool RPMRepomdHandler::Provides(vector<Dependency*> &Provs)
       }
       Dep->Name = depname;
       Dep->Version = depver;
+      if (depver.empty() == false)
+	 Dep->Op = pkgCache::Dep::Equals;
       Provs.push_back(Dep);
    }
    return true;

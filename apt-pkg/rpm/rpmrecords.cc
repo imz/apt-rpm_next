@@ -124,40 +124,6 @@ string rpmRecordParser::ShortDesc()
 string rpmRecordParser::LongDesc()
 {
    return Handler->Description();
-// XXX FIXME: is all this stuff *really* necessary?
-#if 0
-   char *str, *ret, *x, *y;
-   int_32 count, type;
-   int len;
-   str = Handler->Description(); // typecast problems...
-
-   // Count size plus number of newlines
-   for (x = str, len = 0; *x; x++, len++)
-      if (*x == '\n')
-	 len++;
-   
-   ret = (char*)malloc(len+1);
-   if (ret == NULL)
-      return "out of mem";
-
-   // Copy string, inserting a space after each newline
-   for (x = str, y = ret; *x; x++, y++)
-   {
-      *y = *x;
-      if (*x == '\n')
-	 *++y = ' ';
-   }
-   *y = 0;
-
-   // Remove spaces and newlines from end of string
-   for (y--; y > ret && (*y == ' ' || *y == '\n'); y--)
-      *y = 0;
-   
-   string Ret = string(ret);
-   free(ret);
-   
-   return Ret;
-#endif
 }
 									/*}}}*/
 // RecordParser::SourcePkg - Return the source package name if any	/*{{{*/
@@ -203,42 +169,35 @@ void rpmRecordParser::BufCatTag(const char *tag, const char *value)
    BufCat(value);
 }
 
-void rpmRecordParser::BufCatDep(const char *pkg,
-			        const char *version,
-				int flags)
+void rpmRecordParser::BufCatDep(Dependency *Dep)
 {
-   char buf[16];
-   char *ptr = buf;
+   string buf;
 
-   BufCat(pkg);
-   if (*version) 
+   BufCat(Dep->Name.c_str());
+   if (Dep->Version.empty() == false) 
    {
-      int c = 0;
-      *ptr++ = ' ';
-      *ptr++ = '(';
-      if (flags & RPMSENSE_LESS)
-      {
-	 *ptr++ = '<';
-	 c = '<';
+      BufCat(" ");
+      switch (Dep->Op) {
+	 case pkgCache::Dep::Less:
+	    buf += "<";
+	    break;
+	 case pkgCache::Dep::LessEq:
+	    buf += "<=";
+	    break;
+	 case pkgCache::Dep::Equals: 
+	    buf += "=";
+	    break;
+	 case pkgCache::Dep::Greater:
+	    buf += ">";
+	    break;
+	 case pkgCache::Dep::GreaterEq:
+	    buf += ">=";
+	    break;
       }
-      if (flags & RPMSENSE_GREATER) 
-      {
-	 *ptr++ = '>';
-	 c = '>';
-      }
-      if (flags & RPMSENSE_EQUAL) 
-      {
-	 *ptr++ = '=';
-      }/* else {
-	 if (c)
-	   fputc(c, f);
-      }*/
-      *ptr++ = ' ';
-      *ptr = '\0';
 
-      BufCat(buf);
-      BufCat(version);
-      BufCat(")");
+      BufCat(buf.c_str());
+      BufCat(" ");
+      BufCat(Dep->Version.c_str());
    }
 }
 
@@ -287,8 +246,6 @@ void rpmRecordParser::GetRec(const char *&Start,const char *&Stop)
    //BufCatTag("\nVendor: ", Handler->Vendor().c_str());
    
    BufCat("\nVersion: ");
-   // XXX FIXME: handle the epoch madness somewhere central instead of
-   // figuring it out on every damn occasion separately
    
    string e, v, r, verstr;
    e = Handler->Epoch();
@@ -302,97 +259,64 @@ void rpmRecordParser::GetRec(const char *&Start,const char *&Stop)
       
    BufCat(verstr.c_str());
 
-//   headerGetEntry(HeaderP, RPMTAG_DISTRIBUTION, &type, (void **)&str, &count);
-//   fprintf(f, "Distribution: %s\n", str);
 
-// XXX FIXME: handle dependencies in handler as well
-#if 0
-   headerGetEntry(HeaderP, RPMTAG_REQUIRENAME, &type, (void **)&strv, &count);
-   assert(type == RPM_STRING_ARRAY_TYPE || count == 0);
+   vector<Dependency*> Deps, PreDeps, Provides, Obsoletes, Conflicts;
+   vector<Dependency*>::iterator I;
 
-   headerGetEntry(HeaderP, RPMTAG_REQUIREVERSION, &type2, (void **)&strv2, &count);
-   headerGetEntry(HeaderP, RPMTAG_REQUIREFLAGS, &type3, (void **)&numv, &count);
-   
-   if (count > 0)
-   {
-      int i, j;
-
-      for (j = i = 0; i < count; i++) 
-      {
-	 if ((numv[i] & RPMSENSE_PREREQ))
-	 {
-	    if (j == 0) 
-		BufCat("\nPre-Depends: ");
-	    else
-		BufCat(", ");
-	    BufCatDep(strv[i], strv2[i], numv[i]);
-	    j++;
-	 }
-      }
-
-      for (j = 0, i = 0; i < count; i++) 
-      {
-	 if (!(numv[i] & RPMSENSE_PREREQ)) 
-	 {
-	    if (j == 0)
-		BufCat("\nDepends: ");
-	    else
-		BufCat(", ");
-	    BufCatDep(strv[i], strv2[i], numv[i]);
-	    j++;
-	 }
-      }
+   Handler->Depends(pkgCache::Dep::PreDepends, PreDeps);
+   I = PreDeps.begin();
+   if (I != PreDeps.end()) {
+      BufCat("\nPre-Depends: ");
+      BufCatDep(*I);
    }
-   
-   headerGetEntry(HeaderP, RPMTAG_CONFLICTNAME, &type, (void **)&strv, &count);
-   assert(type == RPM_STRING_ARRAY_TYPE || count == 0);
+   for (; I != PreDeps.end(); I++) {
+      BufCat(", ");
+      BufCatDep(*I);
+   }
 
-   headerGetEntry(HeaderP, RPMTAG_CONFLICTVERSION, &type2, (void **)&strv2, &count);
-   headerGetEntry(HeaderP, RPMTAG_CONFLICTFLAGS, &type3, (void **)&numv, &count);
-   
-   if (count > 0) 
-   {
+   Handler->Depends(pkgCache::Dep::Depends, Deps);
+   I = Deps.begin();
+   if (I != Deps.end()) {
+      BufCat("\nDepends: ");
+      BufCatDep(*I);
+   }
+   for (; I != Deps.end(); I++) {
+      BufCat(", ");
+      BufCatDep(*I);
+   }
+      
+   Handler->Depends(pkgCache::Dep::Conflicts, Conflicts);
+   I = Conflicts.begin();
+   if (I != Conflicts.end()) {
       BufCat("\nConflicts: ");
-      for (int i = 0; i < count; i++) 
-      {
-	 if (i > 0)
-	     BufCat(", ");
-	 BufCatDep(strv[i], strv2[i], numv[i]);
-      }
+      BufCatDep(*I);
+   }
+   for (; I != Conflicts.end(); I++) {
+      BufCat(", ");
+      BufCatDep(*I);
    }
 
-   headerGetEntry(HeaderP, RPMTAG_PROVIDENAME, &type, (void **)&strv, &count);
-   assert(type == RPM_STRING_ARRAY_TYPE || count == 0);
-
-   headerGetEntry(HeaderP, RPMTAG_PROVIDEVERSION, &type2, (void **)&strv2, &count);
-   headerGetEntry(HeaderP, RPMTAG_PROVIDEFLAGS, &type3, (void **)&numv, &count);
-   
-   if (count > 0) 
-   {
+   Handler->Provides(Provides);
+   I = Provides.begin();
+   if (I != Provides.end()) {
       BufCat("\nProvides: ");
-      for (int i = 0; i < count; i++) 
-      {
-	 if (i > 0)
-	     BufCat(", ");
-	 BufCatDep(strv[i], strv2[i], numv[i]);
-      }
+      BufCatDep(*I);
+   }
+   for (; I != Provides.end(); I++) {
+      BufCat(", ");
+      BufCatDep(*I);
    }
 
-   headerGetEntry(HeaderP, RPMTAG_OBSOLETENAME, &type, (void **)&strv, &count);
-   assert(type == RPM_STRING_ARRAY_TYPE || count == 0);
-
-   headerGetEntry(HeaderP, RPMTAG_OBSOLETEVERSION, &type2, (void **)&strv2, &count);
-   headerGetEntry(HeaderP, RPMTAG_OBSOLETEFLAGS, &type3, (void **)&numv, &count);
-   if (count > 0) {
+   Handler->Depends(pkgCache::Dep::Obsoletes, Obsoletes);
+   I = Obsoletes.begin();
+   if (I != Obsoletes.end()) {
       BufCat("\nObsoletes: ");
-      for (int i = 0; i < count; i++) 
-      {
-	 if (i > 0)
-	     BufCat(", ");
-	 BufCatDep(strv[i], strv2[i], numv[i]);
-      }
+      BufCatDep(*I);
    }
-#endif
+   for (; I != Obsoletes.end(); I++) {
+      BufCat(", ");
+      BufCatDep(*I);
+   }
 
    BufCatTag("\nArchitecture: ", Handler->Arch().c_str());
    
