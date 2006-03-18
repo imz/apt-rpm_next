@@ -291,14 +291,11 @@ string rpmSrcRecordParser::AsStr()
    bool start = true;
 
    Handler->Depends(pkgCache::Dep::Depends, Deps);
-   I = Deps.begin();
-   if (I != Deps.end()) {
-      BufCat("\nBuild-Depends: ");
-   }
-   for (; I != Deps.end(); I++) {
-      if ((*I)->Type != pkgCache::Dep::PreDepends)
+   for (I = Deps.begin(); I != Deps.end(); I++) {
+      if ((*I)->Type != pkgCache::Dep::Depends)
 	 continue;
       if (start) {
+	 BufCat("\nBuild-Depends: ");
 	 start = false;
       } else {
 	 BufCat(", ");
@@ -308,13 +305,14 @@ string rpmSrcRecordParser::AsStr()
 
    // Doesn't do anything yet, build conflicts aren't recorded yet...
    Handler->Depends(pkgCache::Dep::Conflicts, Conflicts);
-   I = Conflicts.begin();
-   if (I != Conflicts.end()) {
-      BufCat("\nConflicts: ");
-      BufCatDep(*I);
-   }
-   for (; I != Conflicts.end(); I++) {
-      BufCat(", ");
+   start = true;
+   for (I = Conflicts.begin(); I != Conflicts.end(); I++) {
+      if (start) {
+	 BufCat("\nBuild-Conflicts: ");
+	 start = false;
+      } else {
+	 BufCat(", ");
+      }
       BufCatDep(*I);
    }
 
