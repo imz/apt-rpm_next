@@ -260,19 +260,16 @@ void rpmRecordParser::GetRec(const char *&Start,const char *&Stop)
    BufCat(verstr.c_str());
 
 
-   vector<Dependency*> Deps, PreDeps, Provides, Obsoletes, Conflicts;
+   vector<Dependency*> Deps, Provides, Obsoletes, Conflicts;
    vector<Dependency*>::iterator I;
    bool start = true;
 
    Handler->Depends(pkgCache::Dep::Depends, Deps);
-   I = Deps.begin();
-   if (I != Deps.end()) {
-      BufCat("\nPre-Depends: ");
-   }
-   for (; I != Deps.end(); I++) {
+   for (I = Deps.begin(); I != Deps.end(); I++) {
       if ((*I)->Type != pkgCache::Dep::PreDepends)
 	 continue;
       if (start) {
+	 BufCat("\nPre-Depends: ");
 	 start = false;
       } else {
 	 BufCat(", ");
@@ -281,14 +278,11 @@ void rpmRecordParser::GetRec(const char *&Start,const char *&Stop)
    }
 
    start = true;
-   I = Deps.begin();
-   if (I != Deps.end()) {
-      BufCat("\nDepends: ");
-   }
-   for (; I != Deps.end(); I++) {
-      if ((*I)->Type != pkgCache::Dep::PreDepends)
+   for (I = Deps.begin(); I != Deps.end(); I++) {
+      if ((*I)->Type != pkgCache::Dep::Depends)
 	 continue;
       if (start) {
+	 BufCat("\nDepends: ");
 	 start = false;
       } else {
 	 BufCat(", ");
