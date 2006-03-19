@@ -334,7 +334,7 @@ class rpmRepomdPkgIndex : public rpmRepomdIndex
 {
    protected:
 
-   virtual string MainType() const {return "repomd";}
+   virtual string MainType() const {return "repomd";};
 
    public:
 
@@ -347,4 +347,26 @@ class rpmRepomdPkgIndex : public rpmRepomdIndex
 
 };
 
+class rpmRepomdSrcIndex : public rpmRepomdIndex
+{
+   protected:
+
+   virtual string MainType() const {return "repomd-src";};
+
+   public:
+
+   virtual const Type *GetType() const;
+
+   // Stuff for accessing files on remote items
+   virtual string SourceInfo(pkgSrcRecords::Parser const &Record,
+			     pkgSrcRecords::File const &File) const;
+
+   // Interface for the record parsers
+   virtual pkgSrcRecords::Parser *CreateSrcParser() const;
+
+   rpmRepomdSrcIndex(string URI,string Dist,string Section,
+                     pkgRepository *Repository) :
+          rpmRepomdIndex(URI,Dist,Section,Repository) {};
+
+};
 #endif
