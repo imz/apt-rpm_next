@@ -743,6 +743,34 @@ bool rpmRepomdIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
 
    return true;
 }
+
+pkgSrcRecords::Parser *rpmRepomdSrcIndex::CreateSrcParser() const
+{
+   return new rpmSrcRecordParser(IndexPath(), this);
+}
+
+string rpmRepomdSrcIndex::SourceInfo(pkgSrcRecords::Parser const &Record,
+				     pkgSrcRecords::File const &File) const
+{
+   string Res;
+   Res = ::URI::SiteOnly(URI) + ' ';
+   if (Dist[Dist.size() - 1] == '/')
+   {
+      if (Dist != "/")
+	 Res += Dist;
+   }
+   else
+      Res += Dist + '/' + Section;
+
+   Res += " ";
+   Res += Record.Package();
+   Res += " ";
+   Res += Record.Version();
+   if (File.Type.empty() == false)
+      Res += " (" + File.Type + ")";
+   return Res;
+}
+
 // DatabaseIndex::rpmDatabaseIndex - Constructor			/*{{{*/
 // ---------------------------------------------------------------------
 /* */
@@ -1033,11 +1061,32 @@ class rpmSLTypeRepomd : public rpmSLTypeGen
       Label = "RepoMD tree";
    }
 };
+class rpmSLTypeRepomdSrc : public rpmSLTypeRepomd
+{
+   public:
+
+   bool CreateItem(vector<pkgIndexFile *> &List,
+		   string URI, string Dist, string Section,
+		   pkgSourceList::Vendor const *Vendor) const
+   {
+      pkgRepository *Rep = GetRepository(URI,Dist,Vendor);
+      List.push_back(new rpmRepomdSrcIndex(URI,Dist,Section,Rep));
+      return true;
+   };
+
+   rpmSLTypeRepomdSrc()
+   {
+      Name = "repomd-src";
+      Label = "RepoMD src tree";
+   }
+};
+
 rpmSLTypeRpm _apt_rpmType;
 rpmSLTypeSrpm _apt_rpmSrcType;
 rpmSLTypeRpmDir _apt_rpmDirType;
 rpmSLTypeSrpmDir _apt_rpmSrcDirType;
 rpmSLTypeRepomd _apt_repomdType;
+rpmSLTypeRepomdSrc _apt_repomdSrcType;
 									/*}}}*/
 // Index File types for rpm						/*{{{*/
 class rpmIFTypeSrc : public pkgIndexFile::Type
@@ -1101,6 +1150,10 @@ const pkgIndexFile::Type *rpmDatabaseIndex::GetType() const
 const pkgIndexFile::Type *rpmRepomdPkgIndex::GetType() const
 {
    return &_apt_Pkg;
+}
+const pkgIndexFile::Type *rpmRepomdSrcIndex::GetType() const
+{
+   return &_apt_Src;
 }
 
 									/*}}}*/
