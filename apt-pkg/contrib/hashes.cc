@@ -19,6 +19,7 @@
 
 #include <unistd.h>
 #include <system.h>
+#include <algorithm>
 									/*}}}*/
 
 // Hashes::AddFD - Add the contents of the FD				/*{{{*/
