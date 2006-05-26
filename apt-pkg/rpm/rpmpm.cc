@@ -820,8 +820,10 @@ bool pkgRPMLibPM::Process(vector<const char*> &install,
    if (upgrade.empty() == false)
        AddToTransaction(Item::RPMUpgrade, upgrade);
 
-   // Setup the gauge used by rpmShowProgress.
-   packagesTotal = install.size()+upgrade.size();
+   // FIXME: This ain't right because most things show up in upgrade
+   // even if they're really just installs, and repackaging isn't taken
+   // into account either.
+   packagesTotal = install.size() + upgrade.size() * 2 + uninstall.size();
 
 #if RPM_VERSION >= 0x040100
    if (_config->FindB("RPM::NoDeps", false) == false) {
