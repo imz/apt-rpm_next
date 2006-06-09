@@ -611,7 +611,10 @@ bool DoAdd(CommandLine &)
       return false;
    }
 
-   chdir(StartDir.c_str());
+   if (chdir(StartDir.c_str()) != 0)
+   {
+      return false;
+   }
 
    if (_config->FindB("Debug::aptcdrom",false) == true)
    {
