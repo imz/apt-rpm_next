@@ -1,4 +1,64 @@
 ------------------------------------------------------------------------
+r232 | pmatilai | 2006-06-22 01:03:55 +0300 (Thu, 22 Jun 2006) | 5 lines
+
+- backport from trunk r207:
+  - don't try to look up CurrentVer() of noninstalled packages, duh
+    (Daisuke Suzuki)
+
+
+------------------------------------------------------------------------
+r231 | pmatilai | 2006-06-22 01:02:12 +0300 (Thu, 22 Jun 2006) | 3 lines
+
+- backport from trunk r203:
+  - count readlocks as well (so they get released too)
+
+------------------------------------------------------------------------
+r230 | pmatilai | 2006-06-22 01:01:31 +0300 (Thu, 22 Jun 2006) | 3 lines
+
+- backport from trunk r202:
+  - extra check for filelists handling avoiding crashing in some cases
+
+------------------------------------------------------------------------
+r229 | pmatilai | 2006-06-22 00:59:50 +0300 (Thu, 22 Jun 2006) | 6 lines
+
+- backport from trunk r200:
+  - on newer rpm versions link epoch-zeroing behavior with promoteepoch, fixes
+    http://bugzilla.atrpms.net/show_bug.cgi?id=831
+  - bump cache header version to force rebuild on upgrade
+
+
+------------------------------------------------------------------------
+r228 | pmatilai | 2006-06-22 00:55:42 +0300 (Thu, 22 Jun 2006) | 3 lines
+
+- some extra checks to xml handling to avoid crashes on missing properties
+  and such (eg with createrepo -n)
+
+------------------------------------------------------------------------
+r227 | pmatilai | 2006-06-22 00:53:59 +0300 (Thu, 22 Jun 2006) | 2 lines
+
+- dont crash on packages with no files
+
+------------------------------------------------------------------------
+r226 | pmatilai | 2006-06-22 00:52:30 +0300 (Thu, 22 Jun 2006) | 2 lines
+
+- fix building with gcc-2.96
+
+------------------------------------------------------------------------
+r225 | pmatilai | 2006-06-22 00:47:11 +0300 (Thu, 22 Jun 2006) | 2 lines
+
+- create branch for lorg3.x
+
+------------------------------------------------------------------------
+r168 | pmatilai | 2006-05-22 18:47:34 +0300 (Mon, 22 May 2006) | 2 lines
+
+- lorg3.1 tag
+
+------------------------------------------------------------------------
+r167 | pmatilai | 2006-05-22 18:27:16 +0300 (Mon, 22 May 2006) | 2 lines
+
+- update changelog, doh
+
+------------------------------------------------------------------------
 r166 | pmatilai | 2006-05-22 18:11:09 +0300 (Mon, 22 May 2006) | 2 lines
 
 - preparing for lorg3.1

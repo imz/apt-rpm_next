@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: apt\n"
 "Report-Msgid-Bugs-To: apt-rpm@lists.laiskiainen.org\n"
-"POT-Creation-Date: 2006-05-16 17:58+0300\n"
+"POT-Creation-Date: 2006-06-22 01:08+0300\n"
 "PO-Revision-Date: 2001-01-11 15:40-02:00\n"
 "Last-Translator: Stefano Corsi <ippo@madeinlinux.com>\n"
 "Language-Team: Italian <it@li.org>\n"
@@ -1519,12 +1519,12 @@ msgstr ""
 msgid "Sub-process %s received a segmentation fault."
 msgstr ""
 
-#: apt-pkg/contrib/fileutl.cc:374 apt-pkg/rpm/rpmpm.cc:624
+#: apt-pkg/contrib/fileutl.cc:374 apt-pkg/rpm/rpmpm.cc:625
 #, c-format
 msgid "Sub-process %s returned an error code (%u)"
 msgstr ""
 
-#: apt-pkg/contrib/fileutl.cc:376 apt-pkg/rpm/rpmpm.cc:627
+#: apt-pkg/contrib/fileutl.cc:376 apt-pkg/rpm/rpmpm.cc:628
 #, fuzzy, c-format
 msgid "Sub-process %s exited unexpectedly"
 msgstr "Il metodo %s è terminato inaspettatamente!"
@@ -1593,53 +1593,53 @@ msgstr ""
 msgid "Selection %s not found"
 msgstr ""
 
-#: apt-pkg/rpm/repomd.cc:44 apt-pkg/rpm/rpmlistparser.cc:587
+#: apt-pkg/rpm/repomd.cc:44 apt-pkg/rpm/rpmlistparser.cc:589
 #: apt-pkg/repository.cc:40
 #, fuzzy, c-format
 msgid "could not open Release file '%s'"
 msgstr "Impossibile aprire l'indice hash"
 
-#: apt-pkg/rpm/rpmhandler.cc:481
+#: apt-pkg/rpm/rpmhandler.cc:482
 #, fuzzy
 msgid "could not rewind RPMFileHandler"
 msgstr "Impossibile aprire l'indice hash"
 
-#: apt-pkg/rpm/rpmhandler.cc:518 apt-pkg/rpm/rpmhandler.cc:525
-#: apt-pkg/rpm/rpmpm.cc:685 apt-pkg/rpm/rpmpm.cc:690
+#: apt-pkg/rpm/rpmhandler.cc:519 apt-pkg/rpm/rpmhandler.cc:526
+#: apt-pkg/rpm/rpmpm.cc:686 apt-pkg/rpm/rpmpm.cc:691
 #, fuzzy, c-format
 msgid "Failed reading file %s"
 msgstr "Recupero dell' archivio hash fallito:"
 
-#: apt-pkg/rpm/rpmhandler.cc:689
+#: apt-pkg/rpm/rpmhandler.cc:690
 #, fuzzy
 msgid "Unable to determine the file size"
 msgstr "Impossibile ridurre il gruppo da aggiornare"
 
-#: apt-pkg/rpm/rpmhandler.cc:734 apt-pkg/rpm/rpmhandler.cc:743
+#: apt-pkg/rpm/rpmhandler.cc:735 apt-pkg/rpm/rpmhandler.cc:744
 #, fuzzy
 msgid "could not open RPM database"
 msgstr "Impossibile aprire l'indice hash"
 
-#: apt-pkg/rpm/rpmhandler.cc:750
+#: apt-pkg/rpm/rpmhandler.cc:751
 msgid "could not create RPM database iterator"
 msgstr ""
 
-#: apt-pkg/rpm/rpmhandler.cc:916
+#: apt-pkg/rpm/rpmhandler.cc:917
 #, fuzzy, c-format
 msgid "Failed to open package index %s"
 msgstr "Impossibile analizzare il pacchetto %s (1)"
 
-#: apt-pkg/rpm/rpmhandler.cc:920
+#: apt-pkg/rpm/rpmhandler.cc:921
 #, fuzzy, c-format
 msgid "Corrupted package index %s"
 msgstr "Il pacchetto %s non è stato trovato"
 
-#: apt-pkg/rpm/rpmhandler.cc:929
+#: apt-pkg/rpm/rpmhandler.cc:930
 #, fuzzy, c-format
 msgid "Failed to open filelist index %s"
 msgstr "Impossibile aprire %s.new"
 
-#: apt-pkg/rpm/rpmhandler.cc:959
+#: apt-pkg/rpm/rpmhandler.cc:960
 #, c-format
 msgid "Inconsistent metadata, package count doesn't match in %s"
 msgstr ""
@@ -1698,11 +1698,11 @@ msgstr "Linea %u errata nella lista di sorgenti %s (dist)"
 msgid "Malformed line %lu in source list %s (URI parse)"
 msgstr "Linea %u errata nella lista di sorgenti %s (URI)"
 
-#: apt-pkg/rpm/rpmlistparser.cc:86
+#: apt-pkg/rpm/rpmlistparser.cc:88
 msgid "Corrupt pkglist: no RPMTAG_NAME in header entry"
 msgstr ""
 
-#: apt-pkg/rpm/rpmlistparser.cc:110
+#: apt-pkg/rpm/rpmlistparser.cc:112
 #, c-format
 msgid ""
 "There are multiple versions of \"%s\" in your system.\n"
@@ -1719,7 +1719,7 @@ msgid ""
 "RPM::Allow-Duplicated-Warning \"false\";\n"
 msgstr ""
 
-#: apt-pkg/rpm/rpmlistparser.cc:459
+#: apt-pkg/rpm/rpmlistparser.cc:461
 msgid "Bad NotAutomatic flag"
 msgstr ""
 
@@ -1776,67 +1776,67 @@ msgstr "Impossibile creare una pipe IPC per il subprocesso"
 msgid "Failure running script %s"
 msgstr ""
 
-#: apt-pkg/rpm/rpmpm.cc:313
+#: apt-pkg/rpm/rpmpm.cc:314
 msgid "Unknown pkgRPMPM operation."
 msgstr ""
 
-#: apt-pkg/rpm/rpmpm.cc:550
+#: apt-pkg/rpm/rpmpm.cc:551
 msgid "Executing RPM ("
 msgstr ""
 
-#: apt-pkg/rpm/rpmpm.cc:590
+#: apt-pkg/rpm/rpmpm.cc:591
 #, fuzzy
 msgid "Could not exec "
 msgstr "Il pacchetto %s non è stato trovato"
 
-#: apt-pkg/rpm/rpmpm.cc:605
+#: apt-pkg/rpm/rpmpm.cc:606
 #, fuzzy
 msgid "Couldn't wait for subprocess"
 msgstr "Il pacchetto %s non è stato trovato"
 
-#: apt-pkg/rpm/rpmpm.cc:621
+#: apt-pkg/rpm/rpmpm.cc:622
 #, c-format
 msgid "Sub-process %s recieved a segmentation fault."
 msgstr ""
 
-#: apt-pkg/rpm/rpmpm.cc:631 apt-pkg/rpm/rpmpm.cc:900
+#: apt-pkg/rpm/rpmpm.cc:632 apt-pkg/rpm/rpmpm.cc:901
 #, fuzzy
 msgid "Done."
 msgstr "Fatto"
 
-#: apt-pkg/rpm/rpmpm.cc:681
+#: apt-pkg/rpm/rpmpm.cc:682
 #, fuzzy, c-format
 msgid "Failed opening %s"
 msgstr "Problema nell'apertura di %s"
 
-#: apt-pkg/rpm/rpmpm.cc:694 apt-pkg/rpm/rpmpm.cc:718
+#: apt-pkg/rpm/rpmpm.cc:695 apt-pkg/rpm/rpmpm.cc:719
 #, fuzzy, c-format
 msgid "Failed adding %s to transaction %s"
 msgstr "Impossibile rinominare %s in %s"
 
-#: apt-pkg/rpm/rpmpm.cc:769 apt-pkg/rpm/rpmpm.cc:779
+#: apt-pkg/rpm/rpmpm.cc:770 apt-pkg/rpm/rpmpm.cc:780
 #, fuzzy
 msgid "Could not open RPM database"
 msgstr "Impossibile aprire l'indice hash"
 
-#: apt-pkg/rpm/rpmpm.cc:839 apt-pkg/rpm/rpmpm.cc:852
+#: apt-pkg/rpm/rpmpm.cc:840 apt-pkg/rpm/rpmpm.cc:853
 msgid "Transaction set check failed"
 msgstr ""
 
-#: apt-pkg/rpm/rpmpm.cc:872
+#: apt-pkg/rpm/rpmpm.cc:873
 #, c-format
 msgid "Ordering failed for %d packages"
 msgstr ""
 
-#: apt-pkg/rpm/rpmpm.cc:876
+#: apt-pkg/rpm/rpmpm.cc:877
 msgid "Committing changes..."
 msgstr ""
 
-#: apt-pkg/rpm/rpmpm.cc:892
+#: apt-pkg/rpm/rpmpm.cc:893
 msgid "Error while running transaction"
 msgstr ""
 
-#: apt-pkg/rpm/rpmpm.cc:898
+#: apt-pkg/rpm/rpmpm.cc:899
 #, fuzzy
 msgid "Some errors occurred while running transaction"
 msgstr "Errore nel processare %s (NewVersion1)"
@@ -1846,12 +1846,12 @@ msgstr "Errore nel processare %s (NewVersion1)"
 msgid "Could not allocate buffer for record text"
 msgstr "Impossibile attendere il sottoprocesso"
 
-#: apt-pkg/rpm/rpmsystem.cc:259
+#: apt-pkg/rpm/rpmsystem.cc:263
 #, fuzzy, c-format
 msgid "Unable to determine version for package %s"
 msgstr "Impossibile ridurre il gruppo da aggiornare"
 
-#: apt-pkg/rpm/rpmsystem.cc:438 apt-pkg/pkgcachegen.cc:717
+#: apt-pkg/rpm/rpmsystem.cc:442 apt-pkg/pkgcachegen.cc:717
 #: apt-pkg/pkgcachegen.cc:744 apt-pkg/pkgcachegen.cc:786
 #: apt-pkg/pkgcachegen.cc:791 apt-pkg/pkgcachegen.cc:995
 msgid "Reading Package Lists"
