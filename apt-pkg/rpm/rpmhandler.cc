@@ -1038,8 +1038,10 @@ string RPMRepomdHandler::FindTag(xmlNode *Node, string Tag)
    string str = "";
    if (n) {
       xmlChar *content = xmlNodeGetContent(n);
-      str = (char*)content;
-      xmlFree(content);
+      if (content) {
+	 str = (char*)content;
+	 xmlFree(content);
+      }
    }
    return str;
 }
@@ -1049,8 +1051,10 @@ string RPMRepomdHandler::GetProp(xmlNode *Node, char *Prop)
    string str = "";
    if (Node) {
       xmlChar *prop = xmlGetProp(Node, (xmlChar*)Prop);
-      str = (char*)prop;
-      xmlFree(prop);
+      if (prop) {
+	 str = (char*)prop;
+	 xmlFree(prop);
+      }
    }
    return str;
 }
@@ -1109,8 +1113,10 @@ string RPMRepomdHandler::Directory()
    string str = "";
    if ((n = FindNode("location"))) {
       xmlChar *prop = xmlGetProp(n, (xmlChar*)"href");
-      str = dirname((char*)prop);
-      xmlFree(prop);
+      if (prop) {
+	 str = dirname((char*)prop);
+	 xmlFree(prop);
+      }
    }
    return str;
 }
