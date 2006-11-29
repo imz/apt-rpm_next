@@ -13,7 +13,7 @@
 
 #define MAXLEN 360
 
-#include <iostream>
+
 
 using std::cout;
 using std::endl;
@@ -162,7 +162,6 @@ class HttpMethod : public pkgAcqMethod
    /** \brief Try to AutoDetect the proxy */
    bool AutoDetectProxy();
 
-   virtual bool Fetch(FetchItem *);
    virtual bool Configuration(string Message);
    
    // In the event of a fatal signal this file will be closed and timestamped.
@@ -173,6 +172,9 @@ class HttpMethod : public pkgAcqMethod
    
    string NextURI;
    string AutoDetectProxyCmd;
+
+   protected:
+   virtual bool Fetch(FetchItem *);
 
    public:
    friend class ServerState;
