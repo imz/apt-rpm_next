@@ -183,7 +183,7 @@ bool Connect(string Host,int Port,const char *Service,int DefPort,int &Fd,
 		  continue;
 	       }
 	       bad_addr.insert(bad_addr.begin(), Host);
-	       Owner->SetFailExtraMsg("\nFailReason: ResolveFailure");
+	       Owner->SetFailReason("ResolveFailure");
 	       return _error->Error(_("Could not resolve '%s'"),Host.c_str());
 	    }
 	    

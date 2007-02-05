@@ -952,6 +952,9 @@ HttpMethod::DealWithHeaders(FetchResult &Res,ServerState *Srv)
       failure */
    if (Srv->Result < 200 || Srv->Result >= 300)
    {
+      char err[255];
+      snprintf(err,sizeof(err)-1,"HttpError%i",Srv->Result);
+      SetFailReason(err);
       _error->Error("%u %s",Srv->Result,Srv->Code);
       if (Srv->HaveContent == true)
 	 return ERROR_WITH_CONTENT_PAGE;
