@@ -271,6 +271,7 @@ unsigned short rpmListParser::VersionHash()
       vector<Dependency*>::iterator I = Deps.begin();
       for (; I != DepEnd; I++) { 
 	 Result = AddCRC16(Result, (*I)->Name.c_str(), (*I)->Name.length());
+	 delete (*I);
       }
    }
    return Result;
@@ -313,6 +314,7 @@ bool rpmListParser::ParseDepends(pkgCache::VerIterator Ver,
 		    (*I)->Op,(*I)->Type) == false) {
 	 return false;
       }
+      delete (*I);
    }
    return true;
 
@@ -384,6 +386,7 @@ bool rpmListParser::ParseProvides(pkgCache::VerIterator Ver)
       if (NewProvides(Ver,(*I)->Name,(*I)->Version) == false) {
 	 return false;
       }
+      delete (*I);
    }
    return true;
 
