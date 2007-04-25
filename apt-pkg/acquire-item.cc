@@ -208,8 +208,7 @@ pkgAcqIndex::pkgAcqIndex(pkgAcquire *Owner,pkgRepository *Repository,
    DestFile += URItoFileName(URI);
 
    // Create the item
-   // CNC:2002-07-03
-   Desc.URI = URI + "." + Repository->GetComprMethod();
+   Desc.URI = URI + "." + Repository->GetComprMethod(URI);
    Desc.Description = URIDesc;
    Desc.Owner = this;
    Desc.ShortDesc = ShortDesc;
@@ -386,16 +385,16 @@ void pkgAcqIndex::Done(string Message,off_t Size,string MD5,
 
    Decompression = true;
    DestFile += ".decomp";
-   // LORG:2006-02-23 compression is a feature of repository type
-   if (Repository->GetComprMethod() == "gz") {
+   string ComprMeth = Repository->GetComprMethod(RealURI);
+   if (ComprMeth == "gz") {
       Desc.URI = "gzip:" + FileName;
       Mode = "gzip";
-   } else if (Repository->GetComprMethod() == "bz2") {
+   } else if (ComprMeth == "bz2") {
       Desc.URI = "bzip2:" + FileName;
       Mode = "bzip2";
    } else {
-      _error->Warning(_("Unknown compression extension, trying uncompressed"));
-      Desc.URI = FileName;
+      Desc.URI = "copy:" + FileName;
+      Mode = "copy";
    }
    QueueURI(Desc);
 }
