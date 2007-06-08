@@ -153,6 +153,4 @@ class HttpMethod : public pkgAcqMethod
    };
 };
 
-URI Proxy;
-
 #endif
