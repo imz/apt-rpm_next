@@ -289,6 +289,14 @@ bool HttpsMethod::Fetch(FetchItem *Itm)
        utime(File->Name().c_str(),&UBuf);
    }
 
+   // Timestamp
+   struct utimbuf UBuf;
+   if (curl_servdate != -1) {
+       UBuf.actime = curl_servdate;
+       UBuf.modtime = curl_servdate;
+       utime(File->Name().c_str(),&UBuf);
+   }
+
    // check the downloaded result
    struct stat Buf;
    if (stat(File->Name().c_str(),&Buf) == 0)
