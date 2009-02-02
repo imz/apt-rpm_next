@@ -170,12 +170,13 @@ class HttpMethod : public pkgAcqMethod
    static time_t FailTime;
    static void SigTerm(int);
    
-   string NextURI;
    string AutoDetectProxyCmd;
 
    protected:
    virtual bool Fetch(FetchItem *);
-
+   
+   string NextURI;
+   
    public:
    friend class ServerState;
 
