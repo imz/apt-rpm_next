@@ -57,37 +57,40 @@ HttpsMethod::progress_callback(void *clientp, double dltotal, double dlnow,
    return 0;
 }
 
-void HttpsMethod::SetupProxy() {					/*{{{*/
-	URI ServerName = Queue->Uri;
+void HttpsMethod::SetupProxy()  					/*{{{*/
+{
+   URI ServerName = Queue->Uri;
 
-	// Determine the proxy setting - try https first, fallback to http and use env at last
-	string UseProxy = _config->Find("Acquire::https::Proxy::" + ServerName.Host,
-				_config->Find("Acquire::http::Proxy::" + ServerName.Host).c_str());
+   // Determine the proxy setting - try https first, fallback to http and use env at last
+   string UseProxy = _config->Find("Acquire::https::Proxy::" + ServerName.Host,
+				   _config->Find("Acquire::http::Proxy::" + ServerName.Host).c_str());
 
-	if (UseProxy.empty() == true)
-		UseProxy = _config->Find("Acquire::https::Proxy", _config->Find("Acquire::http::Proxy").c_str());
+   if (UseProxy.empty() == true)
+      UseProxy = _config->Find("Acquire::https::Proxy", _config->Find("Acquire::http::Proxy").c_str());
 
-	// User want to use NO proxy, so nothing to setup
-	if (UseProxy == "DIRECT")
-		return;
+   // User want to use NO proxy, so nothing to setup
+   if (UseProxy == "DIRECT")
+      return;
 
-	if (UseProxy.empty() == false) {
-		// Parse no_proxy, a comma (,) separated list of domains we don't want to use
-		// a proxy for so we stop right here if it is in the list
-		if (getenv("no_proxy") != 0 && CheckDomainList(ServerName.Host,getenv("no_proxy")) == true)
-			return;
-	} else {
-		const char* result = getenv("http_proxy");
-		UseProxy = result == NULL ? "" : result;
-	}
+   if (UseProxy.empty() == false) 
+   {
+      // Parse no_proxy, a comma (,) separated list of domains we don't want to use
+      // a proxy for so we stop right here if it is in the list
+      if (getenv("no_proxy") != 0 && CheckDomainList(ServerName.Host,getenv("no_proxy")) == true)
+	 return;
+   } else {
+      const char* result = getenv("http_proxy");
+      UseProxy = result == NULL ? "" : result;
+   }
 
-	// Determine what host and port to use based on the proxy settings
-	if (UseProxy.empty() == false) {
-		Proxy = UseProxy;
-		if (Proxy.Port != 1)
-			curl_easy_setopt(curl, CURLOPT_PROXYPORT, Proxy.Port);
-		curl_easy_setopt(curl, CURLOPT_PROXY, Proxy.Host.c_str());
-	}
+   // Determine what host and port to use based on the proxy settings
+   if (UseProxy.empty() == false) 
+   {
+      Proxy = UseProxy;
+      if (Proxy.Port != 1)
+	 curl_easy_setopt(curl, CURLOPT_PROXYPORT, Proxy.Port);
+      curl_easy_setopt(curl, CURLOPT_PROXY, Proxy.Host.c_str());
+   }
 }									/*}}}*/
 // HttpsMethod::Fetch - Fetch an item					/*{{{*/
 // ---------------------------------------------------------------------
