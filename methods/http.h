@@ -178,7 +178,7 @@ class HttpMethod : public pkgAcqMethod
    string NextURI;
    
    public:
-   friend class ServerState;
+   friend struct ServerState;
 
    FileFd *File;
    ServerState *Server;
