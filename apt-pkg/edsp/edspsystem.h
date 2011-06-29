@@ -7,24 +7,23 @@
 
    ##################################################################### */
 									/*}}}*/
-#ifndef PKGLIB_DEBSYSTEM_H
-#define PKGLIB_DEBSYSTEM_H
+#ifndef PKGLIB_EDSPSYSTEM_H
+#define PKGLIB_EDSPSYSTEM_H
 
 #include <apt-pkg/pkgsystem.h>
 
-class debSystemPrivate;
-
-class debStatusIndex;
-class debSystem : public pkgSystem
+class edspIndex;
+class edspSystem : public pkgSystem
 {
-   // private d-pointer
-   debSystemPrivate *d;
-   bool CheckUpdates();
+   /** \brief dpointer placeholder (for later in case we need it) */
+   void *d;
+
+   edspIndex *StatusFile;
 
    public:
 
    virtual bool Lock();
-   virtual bool UnLock(bool NoErrors = false);   
+   virtual bool UnLock(bool NoErrors = false);
    virtual pkgPackageManager *CreatePM(pkgDepCache *Cache) const;
    virtual bool Initialize(Configuration &Cnf);
    virtual bool ArchiveSupported(const char *Type);
@@ -33,10 +32,10 @@ class debSystem : public pkgSystem
    virtual bool FindIndex(pkgCache::PkgFileIterator File,
 			  pkgIndexFile *&Found) const;
 
-   debSystem();
-   virtual ~debSystem();
+   edspSystem();
+   ~edspSystem();
 };
 
-extern debSystem debSys;
+extern edspSystem edspSys;
 
 #endif
