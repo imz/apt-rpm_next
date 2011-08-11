@@ -109,7 +109,7 @@ bool MirrorMethod::Clean(string Dir)
 	 continue;
 
       // see if we have that uri
-      for(I=list.begin(); I != list.end(); I++)
+      for(I=list.begin(); I != list.end(); ++I)
       {
 	 string uri = (*I)->GetURI();
 	 if(uri.find("mirror://") != 0)
@@ -332,7 +332,7 @@ string MirrorMethod::GetMirrorFileName(string mirror_uri_str)
    vector<metaIndex *>::const_iterator I;
    pkgSourceList list;
    list.ReadMainList();
-   for(I=list.begin(); I != list.end(); I++)
+   for(I=list.begin(); I != list.end(); ++I)
    {
       string uristr = (*I)->GetURI();
       if(Debug)
