@@ -56,7 +56,7 @@ using namespace std;
  */
 
 MirrorMethod::MirrorMethod()
-   : HttpMethod(), DownloadedMirrorFile(false)
+   : HttpMethod(), DownloadedMirrorFile(false), Debug(false)
 {
 };
 
