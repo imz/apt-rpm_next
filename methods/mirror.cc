@@ -44,7 +44,7 @@ using namespace std;
  * - always picks the first mirror from the list
  * - call out to problem reporting script
  * - supports "deb mirror://host/path/to/mirror-list/// dist component"
- * - use pkgAcqMethod::FailReason() to have a string representation
+ * - uses pkgAcqMethod::FailReason() to have a string representation
  *   of the failure that is also send to LP
  * 
  * TODO: 

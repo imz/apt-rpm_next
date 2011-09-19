@@ -234,11 +234,6 @@ bool HttpsMethod::Fetch(FetchItem *Itm)
    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, AllowRedirect);
    curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10);
 
-   // set redirect options and default to 10 redirects
-   bool AllowRedirect = _config->FindI("Acquire::https::AllowRedirect", true);
-   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, AllowRedirect);
-   curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10);
-
    // debug
    if(_config->FindB("Debug::Acquire::https", false))
       curl_easy_setopt(curl, CURLOPT_VERBOSE, true);
@@ -284,14 +279,6 @@ bool HttpsMethod::Fetch(FetchItem *Itm)
       return true;
    }
    File->Close();
-
-   // Timestamp
-   struct utimbuf UBuf;
-   if (curl_servdate != -1) {
-       UBuf.actime = curl_servdate;
-       UBuf.modtime = curl_servdate;
-       utime(File->Name().c_str(),&UBuf);
-   }
 
    // Timestamp
    struct utimbuf UBuf;
