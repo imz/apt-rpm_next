@@ -449,6 +449,8 @@ int main()
 {
    setlocale(LC_ALL, "");
 
+   DropPrivs();
+
    HttpsMethod Mth;
    curl_global_init(CURL_GLOBAL_SSL) ;
 
