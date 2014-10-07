@@ -655,9 +655,11 @@ bool HttpServerState::Go(bool ToFile, FileFd * const File)
 	 return _error->Errno("write",_("Error writing to output file"));
    }
 
-   if (ExpectedSize > 0 && In.TotalWriten > ExpectedSize)
+   if (MaximumSize > 0 && File && File->Tell() > MaximumSize)
+   {
       return _error->Error("Writing more data than expected (%llu > %llu)",
-                           In.TotalWriten, ExpectedSize);
+                           File->Tell(), MaximumSize);
+   }
 
    // Handle commands from APT
    if (FD_ISSET(STDIN_FILENO,&rfds))
