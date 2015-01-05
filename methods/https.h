@@ -68,6 +68,7 @@ class HttpsMethod : public pkgAcqMethod
    CURL *curl;
    FetchResult Res;
    HttpsServerState *Server;
+   bool ReceivedData;
    unsigned long long TotalWritten;
 
    public:
