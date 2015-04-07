@@ -118,17 +118,6 @@ HttpsMethod::write_data(void *buffer, size_t size, size_t nmemb, void *userp)
    return buffer_size;
 }
 
-int
-HttpsMethod::progress_callback(void *clientp, double dltotal, double /*dlnow*/,
-                             double /*ultotal*/, double /*ulnow*/)
-{
-   HttpsMethod *me = (HttpsMethod *)clientp;
-   if(dltotal > 0 && me->Res.Size == 0) {
-      me->Res.Size = (unsigned long long)dltotal;
-   }
-   return 0;
-}
-
 // HttpsServerState::HttpsServerState - Constructor			/*{{{*/
 HttpsServerState::HttpsServerState(URI Srv,HttpsMethod * Owner) : ServerState(Srv, Owner), Hash(NULL)
 {
