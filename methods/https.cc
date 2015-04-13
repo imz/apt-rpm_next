@@ -444,8 +444,6 @@ bool HttpsMethod::Fetch(FetchItem *Itm)
       _error->Error("%i %s", Server->Result, Server->Code);
       // unlink, no need keep 401/404 page content in partial/
       unlink(File->Name().c_str());
-      Res.Size = 0;
-      Res.LastModified = 0;
       return false;
    }
 
