@@ -502,9 +502,9 @@ bool HttpsMethod::Configuration(string Message)
    return true;
 }
 									/*}}}*/
-ServerState * HttpsMethod::CreateServerState(URI uri)			/*{{{*/
+std::unique_ptr<ServerState> HttpsMethod::CreateServerState(URI const &uri)/*{{{*/
 {
-   return new HttpsServerState(uri, this);
+   return std::unique_ptr<ServerState>(new HttpsServerState(uri, this));
 }
 									/*}}}*/
 
