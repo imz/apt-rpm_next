@@ -54,7 +54,7 @@ bool CopyMethod::Fetch(FetchItem *Itm)
    Res.LastModified = Buf.st_mtime;
    Res.IMSHit = false;
    URIStart(Res);
-   
+
    // just calc the hashes if the source and destination are identical
    if (File == Itm->DestFile || Itm->DestFile == "/dev/null")
    {

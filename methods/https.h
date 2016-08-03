@@ -62,9 +62,9 @@ class HttpsMethod : public ServerMethod
 
    static size_t parse_header(void *buffer, size_t size, size_t nmemb, void *userp);
    static size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
-   static int progress_callback(void *clientp, double dltotal, double dlnow, 
-				double ultotal, double ulnow);
-   void SetupProxy();
+   static int progress_callback(void *clientp, double dltotal, double dlnow,
+				 double ultotal, double ulnow);
+   bool SetupProxy();
    CURL *curl;
 
    // Used by ServerMethods unused by https

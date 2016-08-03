@@ -278,7 +278,7 @@ string GPGVMethod::VerifyGetSigners(const char *file, const char *outfile,
    waitpid(pid, &status, 0);
    if (Debug == true)
    {
-      ioprintf(std::clog, "apt-key exited with status %i\n", WEXITSTATUS(status));
+      ioprintf(std::clog, "gpgv exited with status %i\n", WEXITSTATUS(status));
    }
 
    if (Debug)

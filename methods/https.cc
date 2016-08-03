@@ -62,7 +62,7 @@ HttpsMethod::parse_header(void *buffer, size_t size, size_t nmemb, void *userp)
    {
       if (me->https->Server->Result != 416 && me->https->Server->StartPos != 0)
 	 ;
-      else if (me->Server->Result == 416 && me->Server->TotalFileSize == me->File->FileSize())
+      else if (me->https->Server->Result == 416)
       {
 	 bool partialHit = false;
 	 if (me->Itm->ExpectedHashes.usable() == true)
@@ -122,14 +122,18 @@ HttpsMethod::write_data(void *buffer, size_t size, size_t nmemb, void *userp)
       return buffer_size;
 
    if(me->File->Write(buffer, buffer_size) != true)
-      return false;
-
-   if(me->Queue->MaximumSize > 0 && me->File->Tell() > me->Queue->MaximumSize)
-   {
-      me->SetFailReason("MaximumSizeExceeded");
-      _error->Error("Writing more data than expected (%llu > %llu)",
-                           me->TotalWritten, me->Queue->MaximumSize);
       return 0;
+
+   if(me->Queue->MaximumSize > 0)
+   {
+      unsigned long long const TotalWritten = me->File->Tell();
+      if (TotalWritten > me->Queue->MaximumSize)
+      {
+	 me->SetFailReason("MaximumSizeExceeded");
+	 _error->Error("Writing more data than expected (%llu > %llu)",
+	       TotalWritten, me->Queue->MaximumSize);
+	 return 0;
+      }
    }
 
    if (me->Server->GetHashes()->Add((unsigned char const * const)buffer, buffer_size) == false)
@@ -158,7 +162,7 @@ APT_PURE Hashes * HttpsServerState::GetHashes()				/*{{{*/
 }
 									/*}}}*/
 
-void HttpsMethod::SetupProxy()						/*{{{*/
+bool HttpsMethod::SetupProxy()						/*{{{*/
 {
    URI ServerName = Queue->Uri;
 
@@ -180,12 +184,12 @@ void HttpsMethod::SetupProxy()						/*{{{*/
 
    // User want to use NO proxy, so nothing to setup
    if (UseProxy == "DIRECT")
-      return;
+      return true;
 
    // Parse no_proxy, a comma (,) separated list of domains we don't want to use    
    // a proxy for so we stop right here if it is in the list
    if (getenv("no_proxy") != 0 && CheckDomainList(ServerName.Host,getenv("no_proxy")) == true)
-      return;
+      return true;
 
    if (UseProxy.empty() == true)
    {
@@ -212,8 +216,10 @@ void HttpsMethod::SetupProxy()						/*{{{*/
 	 curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4A);
       else if (Proxy.Access == "socks")
 	 curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
-      else
+      else if (Proxy.Access == "http" || Proxy.Access == "https")
 	 curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+      else
+	 return false;
 
       if (Proxy.Port != 1)
 	 curl_easy_setopt(curl, CURLOPT_PROXYPORT, Proxy.Port);
@@ -224,6 +230,7 @@ void HttpsMethod::SetupProxy()						/*{{{*/
          curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD, Proxy.Password.c_str());
       }
    }
+   return true;
 }									/*}}}*/
 // HttpsMethod::Fetch - Fetch an item					/*{{{*/
 // ---------------------------------------------------------------------
@@ -232,11 +239,10 @@ void HttpsMethod::SetupProxy()						/*{{{*/
 bool HttpsMethod::Fetch(FetchItem *Itm)
 {
    struct stat SBuf;
-   struct curl_slist *headers=NULL;  
+   struct curl_slist *headers=NULL;
    char curl_errorstr[CURL_ERROR_SIZE];
    URI Uri = Itm->Uri;
    string remotehost = Uri.Host;
-   ReceivedData = false;
 
    // TODO:
    //       - http::Pipeline-Depth
@@ -244,7 +250,8 @@ bool HttpsMethod::Fetch(FetchItem *Itm)
    //       - more debug options? (CURLOPT_DEBUGFUNCTION?)
 
    curl_easy_reset(curl);
-   SetupProxy();
+   if (SetupProxy() == false)
+      return _error->Error("Unsupported proxy configured: %s", URI::SiteOnly(Proxy).c_str());
 
    maybe_add_auth (Uri, _config->FindFile("Dir::Etc::netrc"));
 

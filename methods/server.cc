@@ -369,7 +369,7 @@ ServerMethod::DealWithHeaders(FetchResult &Res)
    // This is some sort of 2xx 'data follows' reply
    Res.LastModified = Server->Date;
    Res.Size = Server->TotalFileSize;
-
+   
    // Open the file
    delete File;
    File = new FileFd(Queue->DestFile,FileFd::WriteAny);
@@ -674,7 +674,10 @@ int ServerMethod::Loop()
 		  QueueBack = Queue;
 	       }
 	       else
+               {
+                  Server->Close();
 		  Fail(true);
+               }
 	    }
 	    break;
 	 }
