@@ -747,4 +747,3 @@ LUALIB_API int luaopen_io (lua_State *L) {
   registerfile(L, stderr, "stderr", NULL);
   return 1;
 }
-

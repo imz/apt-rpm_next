@@ -22,4 +22,3 @@ if ftp_proxy then
 	ftp_proxy = string.gsub(ftp_proxy, ":password@", ":"..password.."@")
 	confset("Acquire::ftp::proxy", ftp_proxy)
 end
-

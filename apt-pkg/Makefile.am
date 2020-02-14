@@ -154,4 +154,3 @@ $(top_builddir)/include/%: rpm/%
 clean-local:
 	rm -f $(PRIVCOPYHEADERS)
 	rm -rf $(top_builddir)/include/apt-pkg
-

@@ -44,4 +44,3 @@ these files in the following directories:
     /var/state/apt/Contents.gz
 
 Bingo! It should be working. ;-)
-

@@ -162,4 +162,3 @@ fi
 echo "$PRGNAME executing: apt-get $ARG" | tr -s " "
 echo
 apt-get $ARG
-

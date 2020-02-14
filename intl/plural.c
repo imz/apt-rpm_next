@@ -1616,4 +1616,3 @@ yyerror (str)
 {
   /* Do nothing.  We don't print error messages here.  */
 }
-

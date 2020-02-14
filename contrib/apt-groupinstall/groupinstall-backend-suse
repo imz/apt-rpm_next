@@ -277,5 +277,3 @@ case $cmd in
 		get_pkgs $(involved_groups $OPT_GRPS)
 		;;
 esac
-
-

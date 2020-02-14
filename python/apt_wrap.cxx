@@ -20635,4 +20635,3 @@ SWIGEXPORT(void) SWIG_init(void) {
     SWIG_addvarlink(SWIG_globals,(char*)"pkgVersioningSystem_GlobalList",_wrap_pkgVersioningSystem_GlobalList_get, _wrap_pkgVersioningSystem_GlobalList_set);
     SWIG_addvarlink(SWIG_globals,(char*)"pkgVersioningSystem_GlobalListLen",_wrap_pkgVersioningSystem_GlobalListLen_get, _wrap_pkgVersioningSystem_GlobalListLen_set);
 }
-

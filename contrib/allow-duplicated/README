@@ -25,4 +25,3 @@ be selected for installation if you perform a dist-upgrade
 operation with something like this in your configuration:
 
 	RPM::Allow-Duplicated-Upgrade:: "kernel.*";
-

@@ -296,4 +296,3 @@ LUALIB_API int luaopen_debug (lua_State *L) {
   lua_settable(L, LUA_GLOBALSINDEX);
   return 1;
 }
-

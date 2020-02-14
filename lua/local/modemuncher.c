@@ -267,5 +267,3 @@ printf("modemuncher: returning mode = %s\n", tmp);
 
 	return 0; /* successful call */
 }
-
-

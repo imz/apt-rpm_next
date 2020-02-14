@@ -25,4 +25,3 @@ apt_cache_static_SOURCES = $(apt_cache_SOURCES)
 apt_cache_static_LDFLAGS = -all-static
 apt_cdrom_static_SOURCES = $(apt_cdrom_SOURCES)
 apt_cdrom_static_LDFLAGS = -all-static
-

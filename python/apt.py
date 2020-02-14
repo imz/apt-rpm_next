@@ -1866,5 +1866,3 @@ class OpPyProgress(ROpPyProgress):
 		ROpPyProgress.__init__(self, self)
 	def __repr__(self):
 		return "<C OpPyProgress instance at %s>" % self.this
-
-

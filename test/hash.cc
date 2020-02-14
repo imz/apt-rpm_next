@@ -59,5 +59,3 @@ int main()
 		      "57edf4a22be3c955ac49da2e2107b67a");
    return 0;
 }
-
-

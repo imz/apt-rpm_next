@@ -74,4 +74,3 @@ endif
 
 clean-docs:
 	rm -f $(SGML_MANPAGES)
-

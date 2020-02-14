@@ -167,4 +167,3 @@ void luaU_dump (lua_State* L, const Proto* Main, lua_Chunkwriter w, void* data)
  DumpHeader(&D);
  DumpFunction(Main,NULL,&D);
 }
-

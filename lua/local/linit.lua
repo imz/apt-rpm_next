@@ -38,4 +38,3 @@ function util.bgrep(expr, filename)
 	end
 	return false
 end
-

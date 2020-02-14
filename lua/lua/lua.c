@@ -435,4 +435,3 @@ int main (int argc, char *argv[]) {
   lua_close(l);
   return (status || s.status) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
-

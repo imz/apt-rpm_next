@@ -672,4 +672,3 @@ LUALIB_API int luaopen_base (lua_State *L) {
   lua_setglobal(L, REQTAB);
   return 0;
 }
-
