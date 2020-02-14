@@ -129,7 +129,7 @@ COPYHEADERS = $(patsubst %.h, \
 		$(top_builddir)/include/apt-pkg/%.h, \
 		$(notdir $(REALHEADERS)))
 REALOBJECTS = $(patsubst %.cc,%.lo,\
-	      	$(filter %.cc,$(libapt_pkg_la_SOURCES)))
+		$(filter %.cc,$(libapt_pkg_la_SOURCES)))
 $(REALOBJECTS): $(COPYHEADERS) $(PRIVCOPYHEADERS)
 
 $(top_builddir)/include/apt-pkg/%: %

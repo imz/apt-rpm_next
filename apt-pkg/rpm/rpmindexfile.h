@@ -56,7 +56,7 @@ class rpmDatabaseIndex : public rpmIndexFile
    virtual bool HasPackages() const {return true;};
    virtual bool Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const;
    virtual bool MergeFileProvides(pkgCacheGenerator &/*Gen*/,
-		   		  OpProgress &/*Prog*/) const;
+				  OpProgress &/*Prog*/) const;
    virtual pkgCache::PkgFileIterator FindInCache(pkgCache &Cache) const;
 
    rpmDatabaseIndex();
@@ -97,8 +97,8 @@ class rpmListIndex : public rpmIndexFile
 
    rpmListIndex(string URI,string Dist,string Section,
 		pkgRepository *Repository) :
-               	URI(URI), Dist(Dist), Section(Section),
-   		Repository(Repository)
+	URI(URI), Dist(Dist), Section(Section),
+		Repository(Repository)
 	{};
 };
 
@@ -127,7 +127,7 @@ class rpmPkgListIndex : public rpmListIndex
    virtual bool HasPackages() const {return true;};
    virtual bool Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const;
    virtual bool MergeFileProvides(pkgCacheGenerator &/*Gen*/,
-		   		  OpProgress &/*Prog*/) const;
+				  OpProgress &/*Prog*/) const;
    virtual pkgCache::PkgFileIterator FindInCache(pkgCache &Cache) const;
 
    rpmPkgListIndex(string URI,string Dist,string Section,

@@ -114,7 +114,7 @@ fi
 # Make sure IFS has a sensible default
 lt_nl='
 '
-IFS=" 	$lt_nl"
+IFS="	$lt_nl"
 
 if test "$build_libtool_libs" != yes && test "$build_old_libs" != yes; then
   $echo "$modename: not configured to build any kind of library" 1>&2
@@ -133,7 +133,7 @@ show_help=
 execute_dlfiles=
 lo2o="s/\\.lo\$/.${objext}/"
 o2lo="s/\\.${objext}\$/.lo/"
-quote_scanset='[[~#^*{};<>?'"'"' 	]'
+quote_scanset='[[~#^*{};<>?'"'"'	]'
 
 #####################################
 # Shell function definitions:
@@ -334,7 +334,7 @@ func_extract_archives ()
 	    cd "$darwin_orig_dir"
 	  else
 	    cd "$darwin_orig_dir"
- 	    func_extract_an_archive "$my_xdir" "$my_xabs"
+	    func_extract_an_archive "$my_xdir" "$my_xabs"
 	  fi # $darwin_arches
 	fi # $run
       ;;
@@ -620,7 +620,7 @@ if test -z "$show_help"; then
 	  args=`$echo "X$arg" | $Xsed -e "s/^-Wc,//"`
 	  lastarg=
 	  save_ifs="$IFS"; IFS=','
- 	  for arg in $args; do
+	  for arg in $args; do
 	    IFS="$save_ifs"
 
 	    # Double-quote args containing other shell metacharacters.
@@ -1351,7 +1351,7 @@ EOF
 	  continue
 	  ;;
 	shrext)
-  	  shrext_cmds="$arg"
+	  shrext_cmds="$arg"
 	  prev=
 	  continue
 	  ;;
@@ -1744,7 +1744,7 @@ EOF
 	  xdir=`$echo "X$arg" | $Xsed -e 's%/[^/]*$%%'`
 	  if test "X$xdir" = "X$arg"; then
 	    xdir=
- 	  else
+	  else
 	    xdir="$xdir/"
 	  fi
 
@@ -3370,7 +3370,7 @@ EOF
 	    # Do not include libc due to us having libc/libc_r.
 	    test "X$arg" = "X-lc" && continue
 	    ;;
- 	  *)
+	  *)
 	    # Add libc to deplibs on all other systems if necessary.
 	    if test "$build_libtool_need_lc" = "yes"; then
 	      deplibs="$deplibs -lc"
@@ -3632,7 +3632,7 @@ EOF
 	      tmp_deplibs=`$echo "X $tmp_deplibs" | ${SED} -e "1s,^X,," -e "s,$i,,"`
 	    done
 	  fi
-	  if $echo "X $tmp_deplibs" | $Xsed -e 's/[ 	]//g' \
+	  if $echo "X $tmp_deplibs" | $Xsed -e 's/[	]//g' \
 	    | grep . >/dev/null; then
 	    $echo
 	    if test "X$deplibs_check_method" = "Xnone"; then

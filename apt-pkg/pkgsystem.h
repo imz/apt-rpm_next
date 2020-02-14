@@ -106,7 +106,7 @@ class pkgSystem
    virtual bool PreProcess(pkgIndexFile **Start,pkgIndexFile **End,
                            OpProgress &Progress) {return true;};
    virtual bool ProcessCache(pkgDepCache &Cache, pkgProblemResolver &Fix)
-   	{return true;};
+	{return true;};
    virtual bool IgnoreDep(pkgVersioningSystem &VS, pkgCache::DepIterator &Dep)
 	{return false;};
 

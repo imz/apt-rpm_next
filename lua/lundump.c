@@ -171,7 +171,7 @@ static void LoadConstants (LoadState* S, Proto* f)
 	setsvalue2n(o,LoadString(S));
 	break;
    case LUA_TNIL:
-   	setnilvalue(o);
+	setnilvalue(o);
 	break;
    default:
 	luaG_runerror(S->L,"bad constant type (%d) in %s",t,S->name);

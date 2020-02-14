@@ -220,7 +220,7 @@ string rpmSrcListIndex::SourceInfo(pkgSrcRecords::Parser const &Record,
    return Res;
 }
 									/*}}}*/
-// SrcListIndex::ArchiveURI - URI for the archive       	        /*{{{*/
+// SrcListIndex::ArchiveURI - URI for the archive	        /*{{{*/
 // ---------------------------------------------------------------------
 string rpmSrcListIndex::ArchiveURI(string File) const
 {
@@ -304,7 +304,7 @@ string rpmPkgListIndex::ArchiveInfo(pkgCache::VerIterator Ver) const
    return Res;
 }
 									/*}}}*/
-// PkgListIndex::ArchiveURI - URI for the archive       	        /*{{{*/
+// PkgListIndex::ArchiveURI - URI for the archive	        /*{{{*/
 // ---------------------------------------------------------------------
 string rpmPkgListIndex::ArchiveURI(string File) const
 {
@@ -510,7 +510,7 @@ unsigned long rpmSrcDirIndex::Size() const
    return Res;
 }
 
-// SinglePkgIndex::ArchiveURI - URI for the archive       	        /*{{{*/
+// SinglePkgIndex::ArchiveURI - URI for the archive	        /*{{{*/
 // ---------------------------------------------------------------------
 string rpmSinglePkgIndex::ArchiveURI(string File) const
 {
@@ -522,7 +522,7 @@ string rpmSinglePkgIndex::ArchiveURI(string File) const
    return URI;
 }
 									/*}}}*/
-// SinglePkgIndex::ArchiveURI - URI for the archive       	        /*{{{*/
+// SinglePkgIndex::ArchiveURI - URI for the archive	        /*{{{*/
 // ---------------------------------------------------------------------
 string rpmSingleSrcIndex::ArchiveURI(string File) const
 {
@@ -589,7 +589,7 @@ bool rpmDatabaseIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
 // ---------------------------------------------------------------------
 /* */
 bool rpmDatabaseIndex::MergeFileProvides(pkgCacheGenerator &Gen,
-		   		  	 OpProgress &Prog) const
+					 OpProgress &Prog) const
 {
    RPMDBHandler *Handler = rpmSys.GetDBHandler();
    rpmListParser Parser(Handler);

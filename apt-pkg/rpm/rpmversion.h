@@ -30,7 +30,7 @@ class rpmVersioningSystem : public pkgVersioningSystem
    virtual int DoCmpVersion(const char *A,const char *Aend,
 			    const char *B,const char *Bend);
    virtual int DoCmpVersionArch(const char *A,const char *Aend,
-		   		const char *AA,const char *AAend,
+				const char *AA,const char *AAend,
 				const char *B,const char *Bend,
 				const char *BA,const char *BAend);
    virtual bool CheckDep(const char *PkgVer,int Op,const char *DepVer);

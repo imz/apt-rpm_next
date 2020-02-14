@@ -1192,7 +1192,7 @@ bool pkgProblemResolver::ResolveByKeep()
 	 continue;
 
       /* Keep the package. If this works then great, otherwise we have
-       	 to be significantly more agressive and manipulate its dependencies */
+	 to be significantly more agressive and manipulate its dependencies */
       if ((Flags[I->ID] & Protected) == 0)
       {
 	 if (Debug == true)

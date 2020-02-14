@@ -59,7 +59,7 @@ class RPMPackageData
    VerMapType VerMap;
 
    void GenericTranslate(vector<Translate*> &TList, string &FullURI,
-		   	 map<string,string> &Dict);
+			 map<string,string> &Dict);
 
    int MinArchScore;
 
@@ -78,20 +78,20 @@ class RPMPackageData
       return pkgCache::State::Standard;
    };
    inline pkgCache::Flag::PkgFlags PkgFlags(const string &Package)
-   	{return Flags[Package];};
+	{return Flags[Package];};
 
    bool HoldPackage(const char *name);
    bool IgnorePackage(const string &Name)
-   	{return IgnorePackages.find(Name) != IgnorePackages.end();};
+	{return IgnorePackages.find(Name) != IgnorePackages.end();};
 
    bool IgnoreDep(pkgVersioningSystem &VS,pkgCache::DepIterator &Dep);
 
    void TranslateBinary(string &FullURI, map<string,string> &Dict)
-   	{return GenericTranslate(BinaryTranslations, FullURI, Dict);};
+	{return GenericTranslate(BinaryTranslations, FullURI, Dict);};
    void TranslateSource(string &FullURI, map<string,string> &Dict)
-   	{return GenericTranslate(SourceTranslations, FullURI, Dict);};
+	{return GenericTranslate(SourceTranslations, FullURI, Dict);};
    void TranslateIndex(string &FullURI, map<string,string> &Dict)
-   	{return GenericTranslate(IndexTranslations, FullURI, Dict);};
+	{return GenericTranslate(IndexTranslations, FullURI, Dict);};
 
    bool HasBinaryTranslation()
 	{return !BinaryTranslations.empty();};
@@ -116,7 +116,7 @@ class RPMPackageData
    bool IsMultilibSys() { return MultilibSys; };
 
    void SetDupPackage(const string &Name)
-   	{DuplicatedPackages[Name] = 1;};
+	{DuplicatedPackages[Name] = 1;};
    bool IsDupPackage(const string &Name);
 
    static RPMPackageData *Singleton();

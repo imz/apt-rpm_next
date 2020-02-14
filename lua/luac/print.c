@@ -158,7 +158,7 @@ static const char* Source(const Proto* f)
 static void PrintHeader(const Proto* f)
 {
  printf("\n%s <%s:%d> (%d instruction%s, %d bytes at %p)\n",
- 	IsMain(f)?"main":"function",Source(f),f->lineDefined,
+	IsMain(f)?"main":"function",Source(f),f->lineDefined,
 	S(f->sizecode),f->sizecode*Sizeof(Instruction),VOID(f));
  printf("%d%s param%s, %d stack%s, %d upvalue%s, ",
 	f->numparams,f->is_vararg?"+":"",SS(f->numparams),S(f->maxstacksize),

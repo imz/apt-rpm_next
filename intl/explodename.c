@@ -142,7 +142,7 @@ _nl_explode_name (name, language, modifier, territory, codeset,
 
       if (cp[0] == '+')
 	{
- 	  /* Next is special application (CEN syntax).  */
+	  /* Next is special application (CEN syntax).  */
 	  cp[0] = '\0';
 	  *special = ++cp;
 
@@ -154,7 +154,7 @@ _nl_explode_name (name, language, modifier, territory, codeset,
 
       if (cp[0] == ',')
 	{
- 	  /* Next is sponsor (CEN syntax).  */
+	  /* Next is sponsor (CEN syntax).  */
 	  cp[0] = '\0';
 	  *sponsor = ++cp;
 
@@ -166,7 +166,7 @@ _nl_explode_name (name, language, modifier, territory, codeset,
 
       if (cp[0] == '_')
 	{
- 	  /* Next is revision (CEN syntax).  */
+	  /* Next is revision (CEN syntax).  */
 	  cp[0] = '\0';
 	  *revision = ++cp;
 

@@ -48,12 +48,12 @@ class pkgVersioningSystem
 
    // CNC:2002-07-08
    virtual int DoCmpVersionArch(const char *A,const char *Aend,
-		   		const char *AA,const char *AAend,
+				const char *AA,const char *AAend,
 				const char *B,const char *Bend,
 				const char *BA,const char *BAend)
 	{return DoCmpVersion(A,Aend,B,Bend);};
    virtual int CmpVersionArch(string A,string AA,
-		   	      const char *B,const char *BA)
+			      const char *B,const char *BA)
 	{
 	   if (AA.length() == 0 || BA == NULL || *BA == 0)
 	      return DoCmpVersion(A.c_str(),A.c_str()+A.length(),
@@ -64,7 +64,7 @@ class pkgVersioningSystem
 				      B,B+strlen(B),BA,BA+strlen(BA));
 	};
    virtual bool CheckDep(const char *PkgVer,pkgCache::DepIterator Dep)
-   	{return CheckDep(PkgVer,Dep->CompareOp,Dep.TargetVer());};
+	{return CheckDep(PkgVer,Dep->CompareOp,Dep.TargetVer());};
 
 
    virtual bool CheckDep(const char *PkgVer,int Op,const char *DepVer) = 0;

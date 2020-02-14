@@ -115,7 +115,7 @@ bool pkgInitConfig(Configuration &Cnf)
 									/*}}}*/
 
 // CNC:2003-02-16 - We must do that to force a statically linked libapt-pkg
-// 		    library to include the package systems into the binary.
+//		    library to include the package systems into the binary.
 #include <apt-pkg/rpmsystem.h>
 //#include <apt-pkg/debsystem.h>
 void ForceLinkage()
@@ -160,7 +160,7 @@ bool pkgInitSystem(Configuration &Cnf,pkgSystem *&Sys)
 
    // PM:2006-02-06
    if (Cnf.Find("APT::DistroVersion", "").empty()) {
-   	Cnf.Set("APT::DistroVersion", Sys->DistroVer(Cnf));
+	Cnf.Set("APT::DistroVersion", Sys->DistroVer(Cnf));
    }
 
    // CNC:2003-03-15

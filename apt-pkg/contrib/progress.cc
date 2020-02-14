@@ -50,7 +50,7 @@ void OpProgress::Progress(unsigned long Cur)
 // ---------------------------------------------------------------------
 /* */
 void OpProgress::OverallProgress(unsigned long Current, unsigned long Total,
-	  			 unsigned long Size,string Op)
+				 unsigned long Size,string Op)
 {
    this->Current = Current;
    this->Total = Total;

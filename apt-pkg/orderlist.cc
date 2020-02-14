@@ -727,8 +727,8 @@ bool pkgOrderList::DepUnPackPre(DepIterator D)
    for (; D.end() == false; D++)
    {
       /* Only consider the PreDepends or Depends. Depends are only
-       	 considered at the lowest depth or in the case of immediate
-       	 configure */
+	 considered at the lowest depth or in the case of immediate
+	 configure */
       if (D->Type != pkgCache::Dep::PreDepends)
       {
 	 if (D->Type == pkgCache::Dep::Depends)
@@ -934,11 +934,11 @@ bool pkgOrderList::CheckDep(DepIterator D)
       PkgIterator Pkg = Ver.ParentPkg();
 
       /* The meaning of Added and AddPending is subtle. AddPending is
-       	 an indication that the package is looping. Because of the
-       	 way ordering works Added means the package will be unpacked
-       	 before this one and AddPending means after. It is therefore
-       	 correct to ignore AddPending in all cases, but that exposes
-       	 reverse-ordering loops which should be ignored. */
+	 an indication that the package is looping. Because of the
+	 way ordering works Added means the package will be unpacked
+	 before this one and AddPending means after. It is therefore
+	 correct to ignore AddPending in all cases, but that exposes
+	 reverse-ordering loops which should be ignored. */
       if (IsFlag(Pkg,Added) == true ||
 	  (IsFlag(Pkg,AddPending) == true && D.Reverse() == true))
       {

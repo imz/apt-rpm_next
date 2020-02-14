@@ -45,7 +45,7 @@
 #include <netdb.h>
 
 // CNC:2003-02-20 - Moved header to fix compilation error when
-// 		    --disable-nls is used.
+//		    --disable-nls is used.
 #include <apti18n.h>
 
 #include "connect.h"
@@ -657,8 +657,8 @@ void HttpMethod::SendReq(FetchItem *Itm,CircleBuf &Out)
    else
    {
       /* Generate a cache control header if necessary. We place a max
-       	 cache age on index files, optionally set a no-cache directive
-       	 and a no-store directive for archives. */
+	 cache age on index files, optionally set a no-cache directive
+	 and a no-store directive for archives. */
       sprintf(Buf,"GET %s HTTP/1.1\r\nHost: %s\r\n",
 	      Itm->Uri.c_str(),ProperHost.c_str());
       if (_config->FindB("Acquire::http::No-Cache",false) == true)

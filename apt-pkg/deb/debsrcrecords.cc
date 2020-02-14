@@ -77,9 +77,9 @@ bool debSrcRecordParser::BuildDepends(vector<pkgSrcRecords::Parser::BuildDepRec>
 	 rec.Type = I;
 
 	 if (rec.Package != "")
-   	    BuildDeps.push_back(rec);
+	    BuildDeps.push_back(rec);
 
-   	 if (Start == Stop)
+	 if (Start == Stop)
 	    break;
       }
    }

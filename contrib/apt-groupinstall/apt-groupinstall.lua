@@ -45,7 +45,7 @@ elseif script_slot == "Scripts::AptCache::Command" then
 
 elseif script_slot == "Scripts::AptGet::Command" then
 	if command_args[1] == "groupinstall" then
-       	oper = markinstall
+	oper = markinstall
 		command_consume = 1
 	elseif command_args[1] == "groupremove" then
 		oper = markremove

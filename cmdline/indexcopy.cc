@@ -260,7 +260,7 @@ bool IndexCopy::CopyPackages(string CDROM,string Name,vector<string> &List)
       }
 
       /* Mangle the source to be in the proper notation with
-       	 prefix dist [component] */
+	 prefix dist [component] */
       *I = string(*I,Prefix.length());
       ConvertToSourceList(CDROM,*I);
       *I = Prefix + ' ' + *I;
@@ -366,7 +366,7 @@ bool IndexCopy::ReconstructChop(unsigned long &Chop,string Dir,string File)
    return false;
 }
 									/*}}}*/
-// IndexCopy::ConvertToSourceList - Convert a Path to a sourcelist 	/*{{{*/
+// IndexCopy::ConvertToSourceList - Convert a Path to a sourcelist	/*{{{*/
 // ---------------------------------------------------------------------
 /* We look for things in dists/ notation and convert them to
    <dist> <component> form otherwise it is left alone. This also strips

@@ -80,7 +80,7 @@ pkgCacheGenerator::pkgCacheGenerator(DynamicMMap *pMap,OpProgress *Prog) :
    Map.Sync(0,sizeof(pkgCache::Header));
 }
 									/*}}}*/
-// CacheGenerator::~pkgCacheGenerator - Destructor 			/*{{{*/
+// CacheGenerator::~pkgCacheGenerator - Destructor			/*{{{*/
 // ---------------------------------------------------------------------
 /* We sync the data then unset the dirty flag in two steps so as to
    advoid a problem during a crash */
@@ -195,7 +195,7 @@ bool pkgCacheGenerator::MergeList(ListParser &List,
 	 {
 	    // CNC:2002-07-09
 	    Res = Cache.VS->CmpVersionArch(Version,Arch,
-			    		   Ver.VerStr(),Ver.Arch());
+					   Ver.VerStr(),Ver.Arch());
 	    if (Res != 0)
 	       break;
 	 }
@@ -240,7 +240,7 @@ bool pkgCacheGenerator::MergeList(ListParser &List,
    return true;
 }
 									/*}}}*/
-// CacheGenerator::MergeFileProvides - Merge file provides   		/*{{{*/
+// CacheGenerator::MergeFileProvides - Merge file provides		/*{{{*/
 // ---------------------------------------------------------------------
 /* If we found any file depends while parsing the main list we need to
    resolve them. Since it is undesired to load the entire list of files
@@ -383,7 +383,7 @@ bool pkgCacheGenerator::NewFileVer(pkgCache::VerIterator &Ver,
    return true;
 }
 									/*}}}*/
-// CacheGenerator::NewVersion - Create a new Version 			/*{{{*/
+// CacheGenerator::NewVersion - Create a new Version			/*{{{*/
 // ---------------------------------------------------------------------
 /* This puts a version structure in the linked list */
 unsigned long pkgCacheGenerator::NewVersion(pkgCache::VerIterator &Ver,
@@ -643,7 +643,7 @@ static bool CheckValidity(string CacheFile, FileIterator Start,
       {
 	 // CNC:2002-07-04
 	 /*_error->WarningE("stat",_("Couldn't stat source package list %s"),
-	 		  (*Start)->Describe().c_str());*/
+			  (*Start)->Describe().c_str());*/
 	 continue;
       }
 

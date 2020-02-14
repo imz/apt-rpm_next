@@ -32,7 +32,7 @@
 #include <apti18n.h>
 
 // CNC:2003-02-14 - apti18n.h includes libintl.h which includes locale.h,
-// 		    as reported by Radu Greab.
+//		    as reported by Radu Greab.
 //#include <locale.h>
 #include <iostream>
 #include <unistd.h>
@@ -413,7 +413,7 @@ bool DumpAvail(CommandLine &Cmd)
 
       /* Find the proper version to use. If the policy says there are no
          possible selections we return the installed version, if available..
-       	 This prevents dselect from making it obsolete. */
+	 This prevents dselect from making it obsolete. */
       pkgCache::VerIterator V = Plcy.GetCandidateVer(P);
       if (V.end() == true)
       {
@@ -429,7 +429,7 @@ bool DumpAvail(CommandLine &Cmd)
 
       /* Okay, here we have a bit of a problem.. The policy has selected the
          currently installed package - however it only exists in the
-       	 status file.. We need to write out something or dselect will mark
+	 status file.. We need to write out something or dselect will mark
          the package as obsolete! Thus we emit the status file entry, but
          below we remove the status line to make it valid for the
          available file. However! We only do this if their do exist *any*
@@ -490,10 +490,10 @@ bool DumpAvail(CommandLine &Cmd)
 	 break;
 
       /* Write all of the records from this package file, since we
-       	 already did locality sorting we can now just seek through the
-       	 file in read order. We apply 1 more optimization here, since often
-       	 there will be < 1 byte gaps between records (for the \n) we read that
-       	 into the next buffer and offset a bit.. */
+	 already did locality sorting we can now just seek through the
+	 file in read order. We apply 1 more optimization here, since often
+	 there will be < 1 byte gaps between records (for the \n) we read that
+	 into the next buffer and offset a bit.. */
       unsigned long Pos = 0;
       for (; *J != 0; J++)
       {

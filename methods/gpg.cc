@@ -365,7 +365,7 @@ bool GPGMethod::Fetch(FetchItem *Itm)
    {
       // Run GPG on file, extract contents and get the key ID of the signer
       char *msg = getFileSigner(Path.c_str(), NULL,
-		      		Itm->DestFile.c_str(), KeyList);
+				Itm->DestFile.c_str(), KeyList);
       if (msg != NULL)
       {
 	 removeTmpDir(TempDir, SigCount);

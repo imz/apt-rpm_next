@@ -47,7 +47,7 @@ class pkgRepository
    pkgRepository(string URI,string Dist, const pkgSourceList::Vendor *Vendor,
 		 string RootURI)
       : GotRelease(0), URI(URI), Dist(Dist), RootURI(RootURI),
-   	Acquire(1)
+	Acquire(1)
    {
       if (Vendor) FingerPrint = Vendor->FingerPrint;
    };

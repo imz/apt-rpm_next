@@ -202,7 +202,7 @@ bool RPMIndexCopy::CopyPackages(string CDROM,string Name,vector<string> &List)
 
       string Prefix = "";
       /* Mangle the source to be in the proper notation with
-       	 prefix dist [component] */
+	 prefix dist [component] */
 //      *I = string(*I,Prefix.length());
       ConvertToSourceList(CDROM,*I);
       *I = Prefix + ' ' + *I;

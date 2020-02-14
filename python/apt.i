@@ -172,7 +172,7 @@ ItemsIter()
 			Py_XDECREF(o);
 			Py_DECREF(list);
 			return NULL;
-	    	}
+		}
 		Py_DECREF(o);
 	}
 	return list;
@@ -367,7 +367,7 @@ class pkgRPyAcquireStatus : public pkgAcquireStatus
 	pkgAcquireStatus::TotalItems;
 	pkgAcquireStatus::CurrentItems;
 
-   	/* Call only Python method, if existent, or parent method. */
+	/* Call only Python method, if existent, or parent method. */
 	void Fetched(unsigned long Size,unsigned long ResumePoint)
 	{
 		PyObject *attr = PyObject_GetAttrString(PyObj, "Fetched");

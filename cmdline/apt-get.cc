@@ -46,7 +46,7 @@
 #include "acqprogress.h"
 
 // CNC:2003-02-14 - apti18n.h includes libintl.h which includes locale.h,
-// 		    as reported by Radu Greab.
+//		    as reported by Radu Greab.
 //#include <locale.h>
 #include <langinfo.h>
 #include <fstream>
@@ -1471,11 +1471,11 @@ static const char *op2str(int op)
 
 // CNC:2003-11-11
 bool TryToChangeVer(pkgCache::PkgIterator &Pkg,pkgDepCache &Cache,
- 		    int VerOp,const char *VerTag,bool IsRel)
+		    int VerOp,const char *VerTag,bool IsRel)
 {
    // CNC:2003-11-05
    pkgVersionMatch Match(VerTag,(IsRel == true?pkgVersionMatch::Release :
- 				 pkgVersionMatch::Version),VerOp);
+				 pkgVersionMatch::Version),VerOp);
 
    pkgCache::VerIterator Ver = Match.Find(Pkg);
 
@@ -2729,7 +2729,7 @@ bool DoBuildDep(CommandLine &CmdL)
       // Process the build-dependencies
       vector<pkgSrcRecords::Parser::BuildDepRec> BuildDeps;
       if (Last->BuildDepends(BuildDeps, _config->FindB("APT::Get::Arch-Only",false)) == false)
-      	return _error->Error(_("Unable to get build-dependency information for %s"),Src.c_str());
+	return _error->Error(_("Unable to get build-dependency information for %s"),Src.c_str());
 
       // Also ensure that build-essential packages are present
       Configuration::Item const *Opts = _config->Tree("APT::Build-Essential");

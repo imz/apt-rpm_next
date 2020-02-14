@@ -30,7 +30,7 @@ Options handed over to rpm, see rpm manual for their functionality.
   --force-rpm	Rpm option --force.
 
   --force-rpm-install
-             	Rpm option --force, this option will only be active
+	Rpm option --force, this option will only be active
 		during rpm installation (rpm -U or rpm -i).
 
 $PRGNAME is a wrapper around apt-get, extending the available arguments of

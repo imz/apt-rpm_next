@@ -80,7 +80,7 @@ while test $# -gt 0 ; do
         exit 0
     ;;
     --mapi)
-    	# hee hee hee..
+	# hee hee hee..
         mapi=1
 	;;
     --listonly)
@@ -238,9 +238,9 @@ for comp in $components; do
 	fi
 
     if test x$updateinfo = x; then
-    	(cd $basedir; genpkglist $progress $bloat $meta_opts $cacheopts --index $srcidxdir/srcidx.$comp $topdir $comp)
+	(cd $basedir; genpkglist $progress $bloat $meta_opts $cacheopts --index $srcidxdir/srcidx.$comp $topdir $comp)
     else
-    	(cd $basedir; genpkglist $progress $bloat $meta_opts $cacheopts --index $srcidxdir/srcidx.$comp --info $updateinfo $topdir $comp)
+	(cd $basedir; genpkglist $progress $bloat $meta_opts $cacheopts --index $srcidxdir/srcidx.$comp --info $updateinfo $topdir $comp)
     fi
 
     if [ -z "$meta" -a -f $basedir/pkglist.$comp ]; then

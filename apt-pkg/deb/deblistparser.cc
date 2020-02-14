@@ -403,7 +403,7 @@ const char *debListParser::ParseDepends(const char *Start,const char *Stop,
 
          const char *End = I;
          bool Found = false;
-      	 bool NegArch = false;
+	 bool NegArch = false;
          while (I != Stop)
 	 {
             // look for whitespace or ending ']'

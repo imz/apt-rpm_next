@@ -957,7 +957,7 @@ else
     if test "x$lt_cv_dlopen_self" = xyes; then
       LDFLAGS="$LDFLAGS $link_static_flag"
       AC_CACHE_CHECK([whether a statically linked program can dlopen itself],
-    	  lt_cv_dlopen_self_static, [dnl
+	  lt_cv_dlopen_self_static, [dnl
 	  _LT_AC_TRY_DLOPEN_SELF(
 	    lt_cv_dlopen_self_static=yes, lt_cv_dlopen_self_static=yes,
 	    lt_cv_dlopen_self_static=no,  lt_cv_dlopen_self_static=cross)
@@ -2603,7 +2603,7 @@ if test "$GCC" = no; then
 fi
 if test -n "$_LT_AC_TAGVAR(lt_prog_cc_shlib, $1)"; then
   AC_MSG_WARN([`$CC' requires `$_LT_AC_TAGVAR(lt_prog_cc_shlib, $1)' to build shared libraries])
-  if echo "$old_CC $old_CFLAGS " | grep "[[ 	]]$_LT_AC_TAGVAR(lt_prog_cc_shlib, $1)[[ 	]]" >/dev/null; then :
+  if echo "$old_CC $old_CFLAGS " | grep "[[	]]$_LT_AC_TAGVAR(lt_prog_cc_shlib, $1)[[	]]" >/dev/null; then :
   else
     AC_MSG_WARN([add `$_LT_AC_TAGVAR(lt_prog_cc_shlib, $1)' to the CC or CFLAGS env variable and reconfigure])
     _LT_AC_TAGVAR(lt_cv_prog_cc_can_build_shared, $1)=no
@@ -3233,15 +3233,15 @@ case $host_os in
 	# earlier do not add the objects themselves.
 	case `$CC -V 2>&1` in
 	*"Version 7."*)
-  	  _LT_AC_TAGVAR(archive_cmds, $1)='$CC -shared $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname $wl$soname -o $lib'
-  	  _LT_AC_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
+	  _LT_AC_TAGVAR(archive_cmds, $1)='$CC -shared $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname $wl$soname -o $lib'
+	  _LT_AC_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
 	  ;;
 	*)  # Version 8.0 or newer
 	  tmp_idyn=
 	  case $host_cpu in
 	    ia64*) tmp_idyn=' -i_dynamic';;
 	  esac
-  	  _LT_AC_TAGVAR(archive_cmds, $1)='$CC -shared'"$tmp_idyn"' $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
+	  _LT_AC_TAGVAR(archive_cmds, $1)='$CC -shared'"$tmp_idyn"' $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
 	  _LT_AC_TAGVAR(archive_expsym_cmds, $1)='$CC -shared'"$tmp_idyn"' $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
 	  ;;
 	esac
@@ -3253,7 +3253,7 @@ case $host_os in
       pgCC*)
         # Portland Group C++ compiler
 	_LT_AC_TAGVAR(archive_cmds, $1)='$CC -shared $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname ${wl}$soname -o $lib'
-  	_LT_AC_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname ${wl}$soname ${wl}-retain-symbols-file ${wl}$export_symbols -o $lib'
+	_LT_AC_TAGVAR(archive_expsym_cmds, $1)='$CC -shared $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags ${wl}-soname ${wl}$soname ${wl}-retain-symbols-file ${wl}$export_symbols -o $lib'
 
 	_LT_AC_TAGVAR(hardcode_libdir_flag_spec, $1)='${wl}--rpath ${wl}$libdir'
 	_LT_AC_TAGVAR(export_dynamic_flag_spec, $1)='${wl}--export-dynamic'
@@ -4557,7 +4557,7 @@ for ac_symprfx in "" "_"; do
   symxfrm="\\1 $ac_symprfx\\2 \\2"
 
   # Write the raw and C identifiers.
-  lt_cv_sys_global_symbol_pipe="sed -n -e 's/^.*[[ 	]]\($symcode$symcode*\)[[ 	]][[ 	]]*$ac_symprfx$sympat$opt_cr$/$symxfrm/p'"
+  lt_cv_sys_global_symbol_pipe="sed -n -e 's/^.*[[	]]\($symcode$symcode*\)[[	]][[	]]*$ac_symprfx$sympat$opt_cr$/$symxfrm/p'"
 
   # Check to see that the pipe works correctly.
   pipe_works=no
@@ -5267,7 +5267,7 @@ ifelse([$1],[CXX],[
     if $LD --help 2>&1 | grep 'no-whole-archive' > /dev/null; then
 	_LT_AC_TAGVAR(whole_archive_flag_spec, $1)="$wlarc"'--whole-archive$convenience '"$wlarc"'--no-whole-archive'
       else
-  	_LT_AC_TAGVAR(whole_archive_flag_spec, $1)=
+	_LT_AC_TAGVAR(whole_archive_flag_spec, $1)=
     fi
     supports_anon_versioning=no
     case `$LD -v 2>/dev/null` in
@@ -5469,10 +5469,10 @@ EOF
 	# need to do runtime linking.
 	case $host_os in aix4.[[23]]|aix4.[[23]].*|aix5*)
 	  for ld_flag in $LDFLAGS; do
-  	  if (test $ld_flag = "-brtl" || test $ld_flag = "-Wl,-brtl"); then
-  	    aix_use_runtimelinking=yes
-  	    break
-  	  fi
+	  if (test $ld_flag = "-brtl" || test $ld_flag = "-Wl,-brtl"); then
+	    aix_use_runtimelinking=yes
+	    break
+	  fi
 	  done
 	esac
 
@@ -5497,19 +5497,19 @@ EOF
 	# below for broken collect2 doesn't work under 4.3+
 	  collect2name=`${CC} -print-prog-name=collect2`
 	  if test -f "$collect2name" && \
-  	   strings "$collect2name" | grep resolve_lib_name >/dev/null
+	   strings "$collect2name" | grep resolve_lib_name >/dev/null
 	  then
-  	  # We have reworked collect2
-  	  _LT_AC_TAGVAR(hardcode_direct, $1)=yes
+	  # We have reworked collect2
+	  _LT_AC_TAGVAR(hardcode_direct, $1)=yes
 	  else
-  	  # We have old collect2
-  	  _LT_AC_TAGVAR(hardcode_direct, $1)=unsupported
-  	  # It fails to find uninstalled libraries when the uninstalled
-  	  # path is not listed in the libpath.  Setting hardcode_minus_L
-  	  # to unsupported forces relinking
-  	  _LT_AC_TAGVAR(hardcode_minus_L, $1)=yes
-  	  _LT_AC_TAGVAR(hardcode_libdir_flag_spec, $1)='-L$libdir'
-  	  _LT_AC_TAGVAR(hardcode_libdir_separator, $1)=
+	  # We have old collect2
+	  _LT_AC_TAGVAR(hardcode_direct, $1)=unsupported
+	  # It fails to find uninstalled libraries when the uninstalled
+	  # path is not listed in the libpath.  Setting hardcode_minus_L
+	  # to unsupported forces relinking
+	  _LT_AC_TAGVAR(hardcode_minus_L, $1)=yes
+	  _LT_AC_TAGVAR(hardcode_libdir_flag_spec, $1)='-L$libdir'
+	  _LT_AC_TAGVAR(hardcode_libdir_separator, $1)=
 	  fi
 	esac
 	shared_flag='-shared'
@@ -5519,15 +5519,15 @@ EOF
       else
 	# not using gcc
 	if test "$host_cpu" = ia64; then
-  	# VisualAge C++, Version 5.5 for AIX 5L for IA-64, Beta 3 Release
-  	# chokes on -Wl,-G. The following line is correct:
+	# VisualAge C++, Version 5.5 for AIX 5L for IA-64, Beta 3 Release
+	# chokes on -Wl,-G. The following line is correct:
 	  shared_flag='-G'
 	else
-  	if test "$aix_use_runtimelinking" = yes; then
+	if test "$aix_use_runtimelinking" = yes; then
 	    shared_flag='${wl}-G'
 	  else
 	    shared_flag='${wl}-bM:SRE'
-  	fi
+	fi
 	fi
       fi
 
@@ -5626,7 +5626,7 @@ EOF
       _LT_AC_TAGVAR(whole_archive_flag_spec, $1)=''
       _LT_AC_TAGVAR(link_all_deplibs, $1)=yes
     if test "$GCC" = yes ; then
-    	output_verbose_link_cmd='echo'
+	output_verbose_link_cmd='echo'
         _LT_AC_TAGVAR(archive_cmds, $1)='$CC -dynamiclib $allow_undefined_flag -o $lib $libobjs $deplibs $compiler_flags -install_name $rpath/$soname $verstring'
       _LT_AC_TAGVAR(module_cmds, $1)='$CC $allow_undefined_flag -o $lib -bundle $libobjs $deplibs$compiler_flags'
       # Don't fix this by using the ld -exported_symbols_list flag, it doesn't exist in older darwin ld's
@@ -5863,24 +5863,24 @@ EOF
 	wlarc=''
 	_LT_AC_TAGVAR(archive_cmds, $1)='$LD -G${allow_undefined_flag} -h $soname -o $lib $libobjs $deplibs $linker_flags'
 	_LT_AC_TAGVAR(archive_expsym_cmds, $1)='$echo "{ global:" > $lib.exp~cat $export_symbols | $SED -e "s/\(.*\)/\1;/" >> $lib.exp~$echo "local: *; };" >> $lib.exp~
-  	$LD -G${allow_undefined_flag} -M $lib.exp -h $soname -o $lib $libobjs $deplibs $linker_flags~$rm $lib.exp'
+	$LD -G${allow_undefined_flag} -M $lib.exp -h $soname -o $lib $libobjs $deplibs $linker_flags~$rm $lib.exp'
       fi
       _LT_AC_TAGVAR(hardcode_libdir_flag_spec, $1)='-R$libdir'
       _LT_AC_TAGVAR(hardcode_shlibpath_var, $1)=no
       case $host_os in
       solaris2.[[0-5]] | solaris2.[[0-5]].*) ;;
       *)
- 	# The compiler driver will combine linker options so we
- 	# cannot just pass the convience library names through
- 	# without $wl, iff we do not link with $LD.
- 	# Luckily, gcc supports the same syntax we need for Sun Studio.
- 	# Supported since Solaris 2.6 (maybe 2.5.1?)
- 	case $wlarc in
- 	'')
- 	  _LT_AC_TAGVAR(whole_archive_flag_spec, $1)='-z allextract$convenience -z defaultextract' ;;
- 	*)
- 	  _LT_AC_TAGVAR(whole_archive_flag_spec, $1)='${wl}-z ${wl}allextract`for conv in $convenience\"\"; do test -n \"$conv\" && new_convenience=\"$new_convenience,$conv\"; done; $echo \"$new_convenience\"` ${wl}-z ${wl}defaultextract' ;;
- 	esac ;;
+	# The compiler driver will combine linker options so we
+	# cannot just pass the convience library names through
+	# without $wl, iff we do not link with $LD.
+	# Luckily, gcc supports the same syntax we need for Sun Studio.
+	# Supported since Solaris 2.6 (maybe 2.5.1?)
+	case $wlarc in
+	'')
+	  _LT_AC_TAGVAR(whole_archive_flag_spec, $1)='-z allextract$convenience -z defaultextract' ;;
+	*)
+	  _LT_AC_TAGVAR(whole_archive_flag_spec, $1)='${wl}-z ${wl}allextract`for conv in $convenience\"\"; do test -n \"$conv\" && new_convenience=\"$new_convenience,$conv\"; done; $echo \"$new_convenience\"` ${wl}-z ${wl}defaultextract' ;;
+	esac ;;
       esac
       _LT_AC_TAGVAR(link_all_deplibs, $1)=yes
       ;;
@@ -5963,7 +5963,7 @@ EOF
       # object files and a static libstdc++, better avoid it by now
       _LT_AC_TAGVAR(archive_cmds, $1)='$LD -G${allow_undefined_flag} -h $soname -o $lib $libobjs $deplibs $linker_flags'
       _LT_AC_TAGVAR(archive_expsym_cmds, $1)='$echo "{ global:" > $lib.exp~cat $export_symbols | $SED -e "s/\(.*\)/\1;/" >> $lib.exp~$echo "local: *; };" >> $lib.exp~
-  		$LD -G${allow_undefined_flag} -M $lib.exp -h $soname -o $lib $libobjs $deplibs $linker_flags~$rm $lib.exp'
+		$LD -G${allow_undefined_flag} -M $lib.exp -h $soname -o $lib $libobjs $deplibs $linker_flags~$rm $lib.exp'
       _LT_AC_TAGVAR(hardcode_libdir_flag_spec, $1)=
       _LT_AC_TAGVAR(hardcode_shlibpath_var, $1)=no
       runpath_var='LD_RUN_PATH'
@@ -6580,7 +6580,7 @@ AC_REQUIRE([AC_PROG_MAKE_SET])dnl
 AC_REQUIRE([AM_SET_LEADING_DOT])dnl
 _AM_IF_OPTION([tar-ustar], [_AM_PROG_TAR([ustar])],
               [_AM_IF_OPTION([tar-pax], [_AM_PROG_TAR([pax])],
-	      		     [_AM_PROG_TAR([v7])])])
+			     [_AM_PROG_TAR([v7])])])
 _AM_IF_OPTION([no-dependencies],,
 [AC_PROVIDE_IFELSE([AC_PROG_CC],
                   [_AM_DEPENDENCIES(CC)],

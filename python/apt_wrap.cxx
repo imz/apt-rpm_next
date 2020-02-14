@@ -945,22 +945,22 @@ extern char const *pkgLibVersion;
 extern char const *pkgOS;
 extern char const *pkgCPU;
 bool pkgCache_PkgIterator___nonzero__(pkgCache::PkgIterator *self){ return self->end() == false; }
-pkgCache::PkgIterator *pkgCache_PkgIterator_next(pkgCache::PkgIterator *self){  		if (self->end() == true) {  			PyErr_SetObject(PyExc_StopIteration, Py_None);  			return NULL;  		}  		pkgCache::PkgIterator *ret = new pkgCache::PkgIterator(*self);  		(*self)++;  		return ret;  	}
+pkgCache::PkgIterator *pkgCache_PkgIterator_next(pkgCache::PkgIterator *self){		if (self->end() == true) {			PyErr_SetObject(PyExc_StopIteration, Py_None);			return NULL;		}		pkgCache::PkgIterator *ret = new pkgCache::PkgIterator(*self);		(*self)++;		return ret;	}
 pkgCache::PkgIterator *pkgCache_PkgIterator___iter__(pkgCache::PkgIterator *self){ return new pkgCache::PkgIterator(*self); }
 bool pkgCache_VerIterator___nonzero__(pkgCache::VerIterator *self){ return self->end() == false; }
-pkgCache::VerIterator *pkgCache_VerIterator_next(pkgCache::VerIterator *self){  		if (self->end() == true) {  			PyErr_SetObject(PyExc_StopIteration, Py_None);  			return NULL;  		}  		pkgCache::VerIterator *ret = new pkgCache::VerIterator(*self);  		(*self)++;  		return ret;  	}
+pkgCache::VerIterator *pkgCache_VerIterator_next(pkgCache::VerIterator *self){		if (self->end() == true) {			PyErr_SetObject(PyExc_StopIteration, Py_None);			return NULL;		}		pkgCache::VerIterator *ret = new pkgCache::VerIterator(*self);		(*self)++;		return ret;	}
 pkgCache::VerIterator *pkgCache_VerIterator___iter__(pkgCache::VerIterator *self){ return new pkgCache::VerIterator(*self); }
 bool pkgCache_DepIterator___nonzero__(pkgCache::DepIterator *self){ return self->end() == false; }
-pkgCache::DepIterator *pkgCache_DepIterator_next(pkgCache::DepIterator *self){  		if (self->end() == true) {  			PyErr_SetObject(PyExc_StopIteration, Py_None);  			return NULL;  		}  		pkgCache::DepIterator *ret = new pkgCache::DepIterator(*self);  		(*self)++;  		return ret;  	}
+pkgCache::DepIterator *pkgCache_DepIterator_next(pkgCache::DepIterator *self){		if (self->end() == true) {			PyErr_SetObject(PyExc_StopIteration, Py_None);			return NULL;		}		pkgCache::DepIterator *ret = new pkgCache::DepIterator(*self);		(*self)++;		return ret;	}
 pkgCache::DepIterator *pkgCache_DepIterator___iter__(pkgCache::DepIterator *self){ return new pkgCache::DepIterator(*self); }
 bool pkgCache_PrvIterator___nonzero__(pkgCache::PrvIterator *self){ return self->end() == false; }
-pkgCache::PrvIterator *pkgCache_PrvIterator_next(pkgCache::PrvIterator *self){  		if (self->end() == true) {  			PyErr_SetObject(PyExc_StopIteration, Py_None);  			return NULL;  		}  		pkgCache::PrvIterator *ret = new pkgCache::PrvIterator(*self);  		(*self)++;  		return ret;  	}
+pkgCache::PrvIterator *pkgCache_PrvIterator_next(pkgCache::PrvIterator *self){		if (self->end() == true) {			PyErr_SetObject(PyExc_StopIteration, Py_None);			return NULL;		}		pkgCache::PrvIterator *ret = new pkgCache::PrvIterator(*self);		(*self)++;		return ret;	}
 pkgCache::PrvIterator *pkgCache_PrvIterator___iter__(pkgCache::PrvIterator *self){ return new pkgCache::PrvIterator(*self); }
 bool pkgCache_PkgFileIterator___nonzero__(pkgCache::PkgFileIterator *self){ return self->end() == false; }
-pkgCache::PkgFileIterator *pkgCache_PkgFileIterator_next(pkgCache::PkgFileIterator *self){  		if (self->end() == true) {  			PyErr_SetObject(PyExc_StopIteration, Py_None);  			return NULL;  		}  		pkgCache::PkgFileIterator *ret = new pkgCache::PkgFileIterator(*self);  		(*self)++;  		return ret;  	}
+pkgCache::PkgFileIterator *pkgCache_PkgFileIterator_next(pkgCache::PkgFileIterator *self){		if (self->end() == true) {			PyErr_SetObject(PyExc_StopIteration, Py_None);			return NULL;		}		pkgCache::PkgFileIterator *ret = new pkgCache::PkgFileIterator(*self);		(*self)++;		return ret;	}
 pkgCache::PkgFileIterator *pkgCache_PkgFileIterator___iter__(pkgCache::PkgFileIterator *self){ return new pkgCache::PkgFileIterator(*self); }
 bool pkgCache_VerFileIterator___nonzero__(pkgCache::VerFileIterator *self){ return self->end() == false; }
-pkgCache::VerFileIterator *pkgCache_VerFileIterator_next(pkgCache::VerFileIterator *self){  		if (self->end() == true) {  			PyErr_SetObject(PyExc_StopIteration, Py_None);  			return NULL;  		}  		pkgCache::VerFileIterator *ret = new pkgCache::VerFileIterator(*self);  		(*self)++;  		return ret;  	}
+pkgCache::VerFileIterator *pkgCache_VerFileIterator_next(pkgCache::VerFileIterator *self){		if (self->end() == true) {			PyErr_SetObject(PyExc_StopIteration, Py_None);			return NULL;		}		pkgCache::VerFileIterator *ret = new pkgCache::VerFileIterator(*self);		(*self)++;		return ret;	}
 pkgCache::VerFileIterator *pkgCache_VerFileIterator___iter__(pkgCache::VerFileIterator *self){ return new pkgCache::VerFileIterator(*self); }
 extern pkgSystem *_system;
 extern Configuration *_config;
@@ -981,7 +981,7 @@ PyObject *pkgAcquire_ItemsIter(pkgAcquire *self){
 			Py_XDECREF(o);
 			Py_DECREF(list);
 			return NULL;
-	    	}
+		}
 		Py_DECREF(o);
 	}
 	return list;
