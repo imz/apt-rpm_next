@@ -17,19 +17,19 @@ using std::map;
 class pkgRepository
 {
    protected:
-   
+
 
    struct Checksum {
       unsigned long Size;
       string MD5;
       string SHA1;
    };
-   
-   map<string,Checksum> IndexChecksums; // path -> checksum data   
+
+   map<string,Checksum> IndexChecksums; // path -> checksum data
 
    bool GotRelease;
-   
-   public:   
+
+   public:
 
    string URI;
    string Dist;
@@ -37,13 +37,13 @@ class pkgRepository
    string RootURI;
 
    bool Acquire;
-   
+
    bool ParseRelease(string File);
    bool HasRelease() const { return GotRelease; }
 
    bool IsAuthenticated() const { return !FingerPrint.empty(); };
    bool FindChecksums(string URI,unsigned long &Size, string &MD5);
-   
+
    pkgRepository(string URI,string Dist, const pkgSourceList::Vendor *Vendor,
 		 string RootURI)
       : GotRelease(0), URI(URI), Dist(Dist), RootURI(RootURI),

@@ -28,11 +28,11 @@ choisir la version des paquets que l'on veut installer.
 </para>
 
 <para>Quand le fichier &sources-list; contient des références à plusieurs
-distributions (par exemple, <literal>stable</literal> et 
+distributions (par exemple, <literal>stable</literal> et
 <literal>testing</literal>), plusieurs versions d'un paquet peuvent être
-installées&nbsp;; et, si ce fichier contient, pour une même distribution, 
+installées&nbsp;; et, si ce fichier contient, pour une même distribution,
 des références à plusieurs sites de téléchargement, il peut exister plusieurs
-exemplaires de la même version d'un paquet. Apt affecte une priorité à 
+exemplaires de la même version d'un paquet. Apt affecte une priorité à
 chaque exemplaire disponible. (Dans ce qui suit, un exemplaire est l'
 exemplaire d'un paquet disponible selon le fichier &sources-list;.)
 La commande <command>apt-get</command>, tenant compte des contraintes de
@@ -48,13 +48,13 @@ l'exemplaire qu'il veut installer.
 
 <RefSect2><Title>Les priorités assignées par défaut</>
 
-<para>Quand le fichier des préférences n'existe pas, ou quand aucune entrée 
+<para>Quand le fichier des préférences n'existe pas, ou quand aucune entrée
 de ce fichier ne s'applique à un exemplaire précis, la priorité affectée à
 cet exemplaire est la priorité de la distribution à laquelle il appartient.
 On peut distinguer une distribution et lui donner une priorité plus haute
 que celle des autres distributions&nbsp;: on l'appelle la distribution par
-défaut ou «&nbsp;target release&nbsp;» et elle peut être définie sur la ligne 
-de commande de <command>apt-get</command> ou dans le fichier de configuration 
+défaut ou «&nbsp;target release&nbsp;» et elle peut être définie sur la ligne
+de commande de <command>apt-get</command> ou dans le fichier de configuration
 d'APT, <filename>/etc/apt/apt.conf</filename>.
 Par exemple&nbsp;:
 
@@ -64,13 +64,13 @@ Par exemple&nbsp;:
 </programlisting>
 
 <programlisting>
-# Utiliser le fichier de configuration pour rendre la distribution 
-<literal/stable/ la distribution par defaut (ou «&nbsp;target release&nbsp;») 
+# Utiliser le fichier de configuration pour rendre la distribution
+<literal/stable/ la distribution par defaut (ou «&nbsp;target release&nbsp;»)
 APT::Default-Release "stable";
 </programlisting>
 </para>
 
-<para>Quand une distribution par défaut a été indiquée, APT utilise 
+<para>Quand une distribution par défaut a été indiquée, APT utilise
 l'algorithme suivant pour déterminer la priorité des exemplaires d'un
 paquet&nbsp;:
 
@@ -82,13 +82,13 @@ paquet&nbsp;:
 </varlistentry>
 <varlistentry>
 <term>une priorité égale à 500</term>
-<listitem><simpara>est affectée aux exemplaires qui ne sont pas installés et 
+<listitem><simpara>est affectée aux exemplaires qui ne sont pas installés et
 qui n'appartiennent pas à la distribution par défaut.
 </simpara></listitem>
 </varlistentry>
 <varlistentry>
 <term>une priorité égale à 990</term>
-<listitem><simpara>est affectée aux exemplaires qui ne sont pas installés et 
+<listitem><simpara>est affectée aux exemplaires qui ne sont pas installés et
 qui appartiennent à la distribution par défaut.
 </simpara></listitem>
 </varlistentry>
@@ -96,12 +96,12 @@ qui appartiennent à la distribution par défaut.
 </para>
 
 <para>Quand aucune distribution par défaut n'a été indiquée, APT affecte
-simplement une priorité égale à 100 à tout exemplaire installé d'un paquet 
+simplement une priorité égale à 100 à tout exemplaire installé d'un paquet
 et une priorité égale à 500 à tout exemplaire non installé d'un paquet.
 </para>
 
 <para>Puis APT applique les règles suivantes pour déterminer l'exemplaire
-du paquet qu'il faut installer (elles sont listées par ordre de priorité)&nbsp;: 
+du paquet qu'il faut installer (elles sont listées par ordre de priorité)&nbsp;:
 
 <itemizedlist>
 <listitem><simpara>Ne jamais revenir en arrière, sauf si la priorité d'un
@@ -110,16 +110,16 @@ installer une version moins récente que la version installée. Il
 faut noter qu'aucune des priorités par défaut n'excède 1000&nbsp;; de telles
 valeurs ne peuvent être définies que dans le fichier des préférences.)
 </simpara></listitem>
-<listitem><simpara>Installer l'exemplaire qui possède la priorité la plus 
+<listitem><simpara>Installer l'exemplaire qui possède la priorité la plus
 haute.
 </simpara></listitem>
-<listitem><simpara>Quand deux (ou plus) exemplaires ont la même priorité, 
+<listitem><simpara>Quand deux (ou plus) exemplaires ont la même priorité,
 installer l'exemplaire le plus récent.
 </simpara></listitem>
-<listitem><simpara>Quand deux (ou plus) exemplaires ont le même numéro de 
+<listitem><simpara>Quand deux (ou plus) exemplaires ont le même numéro de
 version, installer l'exemplaire dont la source est listée en premier dans
 &sources-list;. (L'exemplaire installé, s'il existe, est toujours choisi
-dans une telle comparaison, sauf si la commande 
+dans une telle comparaison, sauf si la commande
 <command>apt-get --reinstall</command> est utilisée.)
 </simpara></listitem>
 </itemizedlist>
@@ -132,8 +132,8 @@ paquet sera mis à niveau avec la commande&nbsp;:
 <command>apt-get install</command> ou <command>apt-get dist-upgrade</command>.
 </para>
 
-<para>L'exemplaire installé d'un paquet peut être - rarement - 
-<emphasis/plus/ récent que tout autre exemplaire disponible. Pas de retour 
+<para>L'exemplaire installé d'un paquet peut être - rarement -
+<emphasis/plus/ récent que tout autre exemplaire disponible. Pas de retour
 en arrière.
 </para>
 
@@ -154,9 +154,9 @@ séparées par des lignes blanches. Ces entrées peuvent avoir deux formes,
 une forme particulière et une forme générale.
 <itemizedlist>
 <listitem>
-<simpara>La forme particulière affecte une priorité 
-(<emphasis>Pin-Priority</emphasis>) à un paquet précis, à une version précise 
-ou à un intervalle spécifiant plusieurs versions. Par exemple, l'entrée 
+<simpara>La forme particulière affecte une priorité
+(<emphasis>Pin-Priority</emphasis>) à un paquet précis, à une version précise
+ou à un intervalle spécifiant plusieurs versions. Par exemple, l'entrée
 suivante affecte une priorité haute à toutes les versions du paquet
 <filename/perl/ dont le numéro de version commence par <literal/5.8/.
 </simpara>
@@ -171,9 +171,9 @@ Pin-Priority: 1001
 <listitem><simpara>
 La forme générale affecte une priorité à toutes les versions d'un paquet dans
 une distribution donnée (c'est-à-dire, à toutes les versions d'un paquet qui
-sont listées dans un fichier <filename/Release/), ou à toutes les versions 
+sont listées dans un fichier <filename/Release/), ou à toutes les versions
 d'un paquet provenant d'un site internet identifié par un nom pleinement
-qualifié. 
+qualifié.
 </simpara>
 
 <simpara>Cette forme générale des entrées du fichier des préférences
@@ -190,13 +190,13 @@ Pin-Priority: 999
 
 <simpara>Attention ! le mot-clé utilisé ici, <literal/origin/, ne doit pas
 être confondu avec l'«&nbsp;Origin:&nbsp;» d'une distribution indiqué dans
-un fichier <filename/Release/. Ce qui suit l'étiquette «&nbsp;Origin:&nbsp;» 
+un fichier <filename/Release/. Ce qui suit l'étiquette «&nbsp;Origin:&nbsp;»
 dans un fichier <filename/Release/ n'est pas l'adresse d'un site internet
 mais le nom d'un auteur ou d'un vendeur, comme Debian ou Ximian.
 </simpara>
 
 <simpara>L'entrée suivante affecte une priorité basse à toutes les versions
-d'un paquet appartenant à tout distribution dont le nom 
+d'un paquet appartenant à tout distribution dont le nom
 d'«&nbsp;Archive&nbsp;» (<literal/a/) est <literal/unstable/.
 </simpara>
 
@@ -207,9 +207,9 @@ Pin-Priority: 50
 </programlisting>
 
 <simpara>L'entrée suivante affecte une priorité haute à toutes les versions
-d'un paquet appartenant à toute distribution dont le nom 
+d'un paquet appartenant à toute distribution dont le nom
 d'«&nbsp;Archive&nbsp;» (<literal/a/) est <literal/stable/ et dont le numéro
-de «&nbsp;Version&nbsp;» (<literal/v/) est <literal/3.0/. 
+de «&nbsp;Version&nbsp;» (<literal/v/) est <literal/3.0/.
 </simpara>
 
 <programlisting>
@@ -241,7 +241,7 @@ installé est plus récent.
 </simpara></listitem>
 </varlistentry>
 <varlistentry><term>500 &lt; P &lt;=990</term>
-<listitem><simpara>L'exemplaire sera installé, sauf s'il existe un exemplaire 
+<listitem><simpara>L'exemplaire sera installé, sauf s'il existe un exemplaire
 appartenant à la distribution par défaut ou si la version installée est plus
 récente.
 </simpara></listitem>
@@ -265,7 +265,7 @@ n'est installé.
 
 <para>Si l'une des entrées de forme particulière correspond à l'exemplaire
 disponible d'un paquet, cette entrée détermine la priorité de cet exemplaire.
-Si deux entrées de forme particulière correspondent à l'exemplaire disponible 
+Si deux entrées de forme particulière correspondent à l'exemplaire disponible
 d'un paquet, la première entrée rencontrée détermine la priorité. Si deux
 entrées de forme générale correspondent à l'exemplaire disponible d'un paquet,
 la première entrée rencontrée détermine la priorité.
@@ -318,7 +318,7 @@ qui décrivent les exemplaires des paquets disponibles à cet endroit.
 </para>
 
 <para>Le fichier <filename>Packages</filename> se trouve normalement dans le
-répertoire 
+répertoire
 <filename>.../dists/<replaceable>dist-name</replaceable>/<replaceable>component</replaceable>/<replaceable>arch</replaceable></filename>, par exemple,
 <filename>.../dists/stable/main/binary-i386/Packages</filename>. Il consiste
 en entrées composées de lignes, une pour chaque paquet disponible dans le
@@ -341,13 +341,13 @@ répertoire
 <filename>.../dists/<replaceable>dist-name</replaceable></filename>, par exemple, <filename>.../dists/stable/Release</filename>, ou <filename>.../dists/woody/Release</filename>.
 Il consiste en une seule entrée composée de plusieurs lignes qui s'applique à
 <emphasis/tous/ les exemplaires des paquets situés dans les répertoires sous
-le répertoire parent. Contrairement au fichier <filename/Packages/, presque 
+le répertoire parent. Contrairement au fichier <filename/Packages/, presque
 toutes les lignes du fichier <filename/Release/ sont pertinentes pour
 déterminer les priorités&nbsp;:
 <variablelist>
 <varlistentry>
 <term>La ligne <literal/Archive:/ </term>
-<listitem><simpara>nomme l'archive à laquelle appartiennent tous les 
+<listitem><simpara>nomme l'archive à laquelle appartiennent tous les
 exemplaires des paquets situés dans les répertoires. Par exemple, la ligne
 <literal/Archive: stable/ indique que tous les paquets dans les répertoires
 situés sous le répertoire parent du fichier <filename/Release/ appartiennent
@@ -367,7 +367,7 @@ Pin: release a=stable
 exemplaires des paquets dans les répertoires peuvent appartenir à la
 distribution Debian GNU/Linux version 3.0. Il n'y a pas de numéro de version
 pour les distributions testing et unstable car elles n'ont pas encore été
-publiées. Indiquer cette valeur dans le fichier des préférences demanderait 
+publiées. Indiquer cette valeur dans le fichier des préférences demanderait
 ces lignes&nbsp;:
 </simpara>
 
@@ -383,11 +383,11 @@ Pin: release 3.0
 <varlistentry>
 <term>La ligne <literal/Component:/</term>
 <listitem><simpara>nomme un composant qui indique le type de licence associé
-aux exemplaires situés dans les répertoires sous le fichier 
+aux exemplaires situés dans les répertoires sous le fichier
 <filename/Release/. Par exemple, la ligne <literal/Component: main/ indique
 que tous les exemplaires dans les répertoires appartiennent au composant
 <literal/main/, c'est-à-dire que leur licence est en accord avec les
-Directives Debian pour le logiciel libre. Indiquer ce composant dans le 
+Directives Debian pour le logiciel libre. Indiquer ce composant dans le
 fichier des préférences demanderait cette ligne&nbsp;:
 </simpara>
 
@@ -401,7 +401,7 @@ Pin: release c=main
 <term>La ligne <literal/Origin:/ </term>
 <listitem><simpara>nomme le producteur des exemplaires des paquets situés
 dans les répertoires sous le fichier <filename/Release/. En général, c'est
-<literal/Debian/. Indiquer cette origine dans le fichier des préférences 
+<literal/Debian/. Indiquer cette origine dans le fichier des préférences
 demanderait cette ligne&nbsp;:
 </simpara>
 
@@ -431,8 +431,8 @@ Pin: release l=Debian
 fichier &sources-list; sont conservés dans le répertoire
 <filename>/var/lib/apt/lists</filename> ou dans le fichier spécifié par la
 variable <literal/Dir::State::Lists/ dans le fichier <filename/apt.conf/.
-Par exemple, le fichier 
-<filename>debian.lcs.mit.edu_debian_dists_unstable_contrib_binary-i386_Release</filename> contient le fichier <filename>Release</filename> du site 
+Par exemple, le fichier
+<filename>debian.lcs.mit.edu_debian_dists_unstable_contrib_binary-i386_Release</filename> contient le fichier <filename>Release</filename> du site
 <literal/debian.lcs.mit.edu/, architecture <literal/binary-i386/ et
 composant <literal/contrib/ de la distribution <literal/unstable/.
 </para>
@@ -467,7 +467,7 @@ Pin: release a=stable
 Pin-Priority: 900
 
 Explanation: Ne pas installer des exemplaires d'origine Debian
-Explanation: sauf ceux de la distribution stable 
+Explanation: sauf ceux de la distribution stable
 Package: *
 Pin: release o=Debian
 Pin-Priority: -10
@@ -485,7 +485,7 @@ apt-get dist-upgrade
 </programlisting>
 </para>
 
-<para>La commande suivante utilisera la version la plus récente de la 
+<para>La commande suivante utilisera la version la plus récente de la
 distribution <literal/testing/ pour mettre à niveau le paquet spécifié&nbsp;;
 cependant les mises à niveau ultérieures ne se feront pas automatiquement.
 

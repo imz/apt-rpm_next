@@ -6,7 +6,7 @@
 /* ######################################################################
 
    Repository abstraction for 1 or more unique URI+Dist
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -21,7 +21,7 @@
 #include <apt-pkg/configuration.h>
 #include <apt-pkg/strutl.h>
 #include <apt-pkg/tagfile.h>
-#include <apt-pkg/acquire-item.h> 
+#include <apt-pkg/acquire-item.h>
 
 #include <apti18n.h>
 
@@ -71,12 +71,12 @@ bool pkgRepository::ParseRelease(string File)
 	  ParseQuoteWord(C,Path) == false || Path.empty() == true)
 	 return _error->Error(_("Error parsing MD5Sum hash record on Release file '%s'"),
 			      File.c_str());
-      
-      // Parse the size and append the directory      
+
+      // Parse the size and append the directory
       IndexChecksums[Path].Size = atoi(Size.c_str());
       IndexChecksums[Path].MD5 = Hash;
    }
-   
+
    return true;
 }
 									/*}}}*/

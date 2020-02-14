@@ -17,7 +17,7 @@ Index: Source/Modules1.1/lang.cxx
 +      String *classlast = Swig_scopename_last(ClassName);
 +      if (name && (Cmp(namelast,classlast)) && !(Getattr(n,"template"))) {
  	Printf(stdout,"name = '%s', ClassName='%s'\n", name, ClassName);
- 	Swig_warning(WARN_LANG_RETURN_TYPE, input_file,line_number,"Function %s must have a return type.\n", 
+ 	Swig_warning(WARN_LANG_RETURN_TYPE, input_file,line_number,"Function %s must have a return type.\n",
  		     name);
  	Swig_restore(&n);
 +	Delete(namelast);

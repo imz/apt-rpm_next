@@ -4,13 +4,13 @@
 /* ######################################################################
 
    String Util - These are some useful string functions
-   
+
    _strstrip is a function to remove whitespace from the front and end
    of a string.
-   
+
    This source is placed in the Public Domain, do with it what you will
-   It was originally written by Jason Gunthorpe <jgg@gpu.srv.ualberta.ca>   
-   
+   It was originally written by Jason Gunthorpe <jgg@gpu.srv.ualberta.ca>
+
    ##################################################################### */
 									/*}}}*/
 #ifndef STRUTL_H
@@ -18,7 +18,7 @@
 
 #ifdef __GNUG__
 #pragma interface "apt-pkg/strutl.h"
-#endif 
+#endif
 
 #include <stdlib.h>
 #include <string>
@@ -37,8 +37,8 @@ using std::ostream;
 #else
 #define APT_FORMAT2
 #define APT_FORMAT3
-#endif    
-    
+#endif
+
 char *_strstrip(char *String);
 char *_strtabexpand(char *String,size_t Len);
 bool ParseQuoteWord(const char *&String,string &Res);
@@ -66,13 +66,13 @@ bool CheckDomainList(string Host,string List);
 inline int name(const char *A,const char *AEnd,const char *B) {return func(A,AEnd,B,B+strlen(B));}; \
 inline int name(string A,const char *B) {return func(A.c_str(),A.c_str()+A.length(),B,B+strlen(B));}; \
 inline int name(string A,string B) {return func(A.c_str(),A.c_str()+A.length(),B.c_str(),B.c_str()+B.length());}; \
-inline int name(string A,const char *B,const char *BEnd) {return func(A.c_str(),A.c_str()+A.length(),B,BEnd);}; 
+inline int name(string A,const char *B,const char *BEnd) {return func(A.c_str(),A.c_str()+A.length(),B,BEnd);};
 
 #define APT_MKSTRCMP2(name,func) \
 inline int name(const char *A,const char *AEnd,const char *B) {return func(A,AEnd,B,B+strlen(B));}; \
 inline int name(string A,const char *B) {return func(A.begin(),A.end(),B,B+strlen(B));}; \
 inline int name(string A,string B) {return func(A.begin(),A.end(),B.begin(),B.end());}; \
-inline int name(string A,const char *B,const char *BEnd) {return func(A.begin(),A.end(),B,BEnd);}; 
+inline int name(string A,const char *B,const char *BEnd) {return func(A.begin(),A.end(),B,BEnd);};
 
 int stringcmp(const char *A,const char *AEnd,const char *B,const char *BEnd);
 int stringcasecmp(const char *A,const char *AEnd,const char *B,const char *BEnd);
@@ -102,21 +102,21 @@ inline const char *DeNull(const char *s) {return (s == 0?"(null)":s);};
 class URI
 {
    void CopyFrom(string From);
-		 
+
    public:
-   
+
    string Access;
    string User;
    string Password;
    string Host;
    string Path;
    unsigned int Port;
-   
+
    operator string();
    inline void operator =(string From) {CopyFrom(From);};
    inline bool empty() {return Access.empty();};
    static string SiteOnly(string URI);
-   
+
    URI(string Path) {CopyFrom(Path);};
    URI() : Port(0) {};
 };

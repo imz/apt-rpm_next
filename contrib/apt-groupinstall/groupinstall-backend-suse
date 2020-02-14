@@ -173,7 +173,7 @@ function showgroup
 			echo "Recommendend groups:"
 			echo "$REC" | sed 's/^/  /'
 		fi
-		echo "Packages:" 
+		echo "Packages:"
 		get_pkgs $GRP | sed 's/^/  /'
 
 		NUM=$((NUM + 1))
@@ -220,7 +220,7 @@ while [[ $# -gt 0 ]]; do
 		OPT_SHOWHIDDEN=yes
 		;;
 	--list-tasks)
-		cmd=groupnames 
+		cmd=groupnames
 		;;
 	--task-desc)
 		cmd=showgroup
@@ -248,7 +248,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Find the first populated selection directory
-# Some more information about the *.sel files directory can be found in 
+# Some more information about the *.sel files directory can be found in
 # the suse package: yast2-packagemanager.
 # The file is src/inst/InstSrcManager.cc
 for DIR in $(ls -d /var/adm/YaST/InstSrcManager/IS_CACHE_0x000000??); do

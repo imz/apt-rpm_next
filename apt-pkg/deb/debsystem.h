@@ -23,13 +23,13 @@ class debSystem : public pkgSystem
    int LockFD;
    unsigned LockCount;
    bool CheckUpdates();
-   
+
    debStatusIndex *StatusFile;
-   
+
    public:
 
    virtual bool Lock();
-   virtual bool UnLock(bool NoErrors = false);   
+   virtual bool UnLock(bool NoErrors = false);
    virtual pkgPackageManager *CreatePM(pkgDepCache *Cache) const;
    virtual bool Initialize(Configuration &Cnf);
    virtual bool ArchiveSupported(const char *Type);

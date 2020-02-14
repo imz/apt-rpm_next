@@ -4,14 +4,14 @@
 /* ######################################################################
 
    Version Test - Simple program to run through a file and comare versions.
-   
+
    Each version is compared and the result is checked against an expected
    result in the file. The format of the file is
        a b Res
    Where Res is -1, 1, 0. dpkg -D=1 --compare-versions a "<" b can be
    used to determine what Res should be. # at the start of the line
    is a comment and blank lines are skipped
-   
+
    ##################################################################### */
 									/*}}}*/
 #include <system.h>
@@ -23,71 +23,71 @@
 
 using namespace std;
 
-  static int verrevcmp(const char *val, const char *ref) 
+  static int verrevcmp(const char *val, const char *ref)
 {
    int vc, rc;
    long vl, rl;
    const char *vp, *rp;
-   
-   if (!val) 
+
+   if (!val)
       val = "";
-   if (!ref) 
+   if (!ref)
       ref = "";
-   for (;;) 
+   for (;;)
    {
-      vp = val;  
-      while (*vp && !isdigit(*vp)) 
+      vp = val;
+      while (*vp && !isdigit(*vp))
 	 vp++;
-      rp = ref;  
-      while (*rp && !isdigit(*rp)) 
+      rp = ref;
+      while (*rp && !isdigit(*rp))
 	 rp++;
-      for (;;) 
+      for (;;)
       {
 	 vc= val == vp ? 0 : *val++;
 	 rc= ref == rp ? 0 : *ref++;
 	 if (!rc && !vc)
 	    break;
-	 if (vc && !isalpha(vc)) 
+	 if (vc && !isalpha(vc))
 	    vc += 256; /* assumes ASCII character set */
-	 if (rc && !isalpha(rc)) 
+	 if (rc && !isalpha(rc))
 	    rc += 256;
-	 if (vc != rc) 
+	 if (vc != rc)
 	    return vc - rc;
       }
       val = vp;
       ref = rp;
       vl = 0;
-      if (isdigit(*vp)) 
+      if (isdigit(*vp))
 	 vl = strtol(val,(char**)&val,10);
       rl = 0;
-      if (isdigit(*rp)) 
+      if (isdigit(*rp))
 	 rl = strtol(ref,(char**)&ref,10);
-      if (vl != rl) 
+      if (vl != rl)
 	 return vl - rl;
-      if (!*val && !*ref) 
+      if (!*val && !*ref)
 	 return 0;
-      if (!*val) 
+      if (!*val)
 	 return -1;
-      if (!*ref) 
+      if (!*ref)
 	 return +1;
    }
 }
 
 #if 0
-static int verrevcmp(const char *val, const char *ref) 
-{   
+static int verrevcmp(const char *val, const char *ref)
+{
    int vc, rc;
    long vl, rl;
    const char *vp, *rp;
-   
+
    if (!val) val= "";
    if (!ref) ref= "";
-   for (;;) 
+   for (;;)
    {
       vp= val;  while (*vp && !isdigit(*vp) && *vp != '~') vp++;
       rp= ref;  while (*rp && !isdigit(*rp) && *rp != '~') rp++;
       for (;;)
-      {	 
+      {
 	 vc= val == vp ? 0 : *val++;
 	 rc= ref == rp ? 0 : *ref++;
 	 if (!rc && !vc) break;
@@ -95,7 +95,7 @@ static int verrevcmp(const char *val, const char *ref)
 	 if (rc && !isalpha(rc)) rc += 256;
 	 if (vc != rc) return vc - rc;
       }
-      
+
       val= vp;
       ref= rp;
       if (*vp == '~') val++;
@@ -120,18 +120,18 @@ static int verrevcmp(const char *val, const char *ref)
          else
 	    return -1;
       }
-      
+
       if (!*ref)
       {
 	 if (*val == '~')
 	    return -1;
 	 else
 	    return +1;
-      }      
-   }   
+      }
+   }
 }
 #endif
-    
+
 bool RunTest(const char *File)
 {
    ifstream F(File,ios::in);
@@ -140,7 +140,7 @@ bool RunTest(const char *File)
 
    char Buffer[300];
    int CurLine = 0;
-   
+
    while (1)
    {
       F.getline(Buffer,sizeof(Buffer));
@@ -153,7 +153,7 @@ bool RunTest(const char *File)
       // Comment
       if (Buffer[0] == '#' || Buffer[0] == 0)
 	 continue;
-      
+
       // First version
       char *I;
       char *Start = Buffer;
@@ -162,16 +162,16 @@ bool RunTest(const char *File)
 
       if (*I == 0)
 	 return _error->Error("Invalid line %u",CurLine);
-      
+
       // Second version
       I++;
       Start = I;
       for (I = Start; *I != 0 && *I != ' '; I++);
       string B(Start,I - Start);
-      
+
       if (*I == 0 || I[1] == 0)
 	 return _error->Error("Invalid line %u",CurLine);
-      
+
       // Result
       I++;
       int Expected = atoi(I);
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
       cerr << "You must specify a test file" << endl;
       return 0;
    }
-   
+
    RunTest(argv[1]);
 
    // Print any errors or warnings found
@@ -220,14 +220,14 @@ int main(int argc, char *argv[])
       string Err;
       while (_error->empty() == false)
       {
-	 
+
 	 bool Type = _error->PopMessage(Err);
 	 if (Type == true)
 	    cout << "E: " << Err << endl;
 	 else
 	    cout << "W: " << Err << endl;
       }
-      
+
       return 0;
    }
 }

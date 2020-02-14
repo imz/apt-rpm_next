@@ -15,11 +15,11 @@ int main(int argc,char *argv[])
    pkgInitSystem(*_config,_system);
 
 //   cout << flNoLink(argv[1]) << endl;
-   
+
 //   #if 0
 /*   DynamicMMap *FileMap = new DynamicMMap(MMap::Public);
    pkgFLCache *FList = new pkgFLCache(*FileMap);
-   
+
    char *Name = "/tmp/test";
    pkgFLCache::PkgIterator Pkg(*FList,0);
    pkgFLCache::NodeIterator Node = FList->GetNode(Name,Name+strlen(Name),Pkg.Offset(),true,false);
@@ -31,24 +31,24 @@ int main(int argc,char *argv[])
    _config->Set("Dir::State::status","/tmp/testing/status");
 
    debDpkgDB Db;
-   
+
    {
       OpTextProgress Prog;
-      
+
       if (Db.ReadyPkgCache(Prog) == false)
 	 cerr << "Error!" << endl;
       Prog.Done();
-      
+
       if (Db.ReadyFileList(Prog) == false)
 	 cerr << "Error!" << endl;
    }
-   
+
    if (_error->PendingError() == true)
    {
       _error->DumpErrors();
       return 0;
    }
-   
+
 /*   Db.GetFLCache().BeginDiverLoad();
    pkgFLCache::PkgIterator Pkg(Db.GetFLCache(),0);
    if (Db.GetFLCache().AddDiversion(Pkg,"/usr/include/linux/kerneld.h","/usr/bin/nslookup") == false)
@@ -57,7 +57,7 @@ int main(int argc,char *argv[])
    const char *Tmp = "/usr/include/linux/kerneld.h";
    pkgFLCache::NodeIterator Nde = Db.GetFLCache().GetNode(Tmp,Tmp+strlen(Tmp),0,false,false);
    map_ptrloc Loc = Nde->File;
-      
+
    for (; Nde.end() == false && Nde->File == Loc; Nde++)
       cout << Nde->Flags << ',' << Nde->Pointer << ',' << Nde.File() << endl;
    Db.GetFLCache().FinishDiverLoad();*/
@@ -85,21 +85,21 @@ int main(int argc,char *argv[])
    {
       FileFd F(argv[I],FileFd::ReadOnly);
       debDebFile Deb(F);
-      
+
       if (Deb.ExtractControl(Db) == false)
 	 cerr << "Error!" << endl;
       cout << argv[I] << endl;
-      
+
       pkgCache::VerIterator Ver = Deb.MergeControl(Db);
       if (Ver.end() == true)
 	 cerr << "Failed" << endl;
       else
 	 cout << Ver.ParentPkg().Name() << ' ' << Ver.VerStr() << endl;
-      
+
       pkgExtract Extract(Db.GetFLCache(),Ver);
       Deb.ExtractArchive(Extract);
    }
 //   #endif
-//#endif      
+//#endif
    _error->DumpErrors();
 }

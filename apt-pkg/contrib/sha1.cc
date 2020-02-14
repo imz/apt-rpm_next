@@ -2,21 +2,21 @@
 // Description                                                          /*{{{*/
 // $Id: sha1.cc,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
-   
+
    SHA1 - SHA-1 Secure Hash Algorithm.
-   
-   This file is a Public Domain wrapper for the Public Domain SHA1 
+
+   This file is a Public Domain wrapper for the Public Domain SHA1
    calculation code that is at it's end.
 
-   The algorithm was originally implemented by 
-   Steve Reid <sreid@sea-to-sky.net> and later modified by 
+   The algorithm was originally implemented by
+   Steve Reid <sreid@sea-to-sky.net> and later modified by
    James H. Brown <jbrown@burgoyne.com>.
-   
-   Modifications for APT were done by Alfredo K. Kojima and Jason 
+
+   Modifications for APT were done by Alfredo K. Kojima and Jason
    Gunthorpe.
-   
+
    Still in the public domain.
-   
+
    Test Vectors (from FIPS PUB 180-1)
    "abc"
    A9993E36 4706816A BA3E2571 7850C26C 9CD0D89D
@@ -24,8 +24,8 @@
    84983E44 1C3BD26E BAAE4AA1 F95129E5 E54670F1
    A million repetitions of "a"
    34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F
-   
-   ##################################################################### 
+
+   #####################################################################
  */
 									/*}}} */
 // Include Files                                                        /*{{{*/
@@ -90,7 +90,7 @@ static void SHA1Transform(uint32_t state[5],uint8_t const buffer[64])
    c = state[2];
    d = state[3];
    e = state[4];
-   
+
    /* 4 rounds of 20 operations each. Loop unrolled. */
    R0(a,b,c,d,e,0);
    R0(e,a,b,c,d,1);
@@ -172,13 +172,13 @@ static void SHA1Transform(uint32_t state[5],uint8_t const buffer[64])
    R4(d,e,a,b,c,77);
    R4(c,d,e,a,b,78);
    R4(b,c,d,e,a,79);
-   
+
    /* Add the working vars back into context.state[] */
    state[0] += a;
    state[1] += b;
    state[2] += c;
    state[3] += d;
-   state[4] += e;   
+   state[4] += e;
 }
 									/*}}}*/
 
@@ -250,7 +250,7 @@ SHA1Summation::SHA1Summation()
 {
    uint32_t *state = (uint32_t *)State;
    uint32_t *count = (uint32_t *)Count;
-   
+
    /* SHA1 initialization constants */
    state[0] = 0x67452301;
    state[1] = 0xEFCDAB89;
@@ -269,7 +269,7 @@ SHA1SumValue SHA1Summation::Result()
 {
    uint32_t *state = (uint32_t *)State;
    uint32_t *count = (uint32_t *)Count;
-   
+
    // Apply the padding
    if (Done == false)
    {
@@ -279,15 +279,15 @@ SHA1SumValue SHA1Summation::Result()
       {
 	 // Endian independent
 	 finalcount[i] = (unsigned char) ((count[(i >= 4 ? 0 : 1)]
-					   >> ((3 - (i & 3)) * 8)) & 255);	
+					   >> ((3 - (i & 3)) * 8)) & 255);
       }
-      
+
       Add((unsigned char *) "\200",1);
       while ((count[0] & 504) != 448)
 	 Add((unsigned char *) "\0",1);
-      
+
       Add(finalcount,8);	/* Should cause a SHA1Transform() */
-      
+
    }
 
    Done = true;
@@ -332,7 +332,7 @@ bool SHA1Summation::Add(const unsigned char *data,unsigned long len)
    else
       i = 0;
    memcpy(&buffer[j],&data[i],len - i);
-   
+
    return true;
 }
 									/*}}}*/

@@ -15,9 +15,9 @@
 class GPGMethod : public pkgAcqMethod
 {
    virtual bool Fetch(FetchItem *Itm);
-   
+
  public:
-   
+
    GPGMethod() : pkgAcqMethod("1.0",SingleInstance | SendConfig) {};
 };
 
@@ -34,12 +34,12 @@ class GPGMethod : public pkgAcqMethod
  *    oldStyle: Set to true if the filename is not in the format specified
  *       below and is probably an armoured signed file.
  *    sigCount: Number of signatures found in the file.
- * 
+ *
  * Returns false if there was an error processing the file.
- * 
+ *
  * Extracted signatures will be named
  * targetPrefix+".sig"{1,2,...,sigCount}
- * 
+ *
  * File format for the signed file is:
  *<BOF>
  * <ascii data that was signed by gpg>
@@ -49,7 +49,7 @@ class GPGMethod : public pkgAcqMethod
  * <Repeat the above n times, depending
  * on how many people have signed the file.>
  * <EOF>
- * 
+ *
  * Ie: the original file cat'enated with the signatures generated
  * through gpg -s --armor --detach <yourfile>
  */
@@ -65,7 +65,7 @@ bool extractSignedFile(string file, string targetPrefix, string targetFile,
    if (fin == NULL)
       return _error->Errno("open", "could not open gpg signed file %s",
 			   file.c_str());
-   
+
    oldStyle = false;
 
    bool Failed = false;
@@ -86,7 +86,7 @@ bool extractSignedFile(string file, string targetPrefix, string targetFile,
       {
 	 Failed = true;
 	 _error->Error("no signatures in file %s", file.c_str());
-	 break;	
+	 break;
       }
 
       if (STRCMP(buffer, "-----BEGIN") == 0)
@@ -101,15 +101,15 @@ bool extractSignedFile(string file, string targetPrefix, string targetFile,
    }
    fclose(fout);
 
-   if (Failed) 
+   if (Failed)
    {
       fclose(fin);
       return false;
    }
-   
+
    sigCount = 0;
    // now store each of the signatures in a file, separately
-   while (1) 
+   while (1)
    {
       char buf[32];
 
@@ -120,14 +120,14 @@ bool extractSignedFile(string file, string targetPrefix, string targetFile,
 		       tmps.c_str());
 	 break;
       }
-      
+
       sigCount++;
       snprintf(buf, sizeof(buf), "%i", sigCount);
 
       tmps = targetPrefix+"sig"+string(buf);
-      
+
       fout = fopen(tmps.c_str(), "w+");
-      if (fout == NULL) 
+      if (fout == NULL)
       {
 	 fclose(fin);
 	 return _error->Errno("fopen", "could not create signature file %s",
@@ -149,22 +149,22 @@ bool extractSignedFile(string file, string targetPrefix, string targetFile,
 	 {
 	    Failed = true;
 	    _error->Errno("fgets", "error reading from %s", file.c_str());
-	    break;	 
+	    break;
 	 }
       }
       fclose(fout);
 
-      if (Failed) 
+      if (Failed)
       {
 	 fclose(fin);
 	 return false;
       }
-      
+
       if (fgets(buffer, sizeof(buffer)-1, fin) == NULL)
 	 break;
-      
+
       if (buffer[0] == '\n')
-	 break;      
+	 break;
    }
 
    fclose(fin);
@@ -188,24 +188,24 @@ char *getFileSigner(const char *file, const char *sigfile,
    bool badsig = false;
 
    if (pipe(fd) < 0)
-      return "could not create pipe";  
+      return "could not create pipe";
 
    pid = fork();
    if (pid < 0)
       return "could not spawn new process";
-   else if (pid == 0) 
+   else if (pid == 0)
    {
       string path = _config->Find("Dir::Bin::gpg", "/usr/bin/gpg");
       string pubring = "";
       const char *argv[16];
       int argc = 0;
-      
+
       close(fd[0]);
       close(STDERR_FILENO);
       close(STDOUT_FILENO);
       dup2(fd[1], STDOUT_FILENO);
       dup2(fd[1], STDERR_FILENO);
-      
+
       unsetenv("LANG");
       unsetenv("LC_ALL");
       unsetenv("LC_MESSAGES");
@@ -219,7 +219,7 @@ char *getFileSigner(const char *file, const char *sigfile,
 	 argv[argc++] = "--keyring"; argv[argc++] = pubring.c_str();
       }
       argv[argc++] = "--status-fd"; argv[argc++] = "2";
-      
+
       if (outfile != NULL)
       {
 	 argv[argc++] = "-o"; argv[argc++] = outfile;
@@ -230,28 +230,28 @@ char *getFileSigner(const char *file, const char *sigfile,
       }
       argv[argc++] = file;
       argv[argc] = NULL;
-      
+
       execvp(path.c_str(), (char**)argv);
-      
+
       exit(111);
    }
    close(fd[1]);
    keyid[0] = 0;
    goodsig = false;
-   
+
    f = fdopen(fd[0], "r");
-   
+
    while (1) {
       char *ptr, *ptr1;
-      
+
       if (!fgets(buffer, 1024, f))
 	 break;
-      
+
       if (goodsig && keyid[0])
-	 continue;     
-      
+	 continue;
+
 #define SIGPACK "[GNUPG:] VALIDSIG"
-      if ((ptr1 = strstr(buffer, SIGPACK)) != NULL) 
+      if ((ptr1 = strstr(buffer, SIGPACK)) != NULL)
       {
 	 char *sig;
 	 ptr = sig = ptr1 + sizeof(SIGPACK);
@@ -260,7 +260,7 @@ char *getFileSigner(const char *file, const char *sigfile,
 	 strcpy(keyid, sig);
       }
 #undef SIGPACK
-      
+
 #define GOODSIG "[GNUPG:] GOODSIG"
       if ((ptr1 = strstr(buffer, GOODSIG)) != NULL)
 	 goodsig = true;
@@ -272,26 +272,26 @@ char *getFileSigner(const char *file, const char *sigfile,
 #undef BADSIG
    }
    fclose(f);
-   
+
    waitpid(pid, &status, 0);
 
-   if (WEXITSTATUS(status) == 0) 
+   if (WEXITSTATUS(status) == 0)
    {
       signerKeyID = string(keyid);
       return NULL;
    }
-   else if (WEXITSTATUS(status) == 111) 
+   else if (WEXITSTATUS(status) == 111)
    {
       return "Could not execute gpg to verify signature";
    }
-   else 
+   else
    {
       if (badsig)
 	 return "File has bad signature, it might have been corrupted or tampered.";
 
       if (!keyid[0] || !goodsig)
 	 return "File was not signed with a known key. Check if the proper gpg key was imported to your keyring.";
-      
+
       return "File could not be authenticated";
    }
 }
@@ -325,7 +325,7 @@ void removeTmpDir(string path, int sigCount)
       snprintf(buf, sizeof(buf)-1, "%i", sigCount--);
       unlink(string(path+"/sig"+string(buf)).c_str());
    }
-   
+
    rmdir(path.c_str());
 }
 
@@ -341,7 +341,7 @@ bool GPGMethod::Fetch(FetchItem *Itm)
    FetchResult Res;
    Res.Filename = Itm->DestFile;
    URIStart(Res);
-   
+
    string TempDir;
    const char *SysTempDir;
 
@@ -353,7 +353,7 @@ bool GPGMethod::Fetch(FetchItem *Itm)
    }
    if (makeTmpDir(SysTempDir, TempDir) == false)
       return false;
-   
+
    int SigCount = 0;
    bool OldStyle = true;
 
@@ -361,38 +361,38 @@ bool GPGMethod::Fetch(FetchItem *Itm)
 			 SigCount) == false)
       return false;
 
-   if (OldStyle == true) 
+   if (OldStyle == true)
    {
       // Run GPG on file, extract contents and get the key ID of the signer
       char *msg = getFileSigner(Path.c_str(), NULL,
 		      		Itm->DestFile.c_str(), KeyList);
-      if (msg != NULL) 
+      if (msg != NULL)
       {
 	 removeTmpDir(TempDir, SigCount);
 	 return _error->Error(msg);
       }
    }
-   else 
+   else
    {
       char *msg;
       int i;
       char buf[32];
       string KeyID;
-      
+
       // Check fingerprint for each signature
-      for (i = 1; i <= SigCount; i++) 
+      for (i = 1; i <= SigCount; i++)
       {
 	 snprintf(buf, sizeof(buf)-1, "%i", i);
-	 
+
 	 string SigFile = TempDir+"/sig"+string(buf);
 
-	 
+
 	 // Run GPG on file and get the key ID of the signer
-	 msg = getFileSigner(Itm->DestFile.c_str(), SigFile.c_str(), 
+	 msg = getFileSigner(Itm->DestFile.c_str(), SigFile.c_str(),
 			     NULL, KeyID);
 	 if (msg != NULL)
 	 {
-	    removeTmpDir(TempDir, SigCount);	       
+	    removeTmpDir(TempDir, SigCount);
 	    return _error->Error(msg);
 	 }
 	 if (KeyList.empty())
@@ -401,23 +401,23 @@ bool GPGMethod::Fetch(FetchItem *Itm)
 	    KeyList = KeyList+","+KeyID;
       }
    }
-   
+
    removeTmpDir(TempDir, SigCount);
-   
+
    // Transfer the modification times
    struct stat Buf;
    if (stat(Path.c_str(),&Buf) != 0)
       return _error->Errno("stat","Failed to stat %s", Path.c_str());
-   
+
    struct utimbuf TimeBuf;
    TimeBuf.actime = Buf.st_atime;
    TimeBuf.modtime = Buf.st_mtime;
    if (utime(Itm->DestFile.c_str(),&TimeBuf) != 0)
       return _error->Errno("utime","Failed to set modification time");
-   
+
    if (stat(Itm->DestFile.c_str(),&Buf) != 0)
       return _error->Errno("stat","Failed to stat %s", Itm->DestFile.c_str());
-   
+
    // Return a Done response
    Res.LastModified = Buf.st_mtime;
    Res.Size = Buf.st_size;

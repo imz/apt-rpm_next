@@ -4,12 +4,12 @@
 /* ######################################################################
 
    File URI method for APT
-   
+
    This simply checks that the file specified exists, if so the relevent
    information is returned. If a .gz filename is specified then the file
    name with .gz removed will also be checked and information about it
    will be returned in Alt-*
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -27,9 +27,9 @@
 class FileMethod : public pkgAcqMethod
 {
    virtual bool Fetch(FetchItem *Itm);
-   
+
    public:
-   
+
    FileMethod() : pkgAcqMethod("1.0",SingleInstance | LocalOnly) {};
 };
 
@@ -55,7 +55,7 @@ bool FileMethod::Fetch(FetchItem *Itm)
       if (Itm->LastModified == Buf.st_mtime && Itm->LastModified != 0)
 	 Res.IMSHit = true;
    }
-   
+
    // CNC:2003-11-04
    // See if we can compute a file without a .gz/.bz2/etc extension
    string ComprExtension = _config->Find("Acquire::ComprExtension", ".bz2");
@@ -72,15 +72,15 @@ bool FileMethod::Fetch(FetchItem *Itm)
 	 AltRes.IMSHit = false;
 	 if (Itm->LastModified == Buf.st_mtime && Itm->LastModified != 0)
 	    AltRes.IMSHit = true;
-	 
+
 	 URIDone(Res,&AltRes);
 	 return true;
-      }      
+      }
    }
-   
+
    if (Res.Filename.empty() == true)
       return _error->Error(_("File not found"));
-   
+
    URIDone(Res);
    return true;
 }

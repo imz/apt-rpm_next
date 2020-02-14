@@ -2,36 +2,36 @@
 // Description								/*{{{*/
 // $Id: md5.cc,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
-   
+
    MD5Sum - MD5 Message Digest Algorithm.
 
-   This code implements the MD5 message-digest algorithm. The algorithm is 
-   due to Ron Rivest.  This code was written by Colin Plumb in 1993, no 
-   copyright is claimed. This code is in the public domain; do with it what 
+   This code implements the MD5 message-digest algorithm. The algorithm is
+   due to Ron Rivest.  This code was written by Colin Plumb in 1993, no
+   copyright is claimed. This code is in the public domain; do with it what
    you wish.
- 
-   Equivalent code is available from RSA Data Security, Inc. This code has 
-   been tested against that, and is equivalent, except that you don't need to 
+
+   Equivalent code is available from RSA Data Security, Inc. This code has
+   been tested against that, and is equivalent, except that you don't need to
    include two pages of legalese with every copy.
 
    To compute the message digest of a chunk of bytes, instantiate the class,
-   and repeatedly call one of the Add() members. When finished the Result 
+   and repeatedly call one of the Add() members. When finished the Result
    method will return the Hash and finalize the value.
-   
+
    Changed so as no longer to depend on Colin Plumb's `usual.h' header
    definitions; now uses stuff from dpkg's config.h.
     - Ian Jackson <ijackson@nyx.cs.du.edu>.
-   
+
    Changed into a C++ interface and made work with APT's config.h.
     - Jason Gunthorpe <jgg@gpu.srv.ualberta.ca>
-   
+
    Still in the public domain.
 
    The classes use arrays of char that are a specific size. We cast those
    arrays to uint8_t's and go from there. This allows us to advoid using
    the uncommon inttypes.h in a public header or internally newing memory.
    In theory if C9x becomes nicely accepted
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -57,8 +57,8 @@
 static void byteSwap(uint32_t *buf, unsigned words)
 {
    uint8_t *p = (uint8_t *)buf;
-   
-   do 
+
+   do
    {
       *buf++ = (uint32_t)((unsigned)p[3] << 8 | p[2]) << 16 |
 	 ((unsigned)p[1] << 8 | p[0]);
@@ -89,12 +89,12 @@ static void byteSwap(uint32_t *buf, unsigned words)
 static void MD5Transform(uint32_t buf[4], uint32_t const in[16])
 {
    register uint32_t a, b, c, d;
-   
+
    a = buf[0];
    b = buf[1];
    c = buf[2];
    d = buf[3];
-   
+
    MD5STEP(F1, a, b, c, d, in[0] + 0xd76aa478, 7);
    MD5STEP(F1, d, a, b, c, in[1] + 0xe8c7b756, 12);
    MD5STEP(F1, c, d, a, b, in[2] + 0x242070db, 17);
@@ -128,7 +128,7 @@ static void MD5Transform(uint32_t buf[4], uint32_t const in[16])
    MD5STEP(F2, d, a, b, c, in[2] + 0xfcefa3f8, 9);
    MD5STEP(F2, c, d, a, b, in[7] + 0x676f02d9, 14);
    MD5STEP(F2, b, c, d, a, in[12] + 0x8d2a4c8a, 20);
-   
+
    MD5STEP(F3, a, b, c, d, in[5] + 0xfffa3942, 4);
    MD5STEP(F3, d, a, b, c, in[8] + 0x8771f681, 11);
    MD5STEP(F3, c, d, a, b, in[11] + 0x6d9d6122, 16);
@@ -145,7 +145,7 @@ static void MD5Transform(uint32_t buf[4], uint32_t const in[16])
    MD5STEP(F3, d, a, b, c, in[12] + 0xe6db99e5, 11);
    MD5STEP(F3, c, d, a, b, in[15] + 0x1fa27cf8, 16);
    MD5STEP(F3, b, c, d, a, in[2] + 0xc4ac5665, 23);
-   
+
    MD5STEP(F4, a, b, c, d, in[0] + 0xf4292244, 6);
    MD5STEP(F4, d, a, b, c, in[7] + 0x432aff97, 10);
    MD5STEP(F4, c, d, a, b, in[14] + 0xab9423a7, 15);
@@ -162,7 +162,7 @@ static void MD5Transform(uint32_t buf[4], uint32_t const in[16])
    MD5STEP(F4, d, a, b, c, in[11] + 0xbd3af235, 10);
    MD5STEP(F4, c, d, a, b, in[2] + 0x2ad7d2bb, 15);
    MD5STEP(F4, b, c, d, a, in[9] + 0xeb86d391, 21);
-   
+
    buf[0] += a;
    buf[1] += b;
    buf[2] += c;
@@ -203,7 +203,7 @@ string MD5SumValue::Value() const
                     'c','d','e','f'};
    char Result[33];
    Result[32] = 0;
-   
+
    // Convert each char into two letters
    int J = 0;
    int I = 0;
@@ -211,7 +211,7 @@ string MD5SumValue::Value() const
    {
       Result[I] = Conv[Sum[J] >> 4];
       Result[I + 1] = Conv[Sum[J] & 0xF];
-   } 
+   }
 
    return string(Result);
 }
@@ -231,12 +231,12 @@ MD5Summation::MD5Summation()
 {
    uint32_t *buf = (uint32_t *)Buf;
    uint32_t *bytes = (uint32_t *)Bytes;
-   
+
    buf[0] = 0x67452301;
    buf[1] = 0xefcdab89;
    buf[2] = 0x98badcfe;
    buf[3] = 0x10325476;
-   
+
    bytes[0] = 0;
    bytes[1] = 0;
    Done = false;
@@ -257,11 +257,11 @@ bool MD5Summation::Add(const unsigned char *data,unsigned long len)
    // Update byte count and carry (this could be done with a long long?)
    uint32_t t = bytes[0];
    if ((bytes[0] = t + len) < t)
-      bytes[1]++;	
+      bytes[1]++;
 
    // Space available (at least 1)
-   t = 64 - (t & 0x3f);	
-   if (t > len) 
+   t = 64 - (t & 0x3f);
+   if (t > len)
    {
       memcpy((unsigned char *)in + 64 - t,data,len);
       return true;
@@ -273,7 +273,7 @@ bool MD5Summation::Add(const unsigned char *data,unsigned long len)
    MD5Transform(buf,in);
    data += t;
    len -= t;
-   
+
    // Process data in 64-byte chunks
    while (len >= 64)
    {
@@ -287,7 +287,7 @@ bool MD5Summation::Add(const unsigned char *data,unsigned long len)
    // Handle any remaining bytes of data.
    memcpy(in,data,len);
 
-   return true;   
+   return true;
 }
 									/*}}}*/
 // MD5Summation::AddFD - Add the contents of a FD to the hash		/*{{{*/
@@ -317,21 +317,21 @@ MD5SumValue MD5Summation::Result()
    uint32_t *buf = (uint32_t *)Buf;
    uint32_t *bytes = (uint32_t *)Bytes;
    uint32_t *in = (uint32_t *)In;
-   
+
    if (Done == false)
    {
       // Number of bytes in In
-      int count = bytes[0] & 0x3f;	
+      int count = bytes[0] & 0x3f;
       unsigned char *p = (unsigned char *)in + count;
-      
+
       // Set the first char of padding to 0x80.  There is always room.
       *p++ = 0x80;
-      
+
       // Bytes of padding needed to make 56 bytes (-8..55)
       count = 56 - 1 - count;
-      
-      // Padding forces an extra block 
-      if (count < 0) 
+
+      // Padding forces an extra block
+      if (count < 0)
       {
 	 memset(p,0,count + 8);
 	 byteSwap(in, 16);
@@ -339,18 +339,18 @@ MD5SumValue MD5Summation::Result()
 	 p = (unsigned char *)in;
 	 count = 56;
       }
-      
+
       memset(p, 0, count);
       byteSwap(in, 14);
-      
+
       // Append length in bits and transform
       in[14] = bytes[0] << 3;
       in[15] = bytes[1] << 3 | bytes[0] >> 29;
-      MD5Transform(buf,in);   
+      MD5Transform(buf,in);
       byteSwap(buf,4);
       Done = true;
    }
-   
+
    MD5SumValue V;
    memcpy(V.Sum,buf,16);
    return V;

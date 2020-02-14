@@ -4,10 +4,10 @@
 /* ######################################################################
 
    Acquire Method - Method helper class + functions
-   
+
    These functions are designed to be used within the method task to
    ease communication with APT.
-   
+
    ##################################################################### */
 									/*}}}*/
 #ifndef PKGLIB_ACQUIRE_METHOD_H
@@ -18,7 +18,7 @@
 
 #ifdef __GNUG__
 #pragma interface "apt-pkg/acquire-method.h"
-#endif 
+#endif
 
 class Hashes;
 class pkgAcqMethod
@@ -37,7 +37,7 @@ class pkgAcqMethod
       time_t LastModified;
       bool IndexFile;
    };
-   
+
    struct FetchResult
    {
       string MD5Sum;
@@ -49,7 +49,7 @@ class pkgAcqMethod
       string Filename;
       unsigned long Size;
       unsigned long ResumePoint;
-      
+
       void TakeHashes(Hashes &Hash);
       FetchResult();
    };
@@ -59,11 +59,11 @@ class pkgAcqMethod
    FetchItem *Queue;
    FetchItem *QueueBack;
    string FailExtra;
-   
+
    // Handlers for messages
    virtual bool Configuration(string Message);
    virtual bool Fetch(FetchItem * /*Item*/) {return true;};
-   
+
    // Outgoing messages
    void Fail(bool Transient = false);
    inline void Fail(const char *Why, bool Transient = false) {Fail(string(Why),Transient);};
@@ -80,7 +80,7 @@ class pkgAcqMethod
 
    enum CnfFlags {SingleInstance = (1<<0),
                   Pipeline = (1<<1), SendConfig = (1<<2),
-                  LocalOnly = (1<<3), NeedsCleanup = (1<<4), 
+                  LocalOnly = (1<<3), NeedsCleanup = (1<<4),
                   // CNC:2004-04-27
                   Removable = (1<<5), HasPreferredURI = (1<<6)};
 
@@ -90,7 +90,7 @@ class pkgAcqMethod
 
    int Run(bool Single = false);
    inline void SetFailExtraMsg(string Msg) {FailExtra = Msg;};
-   
+
    pkgAcqMethod(const char *Ver,unsigned long Flags = 0);
    virtual ~pkgAcqMethod() {};
 };

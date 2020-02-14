@@ -7,7 +7,7 @@
 
    This was originally authored by Jason Gunthorpe <jgg@debian.org>
    and is placed in the Public Domain, do with it what you will.
-      
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -39,7 +39,7 @@ static struct addrinfo *LastUsed = 0;
 
 // RotateDNS - Select a new server from a DNS rotation			/*{{{*/
 // ---------------------------------------------------------------------
-/* This is called during certain errors in order to recover by selecting a 
+/* This is called during certain errors in order to recover by selecting a
    new server */
 void RotateDNS()
 {
@@ -58,8 +58,8 @@ static bool DoConnect(struct addrinfo *Addr,string Host,
    // Show a status indicator
    char Name[NI_MAXHOST];
    char Service[NI_MAXSERV];
-   
-   Name[0] = 0;   
+
+   Name[0] = 0;
    Service[0] = 0;
    getnameinfo(Addr->ai_addr,Addr->ai_addrlen,
 	       Name,sizeof(Name),Service,sizeof(Service),
@@ -73,22 +73,22 @@ static bool DoConnect(struct addrinfo *Addr,string Host,
       char Name2[NI_MAXHOST + NI_MAXSERV + 10];
       snprintf(Name2,sizeof(Name2),_("[IP: %s %s]"),Name,Service);
       Owner->SetFailExtraMsg(string(Name2));
-   }   
+   }
    else
       Owner->SetFailExtraMsg("");
-      
+
    // Get a socket
    if ((Fd = socket(Addr->ai_family,Addr->ai_socktype,
 		    Addr->ai_protocol)) < 0)
       return _error->Errno("socket",_("Could not create a socket for %s (f=%u t=%u p=%u)"),
 			   Name,Addr->ai_family,Addr->ai_socktype,Addr->ai_protocol);
-   
+
    SetNonBlock(Fd,true);
    if (connect(Fd,Addr->ai_addr,Addr->ai_addrlen) < 0 &&
        errno != EINPROGRESS)
       return _error->Errno("connect",_("Cannot initiate the connection "
 			   "to %s:%s (%s)."),Host.c_str(),Service,Name);
-   
+
    /* This implements a timeout for connect by opening the connection
       nonblocking */
    if (WaitFd(Fd,true,TimeOut) == false)
@@ -100,14 +100,14 @@ static bool DoConnect(struct addrinfo *Addr,string Host,
    unsigned int Len = sizeof(Err);
    if (getsockopt(Fd,SOL_SOCKET,SO_ERROR,&Err,&Len) != 0)
       return _error->Errno("getsockopt",_("Failed"));
-   
+
    if (Err != 0)
    {
       errno = Err;
       return _error->Errno("connect",_("Could not connect to %s:%s (%s)."),Host.c_str(),
 			   Service,Name);
    }
-   
+
    return true;
 }
 									/*}}}*/
@@ -126,7 +126,7 @@ bool Connect(string Host,int Port,const char *Service,int DefPort,int &Fd,
       snprintf(ServStr,sizeof(ServStr),"%u",Port);
    else
       snprintf(ServStr,sizeof(ServStr),"%s",Service);
-   
+
    /* We used a cached address record.. Yes this is against the spec but
       the way we have setup our rotating dns suggests that this is more
       sensible */
@@ -141,13 +141,13 @@ bool Connect(string Host,int Port,const char *Service,int DefPort,int &Fd,
 	 LastHostAddr = 0;
 	 LastUsed = 0;
       }
-      
+
       // We only understand SOCK_STREAM sockets.
       struct addrinfo Hints;
       memset(&Hints,0,sizeof(Hints));
       Hints.ai_socktype = SOCK_STREAM;
       Hints.ai_protocol = 0;
-      
+
       // Resolve both the host and service simultaneously
       while (1)
       {
@@ -165,7 +165,7 @@ bool Connect(string Host,int Port,const char *Service,int DefPort,int &Fd,
 	       }
 	       return _error->Error(_("Could not resolve '%s'"),Host.c_str());
 	    }
-	    
+
 	    if (Res == EAI_AGAIN)
 	       return _error->Error(_("Temporary failure resolving '%s'"),
 				    Host.c_str());
@@ -174,7 +174,7 @@ bool Connect(string Host,int Port,const char *Service,int DefPort,int &Fd,
 	 }
 	 break;
       }
-      
+
       LastHost = Host;
       LastPort = Port;
    }
@@ -183,17 +183,17 @@ bool Connect(string Host,int Port,const char *Service,int DefPort,int &Fd,
    struct addrinfo *CurHost = LastHostAddr;
    if (LastUsed != 0)
        CurHost = LastUsed;
-   
+
    while (CurHost != 0)
    {
       if (DoConnect(CurHost,Host,TimeOut,Fd,Owner) == true)
       {
 	 LastUsed = CurHost;
 	 return true;
-      }      
+      }
       close(Fd);
       Fd = -1;
-      
+
       // Ignore UNIX domain sockets
       do
       {
@@ -205,17 +205,17 @@ bool Connect(string Host,int Port,const char *Service,int DefPort,int &Fd,
          start */
       if (CurHost == 0 && LastUsed != 0)
 	 CurHost = LastHostAddr;
-      
+
       // Reached the end of the search cycle
       if (CurHost == LastUsed)
 	 break;
-      
+
       if (CurHost != 0)
 	 _error->Discard();
-   }   
+   }
 
    if (_error->PendingError() == true)
-      return false;   
+      return false;
    return _error->Error(_("Unable to connect to %s %s:"),Host.c_str(),ServStr);
 }
 									/*}}}*/

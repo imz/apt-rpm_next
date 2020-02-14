@@ -2,9 +2,9 @@
 // Description								/*{{{*/
 // $Id: debrecords.cc,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
-   
+
    Debian Package Records - Parser for debian package records
-     
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -18,8 +18,8 @@
 // RecordParser::debRecordParser - Constructor				/*{{{*/
 // ---------------------------------------------------------------------
 /* */
-debRecordParser::debRecordParser(string FileName,pkgCache &Cache) : 
-                  File(FileName,FileFd::ReadOnly), 
+debRecordParser::debRecordParser(string FileName,pkgCache &Cache) :
+                  File(FileName,FileFd::ReadOnly),
                   Tags(&File,Cache.Head().MaxVerFileSize + 200)
 {
 }

@@ -9,9 +9,9 @@
    at all. Commands are sent syncronously with the FTP server (as the
    rfc recommends, but it is not really necessary..) and no tricks are
    done to speed things along.
-			
+
    RFC 2428 describes the IPv6 FTP behavior
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -70,7 +70,7 @@ time_t FtpMethod::FailTime = 0;
 // FTPConn::FTPConn - Constructor					/*{{{*/
 // ---------------------------------------------------------------------
 /* */
-FTPConn::FTPConn(URI Srv) : Len(0), ServerFd(-1), DataFd(-1), 
+FTPConn::FTPConn(URI Srv) : Len(0), ServerFd(-1), DataFd(-1),
                             DataListenFd(-1), ServerName(Srv)
 {
    Debug = _config->FindB("Debug::Acquire::Ftp",false);
@@ -96,7 +96,7 @@ void FTPConn::Close()
    DataFd = -1;
    close(DataListenFd);
    DataListenFd = -1;
-   
+
    if (PasvAddr != 0)
       freeaddrinfo(PasvAddr);
    PasvAddr = 0;
@@ -104,16 +104,16 @@ void FTPConn::Close()
 									/*}}}*/
 // FTPConn::Open - Open a new connection				/*{{{*/
 // ---------------------------------------------------------------------
-/* Connect to the server using a non-blocking connection and perform a 
+/* Connect to the server using a non-blocking connection and perform a
    login. */
 bool FTPConn::Open(pkgAcqMethod *Owner)
 {
    // Use the already open connection if possible.
    if (ServerFd != -1)
       return true;
-   
+
    Close();
-   
+
    // Determine the proxy setting
    if (getenv("ftp_proxy") == 0)
    {
@@ -125,23 +125,23 @@ bool FTPConn::Open(pkgAcqMethod *Owner)
 	    Proxy = "";
 	 else
 	    Proxy = SpecificProxy;
-      }   
+      }
       else
 	 Proxy = DefProxy;
    }
    else
       Proxy = getenv("ftp_proxy");
-   
+
    // Parse no_proxy, a , separated list of domains
    if (getenv("no_proxy") != 0)
    {
       if (CheckDomainList(ServerName.Host,getenv("no_proxy")) == true)
 	 Proxy = "";
    }
-   
+
    // Determine what host and port to use based on the proxy settings
    int Port = 0;
-   string Host;   
+   string Host;
    if (Proxy.empty() == true)
    {
       if (ServerName.Port != 0)
@@ -164,17 +164,17 @@ bool FTPConn::Open(pkgAcqMethod *Owner)
    // Login must be before getpeername otherwise dante won't work.
    Owner->Status(_("Logging in"));
    bool Res = Login();
-   
+
    // Get the remote server's address
    PeerAddrLen = sizeof(PeerAddr);
    if (getpeername(ServerFd,(sockaddr *)&PeerAddr,&PeerAddrLen) != 0)
       return _error->Errno("getpeername",_("Unable to determine the peer name"));
-   
+
    // Get the local machine's address
    ServerAddrLen = sizeof(ServerAddr);
    if (getsockname(ServerFd,(sockaddr *)&ServerAddr,&ServerAddrLen) != 0)
       return _error->Errno("getsockname",_("Unable to determine the local name"));
-   
+
    return Res;
 }
 									/*}}}*/
@@ -186,7 +186,7 @@ bool FTPConn::Login()
 {
    unsigned int Tag;
    string Msg;
-   
+
    // Setup the variables needed for authentication
    string User = "anonymous";
    // CNC:2003-06-16
@@ -197,7 +197,7 @@ bool FTPConn::Login()
       User = ServerName.User;
    if (ServerName.Password.empty() == false)
       Pass = ServerName.Password;
-       
+
    // Perform simple login
    if (Proxy.empty() == true)
    {
@@ -206,13 +206,13 @@ bool FTPConn::Login()
 	 return false;
       if (Tag >= 400)
 	 return _error->Error(_("Server refused our connection and said: %s"),Msg.c_str());
-      
+
       // Send the user
       if (WriteMsg(Tag,Msg,"USER %s",User.c_str()) == false)
 	 return false;
       if (Tag >= 400)
 	 return _error->Error(_("USER failed, server said: %s"),Msg.c_str());
-      
+
       if (Tag == 331) { // 331 User name okay, need password.
          // Send the Password
          if (WriteMsg(Tag,Msg,"PASS %s",Pass.c_str()) == false)
@@ -220,21 +220,21 @@ bool FTPConn::Login()
          if (Tag >= 400)
             return _error->Error(_("PASS failed, server said: %s"),Msg.c_str());
       }
-      
+
       // Enter passive mode
       if (_config->Exists("Acquire::FTP::Passive::" + ServerName.Host) == true)
 	 TryPassive = _config->FindB("Acquire::FTP::Passive::" + ServerName.Host,true);
       else
-	 TryPassive = _config->FindB("Acquire::FTP::Passive",true);      
+	 TryPassive = _config->FindB("Acquire::FTP::Passive",true);
    }
    else
-   {      
+   {
       // Read the initial response
       if (ReadResp(Tag,Msg) == false)
 	 return false;
       if (Tag >= 400)
 	 return _error->Error(_("Server refused our connection and said: %s"),Msg.c_str());
-      
+
       // Perform proxy script execution
       Configuration::Item const *Opts = _config->Tree("Acquire::ftp::ProxyLogin");
       if (Opts == 0 || Opts->Child == 0)
@@ -247,7 +247,7 @@ bool FTPConn::Login()
       {
 	 if (Opts->Value.empty() == true)
 	    continue;
-	 
+
 	 // Substitute the variables into the command
 	 char SitePort[20];
 	 if (ServerName.Port != 0)
@@ -266,9 +266,9 @@ bool FTPConn::Login()
 	 if (WriteMsg(Tag,Msg,"%s",Tmp.c_str()) == false)
 	    return false;
 	 if (Tag >= 400)
-	    return _error->Error(_("Login script command '%s' failed, server said: %s"),Tmp.c_str(),Msg.c_str());	 
+	    return _error->Error(_("Login script command '%s' failed, server said: %s"),Tmp.c_str(),Msg.c_str());
       }
-      
+
       // Enter passive mode
       TryPassive = false;
       if (_config->Exists("Acquire::FTP::Passive::" + ServerName.Host) == true)
@@ -279,7 +279,7 @@ bool FTPConn::Login()
 	    TryPassive = _config->FindB("Acquire::FTP::Proxy::Passive",true);
 	 else
 	    TryPassive = _config->FindB("Acquire::FTP::Passive",true);
-      }            
+      }
    }
 
    // Force the use of extended commands
@@ -287,13 +287,13 @@ bool FTPConn::Login()
       ForceExtended = _config->FindB("Acquire::FTP::ForceExtended::" + ServerName.Host,true);
    else
       ForceExtended = _config->FindB("Acquire::FTP::ForceExtended",false);
-   
+
    // Binary mode
    if (WriteMsg(Tag,Msg,"TYPE I") == false)
       return false;
    if (Tag >= 400)
       return _error->Error(_("TYPE failed, server said: %s"),Msg.c_str());
-   
+
    return true;
 }
 									/*}}}*/
@@ -304,7 +304,7 @@ bool FTPConn::ReadLine(string &Text)
 {
    if (ServerFd == -1)
       return false;
-   
+
    // Suck in a line
    while (Len < sizeof(Buffer))
    {
@@ -314,15 +314,15 @@ bool FTPConn::ReadLine(string &Text)
 	 // Escape some special chars
 	 if (Buffer[I] == 0)
 	    Buffer[I] = '?';
-	 
+
 	 // End of line?
 	 if (Buffer[I] != '\n')
 	    continue;
-	 
+
 	 I++;
 	 Text = string(Buffer,I);
 	 memmove(Buffer,Buffer+I,Len - I);
-	 Len -= I;	 
+	 Len -= I;
 	 return true;
       }
 
@@ -332,7 +332,7 @@ bool FTPConn::ReadLine(string &Text)
 	 Close();
 	 return _error->Error(_("Connection timeout"));
       }
-      
+
       // Suck it back
       int Res = read(ServerFd,Buffer + Len,sizeof(Buffer) - Len);
       if (Res == 0)
@@ -342,7 +342,7 @@ bool FTPConn::ReadLine(string &Text)
 	 _error->Errno("read",_("Read error"));
 	 Close();
 	 return false;
-      }      
+      }
       Len += Res;
    }
 
@@ -358,9 +358,9 @@ bool FTPConn::ReadResp(unsigned int &Ret,string &Text)
    string Msg;
    if (ReadLine(Msg) == false)
        return false;
-   
+
    // Get the ID code
-   char *End;   
+   char *End;
    Ret = strtol(Msg.c_str(),&End,10);
    if (End - Msg.c_str() != 3)
       return _error->Error(_("Protocol corruption"));
@@ -373,12 +373,12 @@ bool FTPConn::ReadResp(unsigned int &Ret,string &Text)
 	 cerr << "<- '" << QuoteString(Text,"") << "'" << endl;
       return true;
    }
-   
+
    if (*End != '-')
       return _error->Error(_("Protocol corruption"));
-   
+
    /* Okay, here we do the continued message trick. This is foolish, but
-      proftpd follows the protocol as specified and wu-ftpd doesn't, so 
+      proftpd follows the protocol as specified and wu-ftpd doesn't, so
       we filter. I wonder how many clients break if you use proftpd and
       put a '- in the 3rd spot in the message? */
    char Leader[4];
@@ -392,28 +392,28 @@ bool FTPConn::ReadResp(unsigned int &Ret,string &Text)
 	 Text += Msg;
 	 continue;
       }
-      
+
       // Oops, finished
       if (strncmp(Msg.c_str(),Leader,3) == 0 && Msg[3] == ' ')
       {
 	 Text += Msg.c_str()+4;
 	 break;
       }
-      
+
       // This message has the wu-ftpd style reply code prefixed
       if (strncmp(Msg.c_str(),Leader,3) == 0 && Msg[3] == '-')
       {
 	 Text += Msg.c_str()+4;
 	 continue;
       }
-      
+
       // Must be RFC style prefixing
       Text += Msg;
-   }	   
+   }
 
    if (Debug == true && _error->PendingError() == false)
       cerr << "<- '" << QuoteString(Text,"") << "'" << endl;
-      
+
    return !_error->PendingError();
 }
 									/*}}}*/
@@ -429,7 +429,7 @@ bool FTPConn::WriteMsg(unsigned int &Ret,string &Text,const char *Fmt,...)
    char S[400];
    vsnprintf(S,sizeof(S) - 4,Fmt,args);
    strcat(S,"\r\n");
- 
+
    if (Debug == true)
       cerr << "-> '" << QuoteString(S,"") << "'" << endl;
 
@@ -443,7 +443,7 @@ bool FTPConn::WriteMsg(unsigned int &Ret,string &Text,const char *Fmt,...)
 	 Close();
 	 return _error->Error(_("Connection timeout"));
       }
-      
+
       int Res = write(ServerFd,S + Start,Len);
       if (Res <= 0)
       {
@@ -451,37 +451,37 @@ bool FTPConn::WriteMsg(unsigned int &Ret,string &Text,const char *Fmt,...)
 	 Close();
 	 return false;
       }
-      
+
       Len -= Res;
       Start += Res;
    }
-   
+
    return ReadResp(Ret,Text);
 }
 									/*}}}*/
 // FTPConn::GoPasv - Enter Passive mode					/*{{{*/
 // ---------------------------------------------------------------------
 /* Try to enter passive mode, the return code does not indicate if passive
-   mode could or could not be established, only if there was a fatal error. 
+   mode could or could not be established, only if there was a fatal error.
    We have to enter passive mode every time we make a data connection :| */
 bool FTPConn::GoPasv()
 {
    /* The PASV command only works on IPv4 sockets, even though it could
       in theory suppory IPv6 via an all zeros reply */
-   if (((struct sockaddr *)&PeerAddr)->sa_family != AF_INET || 
+   if (((struct sockaddr *)&PeerAddr)->sa_family != AF_INET ||
        ForceExtended == true)
       return ExtGoPasv();
-   
+
    if (PasvAddr != 0)
       freeaddrinfo(PasvAddr);
    PasvAddr = 0;
-   
+
    // Try to enable pasv mode
    unsigned int Tag;
    string Msg;
    if (WriteMsg(Tag,Msg,"PASV") == false)
       return false;
-   
+
    // Unsupported function
    string::size_type Pos = Msg.find('(');
    if (Tag >= 400 || Pos == string::npos)
@@ -491,7 +491,7 @@ bool FTPConn::GoPasv()
    unsigned a0,a1,a2,a3,p0,p1;
    if (sscanf(Msg.c_str() + Pos,"(%u,%u,%u,%u,%u,%u)",&a0,&a1,&a2,&a3,&p0,&p1) != 6)
       return true;
-   
+
    /* Some evil servers return 0 to mean their addr. We can actually speak
       to these servers natively using IPv6 */
    if (a0 == 0 && a1 == 0 && a2 == 0 && a3 == 0)
@@ -502,13 +502,13 @@ bool FTPConn::GoPasv()
       getnameinfo((struct sockaddr *)&PeerAddr,PeerAddrLen,
 		  Name,sizeof(Name),Service,sizeof(Service),
 		  NI_NUMERICHOST|NI_NUMERICSERV);
-      
+
       struct addrinfo Hints;
       memset(&Hints,0,sizeof(Hints));
       Hints.ai_socktype = SOCK_STREAM;
       Hints.ai_family = ((struct sockaddr *)&PeerAddr)->sa_family;
       Hints.ai_flags |= AI_NUMERICHOST;
-      
+
       // Get a new passive address.
       char Port[100];
       snprintf(Port,sizeof(Port),"%u",(p0 << 8) + p1);
@@ -516,13 +516,13 @@ bool FTPConn::GoPasv()
 	 return true;
       return true;
    }
-   
+
    struct addrinfo Hints;
    memset(&Hints,0,sizeof(Hints));
    Hints.ai_socktype = SOCK_STREAM;
    Hints.ai_family = AF_INET;
    Hints.ai_flags |= AI_NUMERICHOST;
-   
+
    // Get a new passive address.
    char Port[100];
    snprintf(Port,sizeof(Port),"%u",(p0 << 8) + p1);
@@ -541,19 +541,19 @@ bool FTPConn::ExtGoPasv()
    if (PasvAddr != 0)
       freeaddrinfo(PasvAddr);
    PasvAddr = 0;
-   
+
    // Try to enable pasv mode
    unsigned int Tag;
    string Msg;
    if (WriteMsg(Tag,Msg,"EPSV") == false)
       return false;
-   
+
    // Unsupported function
    string::size_type Pos = Msg.find('(');
    if (Tag >= 400 || Pos == string::npos)
       return true;
 
-   // Scan it   
+   // Scan it
    string::const_iterator List[4];
    unsigned Count = 0;
    Pos++;
@@ -567,7 +567,7 @@ bool FTPConn::ExtGoPasv()
    }
    if (Count != 4)
       return true;
-   
+
    // Break it up ..
    unsigned long Proto = 0;
    unsigned long Port = 0;
@@ -576,7 +576,7 @@ bool FTPConn::ExtGoPasv()
    Port = atoi(string(List[2]+1,List[3]).c_str());
    if (IP.empty() == false)
       Proto = atoi(string(List[0]+1,List[1]).c_str());
-   
+
    if (Port == 0)
       return false;
 
@@ -589,7 +589,7 @@ bool FTPConn::ExtGoPasv()
    memset(&Hints,0,sizeof(Hints));
    Hints.ai_socktype = SOCK_STREAM;
    Hints.ai_flags |= AI_NUMERICHOST;
-   
+
    /* The RFC defined case, connect to the old IP/protocol using the
       new port. */
    if (IP.empty() == true)
@@ -613,12 +613,12 @@ bool FTPConn::ExtGoPasv()
       if (Hints.ai_family == 0)
 	 return true;
    }
-   
+
    // Get a new passive address.
    int Res;
    if ((Res = getaddrinfo(IP.c_str(),PStr,&Hints,&PasvAddr)) != 0)
       return true;
-   
+
    return true;
 }
 									/*}}}*/
@@ -633,7 +633,7 @@ bool FTPConn::Size(const char *Path,unsigned long &Size)
    Size = 0;
    if (WriteMsg(Tag,Msg,"SIZE %s",Path) == false)
       return false;
-   
+
    char *End;
    Size = strtol(Msg.c_str(),&End,10);
    if (Tag >= 400 || End == Msg.c_str())
@@ -644,12 +644,12 @@ bool FTPConn::Size(const char *Path,unsigned long &Size)
 // FTPConn::ModTime - Return the modification time of the file		/*{{{*/
 // ---------------------------------------------------------------------
 /* Like Size no error is returned if the command is not supported. If the
-   command fails then time is set to the current time of day to fool 
+   command fails then time is set to the current time of day to fool
    date checks. */
 bool FTPConn::ModTime(const char *Path, time_t &Time)
 {
    Time = time(&Time);
-   
+
    // Query the mod time
    unsigned int Tag;
    string Msg;
@@ -657,7 +657,7 @@ bool FTPConn::ModTime(const char *Path, time_t &Time)
       return false;
    if (Tag >= 400 || Msg.empty() == true || isdigit(Msg[0]) == 0)
       return true;
-   
+
    // Parse it
    StrToTime(Msg,Time);
    return true;
@@ -670,18 +670,18 @@ bool FTPConn::CreateDataFd()
 {
    close(DataFd);
    DataFd = -1;
-   
+
    // Attempt to enter passive mode.
    if (TryPassive == true)
    {
       if (GoPasv() == false)
 	 return false;
-      
+
       // Oops, didn't work out, don't bother trying again.
       if (PasvAddr == 0)
 	 TryPassive = false;
    }
-   
+
    // Passive mode?
    if (PasvAddr != 0)
    {
@@ -689,13 +689,13 @@ bool FTPConn::CreateDataFd()
       if ((DataFd = socket(PasvAddr->ai_family,PasvAddr->ai_socktype,
 			   PasvAddr->ai_protocol)) < 0)
 	 return _error->Errno("socket",_("Could not create a socket"));
-      
+
       // Connect to the server
       SetNonBlock(DataFd,true);
       if (connect(DataFd,PasvAddr->ai_addr,PasvAddr->ai_addrlen) < 0 &&
 	  errno != EINPROGRESS)
 	 return _error->Errno("socket",_("Could not create a socket"));
-   
+
       /* This implements a timeout for connect by opening the connection
          nonblocking */
       if (WaitFd(DataFd,true,TimeOut) == false)
@@ -709,7 +709,7 @@ bool FTPConn::CreateDataFd()
 
       return true;
    }
-   
+
    // Port mode :<
    close(DataListenFd);
    DataListenFd = -1;
@@ -724,7 +724,7 @@ bool FTPConn::CreateDataFd()
    int Res;
    if ((Res = getaddrinfo(0,"0",&Hints,&BindAddr)) != 0)
       return _error->Error(_("getaddrinfo was unable to get a listening socket"));
-   
+
    // Construct the socket
    if ((DataListenFd = socket(BindAddr->ai_family,BindAddr->ai_socktype,
 			      BindAddr->ai_protocol)) < 0)
@@ -732,18 +732,18 @@ bool FTPConn::CreateDataFd()
       freeaddrinfo(BindAddr);
       return _error->Errno("socket",_("Could not create a socket"));
    }
-   
+
    // Bind and listen
    if (bind(DataListenFd,BindAddr->ai_addr,BindAddr->ai_addrlen) < 0)
    {
       freeaddrinfo(BindAddr);
       return _error->Errno("bind",_("Could not bind a socket"));
    }
-   freeaddrinfo(BindAddr);   
+   freeaddrinfo(BindAddr);
    if (listen(DataListenFd,1) < 0)
       return _error->Errno("listen",_("Could not listen on the socket"));
    SetNonBlock(DataListenFd,true);
-   
+
    // Determine the name to send to the remote
    struct sockaddr_storage Addr;
    socklen_t AddrLen = sizeof(Addr);
@@ -763,7 +763,7 @@ bool FTPConn::CreateDataFd()
 	       NI_NUMERICHOST|NI_NUMERICSERV);
 
    // Send off an IPv4 address in the old port format
-   if (((struct sockaddr *)&Addr)->sa_family == AF_INET && 
+   if (((struct sockaddr *)&Addr)->sa_family == AF_INET &&
        ForceExtended == false)
    {
       // Convert the dots in the quad into commas
@@ -771,7 +771,7 @@ bool FTPConn::CreateDataFd()
 	 if (*I == '.')
 	    *I = ',';
       unsigned long Port = atoi(Service);
-      
+
       // Send the port command
       unsigned int Tag;
       string Msg;
@@ -792,7 +792,7 @@ bool FTPConn::CreateDataFd()
    if (Proto == 0)
       return _error->Error(_("Unknown address family %u (AF_*)"),
 			   ((struct sockaddr *)&Addr)->sa_family);
-   
+
    // Send the EPRT command
    unsigned int Tag;
    string Msg;
@@ -812,15 +812,15 @@ bool FTPConn::Finalize()
    // Passive mode? Do nothing
    if (PasvAddr != 0)
       return true;
-   
+
    // Close any old socket..
    close(DataFd);
    DataFd = -1;
-   
+
    // Wait for someone to connect..
    if (WaitFd(DataListenFd,false,TimeOut) == false)
       return _error->Error(_("Data socket connect timed out"));
-      
+
    // Accept the connection
    struct sockaddr_in Addr;
    socklen_t Len = sizeof(Addr);
@@ -830,7 +830,7 @@ bool FTPConn::Finalize()
 
    close(DataListenFd);
    DataListenFd = -1;
-   
+
    return true;
 }
 									/*}}}*/
@@ -846,21 +846,21 @@ bool FTPConn::Get(const char *Path,FileFd &To,unsigned long Resume,
       return false;
 
    unsigned int Tag;
-   string Msg;   
+   string Msg;
    if (Resume != 0)
-   {      
+   {
       if (WriteMsg(Tag,Msg,"REST %u",Resume) == false)
 	 return false;
       if (Tag >= 400)
 	 Resume = 0;
    }
-   
+
    if (To.Truncate(Resume) == false)
       return false;
 
    if (To.Seek(0) == false)
       return false;
-   
+
    if (Resume != 0)
    {
       if (Hash.AddFD(To.Fd(),Resume) == false)
@@ -869,22 +869,22 @@ bool FTPConn::Get(const char *Path,FileFd &To,unsigned long Resume,
 	 return false;
       }
    }
-   
+
    // Send the get command
    if (WriteMsg(Tag,Msg,"RETR %s",Path) == false)
       return false;
-   
+
    if (Tag >= 400)
    {
       if (Tag == 550)
 	 Missing = true;
       return _error->Error(_("Unable to fetch file, server said '%s'"),Msg.c_str());
    }
-   
+
    // Finish off the data connection
    if (Finalize() == false)
       return false;
-   
+
    // Copy loop
    unsigned char Buffer[4096];
    while (1)
@@ -895,7 +895,7 @@ bool FTPConn::Get(const char *Path,FileFd &To,unsigned long Resume,
 	 Close();
 	 return _error->Error(_("Data socket timed out"));
       }
-      
+
       // Read the data..
       int Res = read(DataFd,Buffer,sizeof(Buffer));
       if (Res == 0)
@@ -906,19 +906,19 @@ bool FTPConn::Get(const char *Path,FileFd &To,unsigned long Resume,
 	    continue;
 	 break;
       }
-   
+
       Hash.Add(Buffer,Res);
       if (To.Write(Buffer,Res) == false)
       {
 	 Close();
 	 return false;
-      }      
+      }
    }
 
    // All done
    close(DataFd);
    DataFd = -1;
-   
+
    // Read the closing message from the server
    if (ReadResp(Tag,Msg) == false)
       return false;
@@ -935,27 +935,27 @@ FtpMethod::FtpMethod() : pkgAcqMethod("1.0",SendConfig)
 {
    signal(SIGTERM,SigTerm);
    signal(SIGINT,SigTerm);
-   
+
    Server = 0;
    FailFd = -1;
 }
 									/*}}}*/
 // FtpMethod::SigTerm - Handle a fatal signal				/*{{{*/
 // ---------------------------------------------------------------------
-/* This closes and timestamps the open file. This is neccessary to get 
+/* This closes and timestamps the open file. This is neccessary to get
    resume behavoir on user abort */
 void FtpMethod::SigTerm(int)
 {
    if (FailFd == -1)
       _exit(100);
    close(FailFd);
-   
+
    // Timestamp
    struct utimbuf UBuf;
    UBuf.actime = FailTime;
    UBuf.modtime = FailTime;
    utime(FailFile.c_str(),&UBuf);
-   
+
    _exit(100);
 }
 									/*}}}*/
@@ -966,7 +966,7 @@ bool FtpMethod::Configuration(string Message)
 {
    if (pkgAcqMethod::Configuration(Message) == false)
       return false;
-   
+
    TimeOut = _config->FindI("Acquire::Ftp::Timeout",TimeOut);
    return true;
 }
@@ -981,14 +981,14 @@ bool FtpMethod::Fetch(FetchItem *Itm)
    FetchResult Res;
    Res.Filename = Itm->DestFile;
    Res.IMSHit = false;
-   
+
    // Connect to the server
    if (Server == 0 || Server->Comp(Get) == false)
    {
       delete Server;
       Server = new FTPConn(Get);
    }
-  
+
    // Could not connect is a transient error..
    if (Server->Open(this) == false)
    {
@@ -996,7 +996,7 @@ bool FtpMethod::Fetch(FetchItem *Itm)
       Fail(true);
       return true;
    }
-   
+
    // Get the files information
    Status(_("Query"));
    unsigned long Size;
@@ -1016,7 +1016,7 @@ bool FtpMethod::Fetch(FetchItem *Itm)
       URIDone(Res);
       return true;
    }
-   
+
    // See if the file exists
    struct stat Buf;
    if (stat(Itm->DestFile.c_str(),&Buf) == 0)
@@ -1029,36 +1029,36 @@ bool FtpMethod::Fetch(FetchItem *Itm)
 	 URIDone(Res);
 	 return true;
       }
-      
+
       // Resume?
       if (FailTime == Buf.st_mtime && Size > (unsigned)Buf.st_size)
 	 Res.ResumePoint = Buf.st_size;
    }
-   
+
    // Open the file
    Hashes Hash;
    {
       FileFd Fd(Itm->DestFile,FileFd::WriteAny);
       if (_error->PendingError() == true)
 	 return false;
-      
+
       URIStart(Res);
-      
+
       FailFile = Itm->DestFile;
       FailFile.c_str();   // Make sure we dont do a malloc in the signal handler
       FailFd = Fd.Fd();
-      
+
       bool Missing;
       if (Server->Get(File,Fd,Res.ResumePoint,Hash,Missing) == false)
       {
 	 Fd.Close();
-	 
+
 	 // Timestamp
 	 struct utimbuf UBuf;
 	 UBuf.actime = FailTime;
 	 UBuf.modtime = FailTime;
 	 utime(FailFile.c_str(),&UBuf);
-	 
+
 	 // If the file is missing we hard fail otherwise transient fail
 	 if (Missing == true)
 	    return false;
@@ -1068,10 +1068,10 @@ bool FtpMethod::Fetch(FetchItem *Itm)
 
       Res.Size = Fd.Size();
    }
-   
+
    Res.LastModified = FailTime;
    Res.TakeHashes(Hash);
-   
+
    // Timestamp
    struct utimbuf UBuf;
    UBuf.actime = FailTime;
@@ -1080,19 +1080,19 @@ bool FtpMethod::Fetch(FetchItem *Itm)
    FailFd = -1;
 
    URIDone(Res);
-   
+
    return true;
 }
 									/*}}}*/
 
 int main(int argc,const char *argv[])
-{ 
+{
    /* See if we should be come the http client - we do this for http
       proxy urls */
    if (getenv("ftp_proxy") != 0)
    {
       URI Proxy = string(getenv("ftp_proxy"));
-      
+
       // Run the HTTP method
       if (Proxy.Access == "http")
       {
@@ -1101,16 +1101,16 @@ int main(int argc,const char *argv[])
 	 snprintf(S,sizeof(S),"http_proxy=%s",getenv("ftp_proxy"));
 	 putenv(S);
 	 putenv("no_proxy=");
-	 
+
 	 // Run the http method
 	 string Path = flNotFile(argv[0]) + "http";
 	 execl(Path.c_str(),Path.c_str(),0);
 	 cerr << _("Unable to invoke ") << Path << endl;
 	 exit(100);
-      }      
+      }
    }
-   
+
    FtpMethod Mth;
-   
+
    return Mth.Run();
 }

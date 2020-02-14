@@ -85,7 +85,7 @@ versión 1.3 del CVS de
     <RefEntryTitle><command/dselect/</RefEntryTitle>
     <ManVolNum/8/
   </CiteRefEntry>">
-    
+
 <!-- Boiler plate docinfo section -->
 <!ENTITY apt-docinfo "
  <docinfo>
@@ -94,14 +94,14 @@ versión 1.3 del CVS de
    <copyright><year>1998-2001</> <holder>Jason Gunthorpe</></>
    <date>12 March 2001</>
  </docinfo>
-"> 
+">
 
 <!-- Boiler plate Bug reporting section -->
 <!ENTITY manbugs "
  <RefSect1><Title>Fallos</>
    <para>
    Vea la <ulink url='http://bugs.debian.org/src:apt'>página de fallos de APT</>.
-   Si desea avisar de un fallos en APT, vea 
+   Si desea avisar de un fallos en APT, vea
    <filename>/usr/share/doc/debian/bug-reporting.txt</> o la orden  &reportbug;.
  </RefSect1>
 ">
@@ -121,7 +121,7 @@ versión 1.3 del CVS de
      <ListItem><Para>
      Muestra un breve resumen del modo de uso.
      </VarListEntry>
-     
+
      <VarListEntry><term><option/-v/</><term><option/--version/</>
      <ListItem><Para>
      Muestra la versión del programa.
@@ -133,11 +133,11 @@ versión 1.3 del CVS de
      El programa leerá el fichero de configuración por omisión y luego
      este otro. Lea &apt-conf; para más información acerca de la sintaxis.
      </VarListEntry>
-     
+
      <VarListEntry><term><option/-o/</><term><option/--option/</>
      <ListItem><Para>
      Establece una opción de configuración. La sintaxis es <option>-o
-     Foo::Bar=bar</>. 
+     Foo::Bar=bar</>.
      </VarListEntry>
 ">
 

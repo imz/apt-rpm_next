@@ -1,8 +1,8 @@
 # Japanese mesasges for apt.
 # Copyright (C) 2001 Free Software Foundation, Inc.
 # Project Vine, Daisuke SUZUKI <daisuke@linux.or.jp>, 2001-2003
-# 
-# 
+#
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: apt 0.5.15cnc3\n"

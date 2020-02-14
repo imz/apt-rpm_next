@@ -3,7 +3,7 @@ AC_DEFUN([ah_HAVE_GETCONF],
 		[  --with-getconf          Enable automagical buildtime configuration],
 		[if test "$withval" = "yes"; then
 			AC_PATH_PROG(GETCONF, getconf)
-		elif test ! "$withval" = "no";then 
+		elif test ! "$withval" = "no";then
 			AC_MSG_CHECKING([getconf])
 			AC_MSG_RESULT([$withval])
 			GETCONF=$withval

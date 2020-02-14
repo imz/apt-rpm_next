@@ -9,13 +9,13 @@
    queue. Each queue is unique and each queue has a name derived from the
    URI. The degree of paralization can be controled by how the queue
    name is derived from the URI.
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
 #ifdef __GNUG__
 #pragma implementation "apt-pkg/acquire.h"
-#endif       
+#endif
 #include <apt-pkg/acquire.h>
 #include <apt-pkg/acquire-item.h>
 #include <apt-pkg/acquire-worker.h>
@@ -26,7 +26,7 @@
 #include <apti18n.h>
 
 #include <iostream>
-    
+
 #include <dirent.h>
 #include <sys/time.h>
 #include <errno.h>
@@ -45,15 +45,15 @@ pkgAcquire::pkgAcquire(pkgAcquireStatus *Log) : Log(Log)
    Workers = 0;
    ToFetch = 0;
    Running = false;
-   
+
    string Mode = _config->Find("Acquire::Queue-Mode","host");
    if (strcasecmp(Mode.c_str(),"host") == 0)
       QueueMode = QueueHost;
    if (strcasecmp(Mode.c_str(),"access") == 0)
-      QueueMode = QueueAccess;   
+      QueueMode = QueueAccess;
 
    Debug = _config->FindB("Debug::pkgAcquire",false);
-   
+
    // This is really a stupid place for this
    struct stat St;
    if (stat((_config->FindDir("Dir::State::lists") + "partial/").c_str(),&St) != 0 ||
@@ -72,13 +72,13 @@ pkgAcquire::pkgAcquire(pkgAcquireStatus *Log) : Log(Log)
 pkgAcquire::~pkgAcquire()
 {
    Shutdown();
-   
+
    while (Configs != 0)
    {
       MethodConfig *Jnk = Configs;
       Configs = Configs->Next;
       delete Jnk;
-   }   
+   }
 }
 									/*}}}*/
 // Acquire::Shutdown - Clean out the acquire object			/*{{{*/
@@ -94,7 +94,7 @@ void pkgAcquire::Shutdown()
       Queue *Jnk = Queues;
       Queues = Queues->Next;
       delete Jnk;
-   }   
+   }
 }
 									/*}}}*/
 // Acquire::Add - Add a new item					/*{{{*/
@@ -112,15 +112,15 @@ void pkgAcquire::Add(Item *Itm)
 void pkgAcquire::Remove(Item *Itm)
 {
    Dequeue(Itm);
-   
+
    for (ItemIterator I = Items.begin(); I != Items.end();)
    {
       if (*I == Itm)
       {
 	 Items.erase(I);
 	 I = Items.begin();
-      }      
-      else 
+      }
+      else
 	 I++;
    }
 }
@@ -144,7 +144,7 @@ void pkgAcquire::Remove(Worker *Work)
 {
    if (Running == true)
       abort();
-   
+
    Worker **I = &Workers;
    for (; *I != 0;)
    {
@@ -177,7 +177,7 @@ void pkgAcquire::Enqueue(ItemDesc &Item)
       I = new Queue(Name,this);
       I->Next = Queues;
       Queues = I;
-      
+
       if (Running == true)
 	 I->Startup();
    }
@@ -186,11 +186,11 @@ void pkgAcquire::Enqueue(ItemDesc &Item)
    if (Config->LocalOnly == true && Item.Owner->Complete == false)
       Item.Owner->Local = true;
    Item.Owner->Status = Item::StatIdle;
-   
+
    // Queue it into the named queue
    I->Enqueue(Item);
    ToFetch++;
-         
+
    // Some trace stuff
    if (Debug == true)
    {
@@ -210,7 +210,7 @@ void pkgAcquire::Dequeue(Item *Itm)
    bool Res = false;
    for (; I != 0; I = I->Next)
       Res |= I->Dequeue(Itm);
-   
+
    if (Debug == true)
       clog << "Dequeuing " << Itm->DestFile << endl;
    if (Res == true)
@@ -225,11 +225,11 @@ void pkgAcquire::Dequeue(Item *Itm)
 string pkgAcquire::QueueName(string Uri,MethodConfig const *&Config)
 {
    URI U(Uri);
-   
+
    Config = GetConfig(U.Access);
    if (Config == 0)
       return string();
-   
+
    /* Single-Instance methods get exactly one queue per URI. This is
       also used for the Access queue method  */
    if (Config->SingleInstance == true || QueueMode == QueueAccess)
@@ -240,7 +240,7 @@ string pkgAcquire::QueueName(string Uri,MethodConfig const *&Config)
 									/*}}}*/
 // Acquire::GetConfig - Fetch the configuration information		/*{{{*/
 // ---------------------------------------------------------------------
-/* This locates the configuration structure for an access method. If 
+/* This locates the configuration structure for an access method. If
    a config structure cannot be found a Worker will be created to
    retrieve it */
 pkgAcquire::MethodConfig *pkgAcquire::GetConfig(string Access)
@@ -250,7 +250,7 @@ pkgAcquire::MethodConfig *pkgAcquire::GetConfig(string Access)
    for (Conf = Configs; Conf != 0; Conf = Conf->Next)
       if (Conf->Access == Access)
 	 return Conf;
-   
+
    // Create the new config class
    Conf = new MethodConfig;
    Conf->Access = Access;
@@ -261,7 +261,7 @@ pkgAcquire::MethodConfig *pkgAcquire::GetConfig(string Access)
    Worker Work(Conf);
    if (Work.Start() == false)
       return 0;
-   
+
    return Conf;
 }
 									/*}}}*/
@@ -311,19 +311,19 @@ void pkgAcquire::RunFds(fd_set *RSet,fd_set *WSet)
 pkgAcquire::RunResult pkgAcquire::Run()
 {
    Running = true;
-   
+
    for (Queue *I = Queues; I != 0; I = I->Next)
       I->Startup();
-   
+
    if (Log != 0)
       Log->Start();
-   
+
    bool WasCancelled = false;
 
    // Run till all things have been acquired
    struct timeval tv;
    tv.tv_sec = 0;
-   tv.tv_usec = 500000; 
+   tv.tv_usec = 500000;
    while (ToFetch > 0)
    {
       fd_set RFds;
@@ -332,24 +332,24 @@ pkgAcquire::RunResult pkgAcquire::Run()
       FD_ZERO(&RFds);
       FD_ZERO(&WFds);
       SetFds(Highest,&RFds,&WFds);
-      
+
       int Res;
       do
       {
 	 Res = select(Highest+1,&RFds,&WFds,0,&tv);
       }
       while (Res < 0 && errno == EINTR);
-      
+
       if (Res < 0)
       {
 	 _error->Errno("select","Select has failed");
 	 break;
       }
-	     
+
       RunFds(&RFds,&WFds);
       if (_error->PendingError() == true)
 	 break;
-      
+
       // Timeout, notify the log class
       if (Res == 0 || (Log != 0 && Log->Update == true))
       {
@@ -361,12 +361,12 @@ pkgAcquire::RunResult pkgAcquire::Run()
 	    WasCancelled = true;
 	    break;
 	 }
-      }      
-   }   
+      }
+   }
 
    if (Log != 0)
       Log->Stop();
-   
+
    // Shut down the acquire bits
    Running = false;
    for (Queue *I = Queues; I != 0; I = I->Next)
@@ -374,8 +374,8 @@ pkgAcquire::RunResult pkgAcquire::Run()
 
    // Shut down the items
    for (ItemIterator I = Items.begin(); I != Items.end(); I++)
-      (*I)->Finished(); 
-   
+      (*I)->Finished();
+
    if (_error->PendingError())
       return Failed;
    if (WasCancelled)
@@ -407,17 +407,17 @@ pkgAcquire::Worker *pkgAcquire::WorkerStep(Worker *I)
    if it is part of the download set. */
 bool pkgAcquire::Clean(string Dir)
 {
-   DIR *D = opendir(Dir.c_str());   
+   DIR *D = opendir(Dir.c_str());
    if (D == 0)
       return _error->Errno("opendir",_("Unable to read %s"),Dir.c_str());
-   
+
    string StartDir = SafeGetCWD();
    if (chdir(Dir.c_str()) != 0)
    {
       closedir(D);
       return _error->Errno("chdir",_("Unable to change to %s"),Dir.c_str());
    }
-   
+
    for (struct dirent *Dir = readdir(D); Dir != 0; Dir = readdir(D))
    {
       // Skip some files..
@@ -426,21 +426,21 @@ bool pkgAcquire::Clean(string Dir)
 	  strcmp(Dir->d_name,".") == 0 ||
 	  strcmp(Dir->d_name,"..") == 0)
 	 continue;
-      
+
       // Look in the get list
       ItemCIterator I = Items.begin();
       for (; I != Items.end(); I++)
 	 if (flNotDir((*I)->DestFile) == Dir->d_name)
 	    break;
-      
+
       // Nothing found, nuke it
       if (I == Items.end())
 	 unlink(Dir->d_name);
    };
-   
+
    chdir(StartDir.c_str());
    closedir(D);
-   return true;   
+   return true;
 }
 									/*}}}*/
 // Acquire::TotalNeeded - Number of bytes to fetch			/*{{{*/
@@ -515,7 +515,7 @@ pkgAcquire::MethodConfig::MethodConfig()
 // Queue::Queue - Constructor						/*{{{*/
 // ---------------------------------------------------------------------
 /* */
-pkgAcquire::Queue::Queue(string Name,pkgAcquire *Owner) : Name(Name), 
+pkgAcquire::Queue::Queue(string Name,pkgAcquire *Owner) : Name(Name),
             Owner(Owner)
 {
    Items = 0;
@@ -531,7 +531,7 @@ pkgAcquire::Queue::Queue(string Name,pkgAcquire *Owner) : Name(Name),
 pkgAcquire::Queue::~Queue()
 {
    Shutdown(true);
-   
+
    while (Items != 0)
    {
       QItem *Jnk = Items;
@@ -547,14 +547,14 @@ void pkgAcquire::Queue::Enqueue(ItemDesc &Item)
 {
    QItem **I = &Items;
    for (; *I != 0; I = &(*I)->Next);
-   
+
    // Create a new item
    QItem *Itm = new QItem;
    *Itm = Item;
    Itm->Next = 0;
    *I = Itm;
-   
-   Item.Owner->QueueCounter++;   
+
+   Item.Owner->QueueCounter++;
    if (Items->Next == 0)
       Cycle();
 }
@@ -566,9 +566,9 @@ bool pkgAcquire::Queue::Dequeue(Item *Owner)
 {
    if (Owner->Status == pkgAcquire::Item::StatFetching)
       return _error->Error("Tried to dequeue a fetching object");
-       
+
    bool Res = false;
-   
+
    QItem **I = &Items;
    for (; *I != 0;)
    {
@@ -583,7 +583,7 @@ bool pkgAcquire::Queue::Dequeue(Item *Owner)
       else
 	 I = &(*I)->Next;
    }
-   
+
    return Res;
 }
 									/*}}}*/
@@ -599,12 +599,12 @@ bool pkgAcquire::Queue::Startup()
       pkgAcquire::MethodConfig *Cnf = Owner->GetConfig(U.Access);
       if (Cnf == 0)
 	 return false;
-      
+
       Workers = new Worker(this,Cnf,Owner->Log);
       Owner->Add(Workers);
       if (Workers->Start() == false)
 	 return false;
-      
+
       /* When pipelining we commit 10 items. This needs to change when we
          added other source retry to have cycle maintain a pipeline depth
          on its own. */
@@ -613,7 +613,7 @@ bool pkgAcquire::Queue::Startup()
       else
 	 MaxPipeDepth = 1;
    }
-   
+
    return Cycle();
 }
 									/*}}}*/
@@ -635,9 +635,9 @@ bool pkgAcquire::Queue::Shutdown(bool Final)
 	 delete Jnk;
       }
       else
-	 Cur = &(*Cur)->NextQueue;      
+	 Cur = &(*Cur)->NextQueue;
    }
-   
+
    return true;
 }
 									/*}}}*/
@@ -662,7 +662,7 @@ bool pkgAcquire::Queue::ItemDone(QItem *Itm)
    PipeDepth--;
    if (Itm->Owner->Status == pkgAcquire::Item::StatFetching)
       Itm->Owner->Status = pkgAcquire::Item::StatDone;
-   
+
    if (Itm->Owner->QueueCounter <= 1)
       Owner->Dequeue(Itm->Owner);
    else
@@ -670,7 +670,7 @@ bool pkgAcquire::Queue::ItemDone(QItem *Itm)
       Dequeue(Itm->Owner);
       Owner->Bump();
    }
-   
+
    return Cycle();
 }
 									/*}}}*/
@@ -685,7 +685,7 @@ bool pkgAcquire::Queue::Cycle()
 
    if (PipeDepth < 0)
       return _error->Error("Pipedepth failure");
-			   
+
    // Look for a queable item
    // CNC:2004-04-27
    bool Preferred = (Workers->Config->HasPreferredURI == true &&
@@ -706,7 +706,7 @@ bool pkgAcquire::Queue::Cycle()
 	    if (I->Owner->Status == pkgAcquire::Item::StatIdle)
 	       break;
       }
-      
+
       // Nothing to do, queue is idle.
       if (I == 0) {
          // CNC:2004-04-27
@@ -718,14 +718,14 @@ bool pkgAcquire::Queue::Cycle()
 	 }
 	 return true;
       }
-      
+
       I->Worker = Workers;
       I->Owner->Status = pkgAcquire::Item::StatFetching;
       PipeDepth++;
       if (Workers->QueueItem(I) == false)
 	 return false;
    }
-   
+
    return true;
 }
 									/*}}}*/
@@ -757,7 +757,7 @@ bool pkgAcquireStatus::Pulse(pkgAcquire *Owner)
    CurrentBytes = 0;
    TotalItems = 0;
    CurrentItems = 0;
-   
+
    // Compute the total number of bytes to fetch
    unsigned int Unknown = 0;
    unsigned int Count = 0;
@@ -767,7 +767,7 @@ bool pkgAcquireStatus::Pulse(pkgAcquire *Owner)
       TotalItems++;
       if ((*I)->Status == pkgAcquire::Item::StatDone)
 	 CurrentItems++;
-      
+
       // Totally ignore local items
       if ((*I)->Local == true)
 	 continue;
@@ -778,7 +778,7 @@ bool pkgAcquireStatus::Pulse(pkgAcquire *Owner)
       if ((*I)->FileSize == 0 && (*I)->Complete == false)
 	 Unknown++;
    }
-   
+
    // Compute the current completion
    unsigned long ResumeSize = 0;
    for (pkgAcquire::Worker *I = Owner->WorkersBegin(); I != 0;
@@ -787,13 +787,13 @@ bool pkgAcquireStatus::Pulse(pkgAcquire *Owner)
       {
 	 CurrentBytes += I->CurrentSize;
 	 ResumeSize += I->ResumePoint;
-	 
+
 	 // Files with unknown size always have 100% completion
-	 if (I->CurrentItem->Owner->FileSize == 0 && 
+	 if (I->CurrentItem->Owner->FileSize == 0 &&
 	     I->CurrentItem->Owner->Complete == false)
 	    TotalBytes += I->CurrentSize;
       }
-   
+
    // Normalize the figures and account for unknown size downloads
    if (TotalBytes <= 0)
       TotalBytes = 1;
@@ -803,16 +803,16 @@ bool pkgAcquireStatus::Pulse(pkgAcquire *Owner)
    // Wha?! Is not supposed to happen.
    if (CurrentBytes > TotalBytes)
       CurrentBytes = TotalBytes;
-   
+
    // Compute the CPS
    struct timeval NewTime;
    gettimeofday(&NewTime,0);
    if (NewTime.tv_sec - Time.tv_sec == 6 && NewTime.tv_usec > Time.tv_usec ||
        NewTime.tv_sec - Time.tv_sec > 6)
-   {    
-      double Delta = NewTime.tv_sec - Time.tv_sec + 
+   {
+      double Delta = NewTime.tv_sec - Time.tv_sec +
 	             (NewTime.tv_usec - Time.tv_usec)/1000000.0;
-      
+
       // Compute the CPS value
       if (Delta < 0.01)
 	 CurrentCPS = 0;
@@ -851,10 +851,10 @@ void pkgAcquireStatus::Stop()
    // Compute the CPS and elapsed time
    struct timeval NewTime;
    gettimeofday(&NewTime,0);
-   
-   double Delta = NewTime.tv_sec - StartTime.tv_sec + 
+
+   double Delta = NewTime.tv_sec - StartTime.tv_sec +
                   (NewTime.tv_usec - StartTime.tv_usec)/1000000.0;
-   
+
    // Compute the CPS value
    if (Delta < 0.01)
       CurrentCPS = 0;
@@ -868,7 +868,7 @@ void pkgAcquireStatus::Stop()
 // ---------------------------------------------------------------------
 /* This is used to get accurate final transfer rate reporting. */
 void pkgAcquireStatus::Fetched(unsigned long Size,unsigned long Resume)
-{   
+{
    FetchedBytes += Size - Resume;
 }
 

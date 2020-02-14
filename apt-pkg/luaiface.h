@@ -4,7 +4,7 @@
 
 #ifdef __GNUG__
 #pragma interface "apt-pkg/luaiface.h"
-#endif 
+#endif
 
 #ifdef WITH_LUA
 

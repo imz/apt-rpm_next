@@ -17,7 +17,7 @@ template <class T> void Test(const char *In,const char *Out)
 template <class T> void TestMill(const char *Out)
 {
    T Sum;
-   
+
    const unsigned char As[] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
    unsigned Count = 1000000;
    for (; Count != 0;)
@@ -33,7 +33,7 @@ template <class T> void TestMill(const char *Out)
 	 Count = 0;
       }
    }
-   
+
    cout << Sum.Result().Value() << endl;
    if (stringcasecmp(Sum.Result().Value(),Out) != 0)
       abort();
@@ -46,7 +46,7 @@ int main()
    Test<SHA1Summation>("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
 		       "84983E441C3BD26EBAAE4AA1F95129E5E54670F1");
    TestMill<SHA1Summation>("34AA973CD4C4DAA4F61EEB2BDBAD27316534016F");
-   
+
    // MD5 tests from RFC 1321
    Test<MD5Summation>("","d41d8cd98f00b204e9800998ecf8427e");
    Test<MD5Summation>("a","0cc175b9c0f1b6a831c399e269772661");
@@ -57,7 +57,7 @@ int main()
 		      "d174ab98d277d9f5a5611c2c9f419d9f");
    Test<MD5Summation>("12345678901234567890123456789012345678901234567890123456789012345678901234567890",
 		      "57edf4a22be3c955ac49da2e2107b67a");
-   return 0; 
+   return 0;
 }
 
-	 
+

@@ -4,7 +4,7 @@
 /* ######################################################################
 
    Dependency Cache - Caches Dependency information.
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -23,8 +23,8 @@
 // CNC:2003-03-17
 #include <config.h>
 #include <apt-pkg/luaiface.h>
-    
-#include <apti18n.h>    
+
+#include <apti18n.h>
 									/*}}}*/
 
 // DepCache::pkgDepCache - Constructors					/*{{{*/
@@ -59,7 +59,7 @@ bool pkgDepCache::Init(OpProgress *Prog)
    PkgState = new StateCache[Head().PackageCount];
    DepState = new unsigned char[Head().DependsCount];
    memset(PkgState,0,sizeof(*PkgState)*Head().PackageCount);
-   memset(DepState,0,sizeof(*DepState)*Head().DependsCount); 
+   memset(DepState,0,sizeof(*DepState)*Head().DependsCount);
 
    if (Prog != 0)
    {
@@ -67,7 +67,7 @@ bool pkgDepCache::Init(OpProgress *Prog)
 			    _("Building Dependency Tree"));
       Prog->SubProgress(Head().PackageCount,_("Candidate Versions"));
    }
-   
+
    /* Set the current state of everything. In this state all of the
       packages are kept exactly as is. See AllUpgrade */
    int Done = 0;
@@ -75,28 +75,28 @@ bool pkgDepCache::Init(OpProgress *Prog)
    {
       if (Prog != 0)
 	 Prog->Progress(Done);
-      
+
       // Find the proper cache slot
       StateCache &State = PkgState[I->ID];
       State.iFlags = 0;
-      
+
       // Figure out the install version
       State.CandidateVer = GetCandidateVer(I);
       State.InstallVer = I.CurrentVer();
       State.Mode = ModeKeep;
-      
+
       State.Update(I,*this);
-   }   
-   
+   }
+
    if (Prog != 0)
    {
-      
+
       Prog->OverallProgress(Head().PackageCount,2*Head().PackageCount,
 			    Head().PackageCount,
 			    _("Building Dependency Tree"));
       Prog->SubProgress(Head().PackageCount,_("Dependency Generation"));
    }
-   
+
    Update(Prog);
 
 // CNC:2003-03-17
@@ -105,16 +105,16 @@ bool pkgDepCache::Init(OpProgress *Prog)
    _lua->RunScripts("Scripts::Cache::Init", true);
    _lua->ResetCaches();
 #endif
-   
+
    return true;
-} 
+}
 									/*}}}*/
 
 // DepCache::CheckDep - Checks a single dependency			/*{{{*/
 // ---------------------------------------------------------------------
 /* This first checks the dependency against the main target package and
-   then walks along the package provides list and checks if each provides 
-   will be installed then checks the provides against the dep. Res will be 
+   then walks along the package provides list and checks if each provides
+   will be installed then checks the provides against the dep. Res will be
    set to the package which was used to satisfy the dep. */
 bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
 {
@@ -125,10 +125,10 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
 #if 0
    Res = Dep.TargetPkg();
 
-   /* Check simple depends. A depends -should- never self match but 
+   /* Check simple depends. A depends -should- never self match but
       we allow it anyhow because dpkg does. Technically it is a packaging
       bug. Conflicts may never self match */
-   if (Dep.TargetPkg() != Dep.ParentPkg() || 
+   if (Dep.TargetPkg() != Dep.ParentPkg() ||
        (Dep->Type != Dep::Conflicts && Dep->Type != Dep::Obsoletes))
    {
       PkgIterator Pkg = Dep.TargetPkg();
@@ -138,21 +138,21 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
 	 //                  define if it would be satisfied or not.
 	 if (VS().CheckDep(Pkg.CurrentVer().VerStr(),Dep) == true)
 	    return true;
-      
+
       if (Type == InstallVersion && PkgState[Pkg->ID].InstallVer != 0)
 	 if (VS().CheckDep(PkgState[Pkg->ID].InstVerIter(*this).VerStr(),
 				 Dep) == true)
 	    return true;
-      
+
       if (Type == CandidateVersion && PkgState[Pkg->ID].CandidateVer != 0)
 	 if (VS().CheckDep(PkgState[Pkg->ID].CandidateVerIter(*this).VerStr(),
 				 Dep) == true)
 	    return true;
    }
-   
+
    if (Dep->Type == Dep::Obsoletes)
       return false;
-   
+
    // Check the providing packages
    PrvIterator P = Dep.TargetPkg().ProvidesList();
    PkgIterator Pkg = Dep.ParentPkg();
@@ -162,14 +162,14 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
          a conflicts. See the comment above. */
       if (P.OwnerPkg() == Pkg && Dep->Type == Dep::Conflicts)
 	 continue;
-      
+
       // Check if the provides is a hit
       if (Type == NowVersion)
       {
 	 if (P.OwnerPkg().CurrentVer() != P.OwnerVer())
 	    continue;
       }
-      
+
       if (Type == InstallVersion)
       {
 	 StateCache &State = PkgState[P.OwnerPkg()->ID];
@@ -183,7 +183,7 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
 	 if (State.CandidateVer != (Version *)P.OwnerVer())
 	    continue;
       }
-      
+
       // Compare the versions.
       if (VS().CheckDep(P.ProvideVersion(),Dep) == true) // CNC:2002-07-10
       {
@@ -198,7 +198,7 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
       Res = Dep.TargetPkg();
       return true;
    }
-   
+
 #else
 
    Res = Dep.TargetPkg();
@@ -212,10 +212,10 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
    PkgIterator Dep_ParentPkg = Dep.ParentPkg();
    pkgVersioningSystem &VS = this->VS();
 
-   /* Check simple depends. A depends -should- never self match but 
+   /* Check simple depends. A depends -should- never self match but
       we allow it anyhow because dpkg does. Technically it is a packaging
       bug. Conflicts may never self match */
-   if (Dep_TargetPkg != Dep_ParentPkg || 
+   if (Dep_TargetPkg != Dep_ParentPkg ||
        (Dep->Type != Dep::Conflicts && Dep->Type != Dep::Obsoletes))
    {
       PkgIterator &Pkg = Dep_TargetPkg;
@@ -238,7 +238,7 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
 				       Dep) == true)
 		  return true;
 	    break;
-      
+
 	 case CandidateVersion:
 	    if (PkgState[Pkg->ID].CandidateVer != 0)
 	       if (VS.CheckDep(PkgState[Pkg->ID].CandidateVerIter(*this).VerStr(),
@@ -247,12 +247,12 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
 	    break;
       }
 
-      
+
    }
-   
+
    if (Dep->Type == Dep::Obsoletes)
       return false;
-   
+
    // Check the providing packages
    PrvIterator P = Dep_TargetPkg.ProvidesList();
    PkgIterator &Pkg = Dep_ParentPkg;
@@ -264,7 +264,7 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
          a conflicts. See the comment above. */
       if (P_OwnerPkg == Pkg && Dep->Type == Dep::Conflicts)
 	 continue;
-      
+
       // Check if the provides is a hit
       switch (Type)
       {
@@ -289,7 +289,7 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
 	       break;
 	    }
       }
-      
+
       // Compare the versions.
       if (VS.CheckDep(P.ProvideVersion(),Dep) == true) // CNC:2002-07-10
       {
@@ -315,14 +315,14 @@ bool pkgDepCache::CheckDep(DepIterator Dep,int Type,PkgIterator &Res)
 void pkgDepCache::AddSizes(const PkgIterator &Pkg,signed long Mult)
 {
    StateCache &P = PkgState[Pkg->ID];
-   
+
    if (Pkg->VersionList == 0)
       return;
-   
-   if (Pkg.State() == pkgCache::PkgIterator::NeedsConfigure && 
+
+   if (Pkg.State() == pkgCache::PkgIterator::NeedsConfigure &&
        P.Keep() == true)
       return;
-   
+
    // Compute the size data
    if (P.NewInstall() == true)
    {
@@ -330,18 +330,18 @@ void pkgDepCache::AddSizes(const PkgIterator &Pkg,signed long Mult)
       iDownloadSize += (signed)(Mult*P.InstVerIter(*this)->Size);
       return;
    }
-   
+
    // Upgrading
-   if (Pkg->CurrentVer != 0 && 
-       (P.InstallVer != (Version *)Pkg.CurrentVer() || 
+   if (Pkg->CurrentVer != 0 &&
+       (P.InstallVer != (Version *)Pkg.CurrentVer() ||
 	(P.iFlags & ReInstall) == ReInstall) && P.InstallVer != 0)
    {
-      iUsrSize += (signed)(Mult*((signed)P.InstVerIter(*this)->InstalledSize - 
+      iUsrSize += (signed)(Mult*((signed)P.InstVerIter(*this)->InstalledSize -
 			(signed)Pkg.CurrentVer()->InstalledSize));
       iDownloadSize += (signed)(Mult*P.InstVerIter(*this)->Size);
       return;
    }
-   
+
    // Reinstall
    if (Pkg.State() == pkgCache::PkgIterator::NeedsUnpack &&
        P.Delete() == false)
@@ -349,62 +349,62 @@ void pkgDepCache::AddSizes(const PkgIterator &Pkg,signed long Mult)
       iDownloadSize += (signed)(Mult*P.InstVerIter(*this)->Size);
       return;
    }
-   
+
    // Removing
    if (Pkg->CurrentVer != 0 && P.InstallVer == 0)
    {
       iUsrSize -= (signed)(Mult*Pkg.CurrentVer()->InstalledSize);
       return;
-   }   
+   }
 }
 									/*}}}*/
 // DepCache::AddStates - Add the package to the state counter		/*{{{*/
 // ---------------------------------------------------------------------
-/* This routine is tricky to use, you must make sure that it is never 
+/* This routine is tricky to use, you must make sure that it is never
    called twice for the same package. This means the Remove/Add section
-   should be as short as possible and not encompass any code that will 
+   should be as short as possible and not encompass any code that will
    calld Remove/Add itself. Remember, dependencies can be circular so
    while processing a dep for Pkg it is possible that Add/Remove
    will be called on Pkg */
 void pkgDepCache::AddStates(const PkgIterator &Pkg,int Add)
 {
    StateCache &State = PkgState[Pkg->ID];
-   
+
    // The Package is broken
    if ((State.DepState & DepInstMin) != DepInstMin)
       iBrokenCount += Add;
-   
+
    // Bad state
    if (Pkg.State() != PkgIterator::NeedsNothing)
       iBadCount += Add;
-   
+
    // Not installed
    if (Pkg->CurrentVer == 0)
    {
-      if (State.Mode == ModeDelete && 
+      if (State.Mode == ModeDelete &&
 	  (State.iFlags | Purge) == Purge && Pkg.Purge() == false)
 	 iDelCount += Add;
-      
+
       if (State.Mode == ModeInstall)
 	 iInstCount += Add;
       return;
    }
-   
+
    // Installed, no upgrade
    if (State.Status == 0)
-   {	 
+   {
       if (State.Mode == ModeDelete)
 	 iDelCount += Add;
       else
 	 if ((State.iFlags & ReInstall) == ReInstall)
 	    iInstCount += Add;
-      
+
       return;
    }
-   
+
    // Alll 3 are possible
    if (State.Mode == ModeDelete)
-      iDelCount += Add;   
+      iDelCount += Add;
    if (State.Mode == ModeKeep)
       iKeepCount += Add;
    if (State.Mode == ModeInstall)
@@ -418,7 +418,7 @@ void pkgDepCache::AddStates(const PkgIterator &Pkg,int Add)
 void pkgDepCache::BuildGroupOrs(VerIterator const &V)
 {
    unsigned char Group = 0;
-   
+
    for (DepIterator D = V.DependsList(); D.end() != true; D++)
    {
       // Build the dependency state.
@@ -428,18 +428,18 @@ void pkgDepCache::BuildGroupOrs(VerIterator const &V)
          right sense for a conflicts group */
       if (D->Type == Dep::Conflicts || D->Type == Dep::Obsoletes)
 	 State = ~State;
-      
+
       // Add to the group if we are within an or..
       State &= 0x7;
       Group |= State;
       State |= Group << 3;
       if ((D->CompareOp & Dep::Or) != Dep::Or)
 	 Group = 0;
-      
+
       // Invert for Conflicts
       if (D->Type == Dep::Conflicts || D->Type == Dep::Obsoletes)
 	 State = ~State;
-   }	 
+   }
 }
 									/*}}}*/
 // DepCache::VersionState - Perform a pass over a dependency list	/*{{{*/
@@ -453,7 +453,7 @@ unsigned char pkgDepCache::VersionState(DepIterator D,unsigned char Check,
 				       unsigned char SetPolicy)
 {
    unsigned char Dep = 0xFF;
-   
+
    while (D.end() != true)
    {
       // Compute a single dependency element (glob or)
@@ -464,7 +464,7 @@ unsigned char pkgDepCache::VersionState(DepIterator D,unsigned char Check,
 	 State |= DepState[D->ID];
 	 LastOR = (D->CompareOp & Dep::Or) == Dep::Or;
       }
-	
+
       // CNC:2003-02-17 - IsImportantDep() currently calls IsCritical(), so
       //		  these two are currently doing the same thing. Check
       //		  comments in IsImportantDep() definition.
@@ -473,9 +473,9 @@ unsigned char pkgDepCache::VersionState(DepIterator D,unsigned char Check,
       if (Start.IsCritical() == true)
 	 if ((State & Check) != Check)
 	    Dep &= ~SetMin;
-      
+
       // Policy deps that must be satisfied to install the package
-      if (IsImportantDep(Start) == true && 
+      if (IsImportantDep(Start) == true &&
 	  (State & Check) != Check)
 	 Dep &= ~SetPolicy;
 #else
@@ -498,14 +498,14 @@ unsigned char pkgDepCache::VersionState(DepIterator D,unsigned char Check,
 unsigned char pkgDepCache::DependencyState(DepIterator &D)
 {
    unsigned char State = 0;
-   
+
    if (CheckDep(D,NowVersion) == true)
       State |= DepNow;
    if (CheckDep(D,InstallVersion) == true)
       State |= DepInstall;
    if (CheckDep(D,CandidateVersion) == true)
       State |= DepCVer;
-   
+
    return State;
 }
 									/*}}}*/
@@ -515,27 +515,27 @@ unsigned char pkgDepCache::DependencyState(DepIterator &D)
    for its two states now and install. This is done by using the pre-generated
    dependency information. */
 void pkgDepCache::UpdateVerState(PkgIterator Pkg)
-{   
+{
    // Empty deps are always true
    StateCache &State = PkgState[Pkg->ID];
    State.DepState = 0xFF;
-   
+
    // Check the Current state
    if (Pkg->CurrentVer != 0)
    {
       DepIterator D = Pkg.CurrentVer().DependsList();
       State.DepState &= VersionState(D,DepNow,DepNowMin,DepNowPolicy);
    }
-   
+
    /* Check the candidate state. We do not compare against the whole as
-      a candidate state but check the candidate version against the 
+      a candidate state but check the candidate version against the
       install states */
    if (State.CandidateVer != 0)
    {
       DepIterator D = State.CandidateVerIter(*this).DependsList();
       State.DepState &= VersionState(D,DepInstall,DepCandMin,DepCandPolicy);
    }
-   
+
    // Check target state which can only be current or installed
    if (State.InstallVer != 0)
    {
@@ -546,10 +546,10 @@ void pkgDepCache::UpdateVerState(PkgIterator Pkg)
 									/*}}}*/
 // DepCache::Update - Figure out all the state information		/*{{{*/
 // ---------------------------------------------------------------------
-/* This will figure out the state of all the packages and all the 
+/* This will figure out the state of all the packages and all the
    dependencies based on the current policy. */
 void pkgDepCache::Update(OpProgress *Prog)
-{   
+{
    iUsrSize = 0;
    iDownloadSize = 0;
    iDelCount = 0;
@@ -557,7 +557,7 @@ void pkgDepCache::Update(OpProgress *Prog)
    iKeepCount = 0;
    iBrokenCount = 0;
    iBadCount = 0;
-   
+
    // Perform the depends pass
    int Done = 0;
    for (PkgIterator I = PkgBegin(); I.end() != true; I++,Done++)
@@ -567,7 +567,7 @@ void pkgDepCache::Update(OpProgress *Prog)
       for (VerIterator V = I.VersionList(); V.end() != true; V++)
       {
 	 unsigned char Group = 0;
-	 
+
 	 for (DepIterator D = V.DependsList(); D.end() != true; D++)
 	 {
 	    // Build the dependency state.
@@ -583,7 +583,7 @@ void pkgDepCache::Update(OpProgress *Prog)
 	    // Invert for Conflicts
 	    if (D->Type == Dep::Conflicts || D->Type == Dep::Obsoletes)
 	       State = ~State;
-	 }	 
+	 }
       }
 
       // Compute the pacakge dependency state and size additions
@@ -592,22 +592,22 @@ void pkgDepCache::Update(OpProgress *Prog)
       AddStates(I);
    }
 
-   if (Prog != 0)      
+   if (Prog != 0)
       Prog->Progress(Done);
 }
 									/*}}}*/
 // DepCache::Update - Update the deps list of a package	   		/*{{{*/
 // ---------------------------------------------------------------------
-/* This is a helper for update that only does the dep portion of the scan. 
+/* This is a helper for update that only does the dep portion of the scan.
    It is mainly ment to scan reverse dependencies. */
 void pkgDepCache::Update(DepIterator D)
 {
    // Update the reverse deps
    for (;D.end() != true; D++)
-   {      
+   {
       unsigned char &State = DepState[D->ID];
       State = DependencyState(D);
-    
+
       // Invert for Conflicts
       if (D->Type == Dep::Conflicts || D->Type == Dep::Obsoletes)
 	 State = ~State;
@@ -624,18 +624,18 @@ void pkgDepCache::Update(DepIterator D)
 /* This is called whenever the state of a package changes. It updates
    all cached dependencies related to this package. */
 void pkgDepCache::Update(PkgIterator const &Pkg)
-{   
+{
    // Recompute the dep of the package
    RemoveStates(Pkg);
    UpdateVerState(Pkg);
    AddStates(Pkg);
-   
+
    // Update the reverse deps
    Update(Pkg.RevDependsList());
 
    // Update the provides map for the current ver
    if (Pkg->CurrentVer != 0)
-      for (PrvIterator P = Pkg.CurrentVer().ProvidesList(); 
+      for (PrvIterator P = Pkg.CurrentVer().ProvidesList();
 	   P.end() != true; P++)
 	 Update(P.ParentPkg().RevDependsList());
 
@@ -659,10 +659,10 @@ void pkgDepCache::MarkKeep(PkgIterator const &Pkg,bool Soft)
 
    /* Reject an attempt to keep a non-source broken installed package, those
       must be upgraded */
-   if (Pkg.State() == PkgIterator::NeedsUnpack && 
+   if (Pkg.State() == PkgIterator::NeedsUnpack &&
        Pkg.CurrentVer().Downloadable() == false)
       return;
-   
+
    /* We changed the soft state all the time so the UI is a bit nicer
       to use */
    StateCache &P = PkgState[Pkg->ID];
@@ -670,7 +670,7 @@ void pkgDepCache::MarkKeep(PkgIterator const &Pkg,bool Soft)
       P.iFlags |= AutoKept;
    else
       P.iFlags &= ~AutoKept;
-   
+
    // Check that it is not already kept
    if (P.Mode == ModeKeep)
       return;
@@ -678,7 +678,7 @@ void pkgDepCache::MarkKeep(PkgIterator const &Pkg,bool Soft)
    // We dont even try to keep virtual packages..
    if (Pkg->VersionList == 0)
       return;
-   
+
    P.Flags &= ~Flag::Auto;
    RemoveSizes(Pkg);
    RemoveStates(Pkg);
@@ -710,18 +710,18 @@ void pkgDepCache::MarkDelete(PkgIterator const &Pkg, bool rPurge)
    P.iFlags &= ~(AutoKept | Purge);
    if (rPurge == true)
       P.iFlags |= Purge;
-   
-   if ((P.Mode == ModeDelete || P.InstallVer == 0) && 
+
+   if ((P.Mode == ModeDelete || P.InstallVer == 0) &&
        (Pkg.Purge() == true || rPurge == false))
       return;
-   
+
    // We dont even try to delete virtual packages..
    if (Pkg->VersionList == 0)
       return;
 
    RemoveSizes(Pkg);
    RemoveStates(Pkg);
-   
+
    if (Pkg->CurrentVer == 0 && (Pkg.Purge() == true || rPurge == false))
       P.Mode = ModeKeep;
    else
@@ -729,7 +729,7 @@ void pkgDepCache::MarkDelete(PkgIterator const &Pkg, bool rPurge)
    P.InstallVer = 0;
    P.Flags &= Flag::Auto;
 
-   AddStates(Pkg);   
+   AddStates(Pkg);
    Update(Pkg);
    AddSizes(Pkg);
 }
@@ -742,12 +742,12 @@ void pkgDepCache::MarkInstall(PkgIterator const &Pkg,bool AutoInst,
 {
    if (Depth > 100)
       return;
-   
+
    // Simplifies other routines.
    if (Pkg.end() == true)
       return;
-   
-   /* Check that it is not already marked for install and that it can be 
+
+   /* Check that it is not already marked for install and that it can be
       installed */
    StateCache &P = PkgState[Pkg->ID];
    P.iFlags &= ~AutoKept;
@@ -762,27 +762,27 @@ void pkgDepCache::MarkInstall(PkgIterator const &Pkg,bool AutoInst,
    // See if there is even any possible instalation candidate
    if (P.CandidateVer == 0)
       return;
-   
+
    // We dont even try to install virtual packages..
    if (Pkg->VersionList == 0)
       return;
-   
+
    /* Target the candidate version and remove the autoflag. We reset the
       autoflag below if this was called recursively. Otherwise the user
       should have the ability to de-auto a package by changing its state */
    RemoveSizes(Pkg);
    RemoveStates(Pkg);
-   
+
    P.Mode = ModeInstall;
    P.InstallVer = P.CandidateVer;
    P.Flags &= ~Flag::Auto;
    if (P.CandidateVer == (Version *)Pkg.CurrentVer())
       P.Mode = ModeKeep;
-       
+
    AddStates(Pkg);
    Update(Pkg);
    AddSizes(Pkg);
-   
+
    if (AutoInst == false)
       return;
 
@@ -800,7 +800,7 @@ void pkgDepCache::MarkInstall(PkgIterator const &Pkg,bool AutoInst,
 	 if ((DepState[Dep->ID] & DepInstall) == DepInstall)
 	    Result = false;
       }
-      
+
       // Dep is satisfied okay.
       if (Result == false)
 	 continue;
@@ -810,7 +810,7 @@ void pkgDepCache::MarkInstall(PkgIterator const &Pkg,bool AutoInst,
       //		  comments in IsImportantDep() definition.
 #if 0
       /* Check if this dep should be consider for install. If it is a user
-         defined important dep and we are installed a new package then 
+         defined important dep and we are installed a new package then
 	 it will be installed. Otherwise we only worry about critical deps */
       if (IsImportantDep(Start) == false)
 	 continue;
@@ -820,8 +820,8 @@ void pkgDepCache::MarkInstall(PkgIterator const &Pkg,bool AutoInst,
       if (Start.IsCritical() == false)
 	 continue;
 #endif
-      
-      /* If we are in an or group locate the first or that can 
+
+      /* If we are in an or group locate the first or that can
          succeed. We have already cached this.. */
       for (; Ors > 1 && (DepState[Start->ID] & DepCVer) != DepCVer; Ors--)
 	 Start++;
@@ -835,7 +835,7 @@ void pkgDepCache::MarkInstall(PkgIterator const &Pkg,bool AutoInst,
 	 Version **Cur = List;
 	 PkgIterator P = Start.TargetPkg();
 	 PkgIterator InstPkg(*Cache,0);
-	 
+
 	 // See if there are direct matches (at the start of the list)
 	 for (; *Cur != 0 && (*Cur)->ParentPkg == P.Index(); Cur++)
 	 {
@@ -859,7 +859,7 @@ void pkgDepCache::MarkInstall(PkgIterator const &Pkg,bool AutoInst,
 	       break;
 	    }
 	 }
-	 
+
 	 if (InstPkg.end() == false)
 	 {
 	    MarkInstall(InstPkg,true,Depth + 1);
@@ -868,10 +868,10 @@ void pkgDepCache::MarkInstall(PkgIterator const &Pkg,bool AutoInst,
 	    if (P->CurrentVer == 0)
 	       PkgState[InstPkg->ID].Flags |= Flag::Auto;
 	 }
-	 
+
 	 continue;
       }
-      
+
       /* For conflicts we just de-install the package and mark as auto,
          Conflicts may not have or groups */
       if (Start->Type == Dep::Conflicts || Start->Type == Dep::Obsoletes)
@@ -880,12 +880,12 @@ void pkgDepCache::MarkInstall(PkgIterator const &Pkg,bool AutoInst,
 	 {
 	    VerIterator Ver(*this,*I);
 	    PkgIterator Pkg = Ver.ParentPkg();
-      
+
 	    MarkDelete(Pkg);
 	    PkgState[Pkg->ID].Flags |= Flag::Auto;
 	 }
 	 continue;
-      }      
+      }
    }
 }
 									/*}}}*/
@@ -896,13 +896,13 @@ void pkgDepCache::SetReInstall(PkgIterator const &Pkg,bool To)
 {
    RemoveSizes(Pkg);
    RemoveStates(Pkg);
-   
+
    StateCache &P = PkgState[Pkg->ID];
    if (To == true)
       P.iFlags |= ReInstall;
    else
       P.iFlags &= ~ReInstall;
-   
+
    AddStates(Pkg);
    AddSizes(Pkg);
 }
@@ -914,7 +914,7 @@ void pkgDepCache::SetCandidateVersion(VerIterator TargetVer)
 {
    pkgCache::PkgIterator Pkg = TargetVer.ParentPkg();
    StateCache &P = PkgState[Pkg->ID];
-   
+
    RemoveSizes(Pkg);
    RemoveStates(Pkg);
 
@@ -922,7 +922,7 @@ void pkgDepCache::SetCandidateVersion(VerIterator TargetVer)
       P.InstallVer = (Version *)TargetVer;
    P.CandidateVer = (Version *)TargetVer;
    P.Update(Pkg,*this);
-   
+
    AddStates(Pkg);
    Update(Pkg);
    AddSizes(Pkg);
@@ -935,26 +935,26 @@ void pkgDepCache::StateCache::Update(PkgIterator Pkg,pkgCache &Cache)
 {
    // Some info
    VerIterator Ver = CandidateVerIter(Cache);
-   
+
    // Use a null string or the version string
    if (Ver.end() == true)
       CandVersion = "";
    else
       CandVersion = Ver.VerStr();
-   
+
    // Find the current version
    CurVersion = "";
    if (Pkg->CurrentVer != 0)
       CurVersion = Pkg.CurrentVer().VerStr();
-   
+
    // Strip off the epochs for display
    CurVersion = StripEpoch(CurVersion);
    CandVersion = StripEpoch(CandVersion);
-   
+
    // Figure out if its up or down or equal
    Status = Ver.CompareVer(Pkg.CurrentVer());
    if (Pkg->CurrentVer == 0 || Pkg->VersionList == 0 || CandidateVer == 0)
-     Status = 2;      
+     Status = 2;
 }
 									/*}}}*/
 // StateCache::StripEpoch - Remove the epoch specifier from the version	/*{{{*/
@@ -979,15 +979,15 @@ const char *pkgDepCache::StateCache::StripEpoch(const char *Ver)
    a source and automatic. */
 pkgCache::VerIterator pkgDepCache::Policy::GetCandidateVer(PkgIterator Pkg)
 {
-   /* Not source/not automatic versions cannot be a candidate version 
+   /* Not source/not automatic versions cannot be a candidate version
       unless they are already installed */
    VerIterator Last(*(pkgCache *)this,0);
-   
+
    for (VerIterator I = Pkg.VersionList(); I.end() == false; I++)
    {
       if (Pkg.CurrentVer() == I)
 	 return I;
-      
+
       for (VerFileIterator J = I.FileList(); J.end() == false; J++)
       {
 	 if ((J.File()->Flags & Flag::NotSource) != 0)
@@ -1005,7 +1005,7 @@ pkgCache::VerIterator pkgDepCache::Policy::GetCandidateVer(PkgIterator Pkg)
 	 return I;
       }
    }
-   
+
    return Last;
 }
 									/*}}}*/

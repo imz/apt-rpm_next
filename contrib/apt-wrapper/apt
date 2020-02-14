@@ -133,7 +133,7 @@ apt-get)
 	APTOPT="$APTOPT,no-remove,no-upgrade,only-source,option:,print-uris,purge"
 	APTOPT="$APTOPT,quiet,recon,reinstall,remove,show-upgraded,simulate,tar-only"
 	APTOPT="$APTOPT,target-release,trivial-only,version,yes"
-	
+
 	# Additional options, provided by this tool
 	ADDOPT="checksig,force-rpm,hold:,sourceslist:,no-checksig,no-postscript,postscript"
 	ADDOPT="$ADDOPT,show-rpm-command,test"
@@ -146,10 +146,10 @@ apt-get)
 	  echo "Terminating..." >&2
 	  exit 100
 	fi
-	
+
 	# Note the quotes around `$TEMP': they are essential!
 	eval set -- "$TEMP"
-	
+
 	while true
 	do
 		case $1 in
@@ -204,7 +204,7 @@ apt-get)
 		esac
 		shift
 	done
-	
+
 	if [ -n "$RPM_SHOW_CMD" ]; then
 
 		RPM_CMD=/usr/lib/apt/show_rpm_cmd
@@ -251,13 +251,13 @@ apt-get)
 			exit 100
 		fi
 	fi
-	
+
 	if [ "$APT_FIXBROKEN" == "yes" ]; then
 	  echo "warning: the argument --fix-broken (-f) is not needed normally."
 	  echo "If you want to use this apt argument, use apt-get directly."
 	  exit 100
 	fi
-	
+
 	if [ "$APT_VERBOSE" != "no" ]; then
 		( echo "$PRGNAME dispatching: apt-get $ARG" | tr -s " "
 		  echo

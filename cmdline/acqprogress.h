@@ -3,8 +3,8 @@
 // $Id: acqprogress.h,v 1.5 2003/02/02 22:24:11 jgg Exp $
 /* ######################################################################
 
-   Acquire Progress - Command line progress meter 
-   
+   Acquire Progress - Command line progress meter
+
    ##################################################################### */
 									/*}}}*/
 #ifndef ACQPROGRESS_H
@@ -18,9 +18,9 @@ class AcqTextStatus : public pkgAcquireStatus
    char BlankLine[1024];
    unsigned long ID;
    unsigned long Quiet;
-   
+
    public:
-   
+
    virtual bool MediaChange(string Media,string Drive);
    virtual bool Authenticate(string Desc,string &User,string &Pass);
    virtual void IMSHit(pkgAcquire::ItemDesc &Itm);
@@ -29,7 +29,7 @@ class AcqTextStatus : public pkgAcquireStatus
    virtual void Fail(pkgAcquire::ItemDesc &Itm);
    virtual void Start();
    virtual void Stop();
-   
+
    bool Pulse(pkgAcquire *Owner);
 
    AcqTextStatus(unsigned int &ScreenWidth,unsigned int Quiet);

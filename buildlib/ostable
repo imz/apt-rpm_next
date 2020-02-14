@@ -11,7 +11,7 @@
 [^-]*-kfreebsd.*-gnu   freebsd
 [^-]*-gnu[^-]*   hurd
 
-# These are samples. 
+# These are samples.
 hp-hpux[^-]*	    hp-ux
 sun-solaris[^-]*    solaris
 [^-]*-openbsd[^-]*  openbsd

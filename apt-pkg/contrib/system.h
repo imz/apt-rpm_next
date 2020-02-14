@@ -2,12 +2,12 @@
 // Description								/*{{{*/
 // $Id: system.h,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
-   
+
    System Header - Usefull private definitions
 
    This source is placed in the Public Domain, do with it what you will
    It was originally written by Brian C. White.
-   
+
    ##################################################################### */
 									/*}}}*/
 // Private header

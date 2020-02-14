@@ -7,7 +7,7 @@
 <version>$Id: offline.sgml,v 1.8 2003/02/12 15:06:41 doogie Exp $</version>
 
 <abstract>
-This document describes how to use APT in a non-networked environment, 
+This document describes how to use APT in a non-networked environment,
 specifically a 'sneaker-net' approach for performing upgrades.
 </abstract>
 
@@ -34,16 +34,16 @@ For more details, on Debian GNU/Linux systems, see the file
 <p>
 Normally APT requires direct access to a Debian archive, either from a local
 media or through a network. Another common complaint is that a Debian machine
-is on a slow link, such as a modem and another machine has a very fast 
+is on a slow link, such as a modem and another machine has a very fast
 connection but they are physically distant.
 
 <p>
-The solution to this is to use large removable media such as a Zip disc or a 
+The solution to this is to use large removable media such as a Zip disc or a
 SuperDisk disc. These discs are not large enough to store the entire Debian
 archive but can easily fit a subset large enough for most users. The idea
 is to use APT to generate a list of packages that are required and then fetch
-them onto the disc using another machine with good connectivity. It is 
-even possible to use another Debian machine with APT or to use a completely 
+them onto the disc using another machine with good connectivity. It is
+even possible to use another Debian machine with APT or to use a completely
 different OS and a download tool like wget.
 
 <p>
@@ -61,9 +61,9 @@ names such as ext2, fat32 or vfat.
 <sect>Overview
 
 <p>
-APT being available on both machines gives the simplest configuration. The 
-basic idea is to place a copy of the status file on the disc and use the 
-remote machine to fetch the latest package files and decide which packages to 
+APT being available on both machines gives the simplest configuration. The
+basic idea is to place a copy of the status file on the disc and use the
+remote machine to fetch the latest package files and decide which packages to
 download. The disk directory structure should look like:
 
 <example>
@@ -92,7 +92,7 @@ if you are using a local archive you must use copy URIs, the syntax is identical
 to file URIs.
 
 <p>
-<em>apt.conf</em> must contain the necessary information to make APT use the 
+<em>apt.conf</em> must contain the necessary information to make APT use the
 disc:
 
 <example>
@@ -101,10 +101,10 @@ disc:
    /* This is not necessary if the two machines are the same arch, it tells
       the remote APT what architecture the Debian machine is */
    Architecture "i386";
-   
+
    Get::Download-Only "true";
  };
- 
+
  Dir
  {
    /* Use the disc for state information and redirect the status file from
@@ -115,20 +115,20 @@ disc:
    // Binary caches will be stored locally
    Cache::archives "/disc/archives/";
    Cache "/tmp/";
-   
+
    // Location of the source list.
    Etc "/disc/";
- }; 
+ };
 </example>
 
 More details can be seen by examining the apt.conf man page and the sample
 configuration file in <em>/usr/share/doc/apt/examples/apt.conf</em>.
 
 <p>
-On the remote Debian machine the first thing to do is mount the disc and copy 
+On the remote Debian machine the first thing to do is mount the disc and copy
 <em>/var/lib/dpkg/status</em> to it. You will also need to create the directories
 outlined in the Overview, <em>archives/partial/</em> and <em>lists/partial/</em>
-Then take the disc to the remote machine and configure the sources.list. 
+Then take the disc to the remote machine and configure the sources.list.
 On the remote machine execute the following:
 
 <example>
@@ -140,8 +140,8 @@ On the remote machine execute the following:
 </example>
 
 The dist-upgrade command can be replaced with any-other standard APT commands,
-particularly dselect-upgrad. You can even use an APT front end such as 
-<em>dselect</em> However this presents a problem in communicating your 
+particularly dselect-upgrad. You can even use an APT front end such as
+<em>dselect</em> However this presents a problem in communicating your
 selections back to the local computer.
 
 <p>
@@ -156,12 +156,12 @@ the Debian machine. Take the disc back and run:
   [ Or any other APT command ]
 </example>
 
-<p> 
-It is necessary for proper function to re-specify the status file to be the 
+<p>
+It is necessary for proper function to re-specify the status file to be the
 local one. This is very important!
 
 <p>
-If you are using dselect you can do the very risky operation of copying 
+If you are using dselect you can do the very risky operation of copying
 disc/status to /var/lib/dpkg/status so that any selections you made on the
 remote machine are updated. I highly recommend that people only make selections
 on the local machine - but this may not always be possible. DO NOT copy
@@ -196,19 +196,19 @@ Unlike the previous technique no special configuration files are required. We
 merely use the standard APT commands to generate the file list.
 
 <example>
- # apt-get dist-upgrade 
+ # apt-get dist-upgrade
  [ Press no when prompted, make sure you are happy with the actions ]
  # apt-get -qq --print-uris dist-upgrade > uris
  # awk '{print "wget -O " $2 " " $1}' < uris > /disc/wget-script
 </example>
 
-Any command other than dist-upgrade could be used here, including 
+Any command other than dist-upgrade could be used here, including
 dselect-upgrade.
 
 <p>
-The /disc/wget-script file will now contain a list of wget commands to execute 
+The /disc/wget-script file will now contain a list of wget commands to execute
 in order to fetch the necessary archives. This script should be run with the
-current directory as the disc's mount point so as to save the output on the 
+current directory as the disc's mount point so as to save the output on the
 disc.
 
 <p>

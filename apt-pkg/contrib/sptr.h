@@ -2,20 +2,20 @@
 // Description								/*{{{*/
 // $Id: sptr.h,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
-   
+
    Trivial non-ref counted 'smart pointer'
-   
-   This is really only good to eliminate 
-     { 
+
+   This is really only good to eliminate
+     {
        delete Foo;
        return;
      }
-   
+
    Blocks from functions.
-   
+
    I think G++ has become good enough that doing this won't have much
    code size implications.
-   
+
    ##################################################################### */
 									/*}}}*/
 #ifndef SMART_POINTER_H
@@ -26,17 +26,17 @@ class SPtr
 {
    public:
    T *Ptr;
-   
+
    inline T *operator ->() {return Ptr;};
    inline T &operator *() {return *Ptr;};
    inline operator T *() {return Ptr;};
    inline operator void *() {return Ptr;};
    inline T *UnGuard() {T *Tmp = Ptr; Ptr = 0; return Tmp;};
-   inline void operator =(T *N) {Ptr = N;};      
+   inline void operator =(T *N) {Ptr = N;};
    inline bool operator ==(T *lhs) const {return Ptr == lhs;};
    inline bool operator !=(T *lhs) const {return Ptr != lhs;};
    inline T*Get() {return Ptr;};
-      
+
    inline SPtr(T *Ptr) : Ptr(Ptr) {};
    inline SPtr() : Ptr(0) {};
    inline ~SPtr() {delete Ptr;};
@@ -47,7 +47,7 @@ class SPtrArray
 {
    public:
    T *Ptr;
-   
+
    //inline T &operator *() {return *Ptr;};
    inline operator T *() {return Ptr;};
    inline operator void *() {return Ptr;};
@@ -57,7 +57,7 @@ class SPtrArray
    inline bool operator ==(T *lhs) const {return Ptr == lhs;};
    inline bool operator !=(T *lhs) const {return Ptr != lhs;};
    inline T *Get() {return Ptr;};
-   
+
    inline SPtrArray(T *Ptr) : Ptr(Ptr) {};
    inline SPtrArray() : Ptr(0) {};
    inline ~SPtrArray() {delete [] Ptr;};

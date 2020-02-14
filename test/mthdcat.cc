@@ -7,7 +7,7 @@
 int main()
 {
    char Buffer[4096];
-   
+
    while (1)
    {
       int Res = read(STDIN_FILENO,Buffer,sizeof(Buffer));

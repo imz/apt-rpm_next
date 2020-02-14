@@ -5,7 +5,7 @@
 
    RPM Specific sources.list types and the three sorts of RPM
    index files.
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -61,7 +61,7 @@ string rpmListIndex::ReleaseURI(string Type) const
       Res = URI + Dist + "/base/";
 
    Res += Type;
-   
+
    if (rpmdata->HasIndexTranslation() == true)
    {
       map<string,string> Dict;
@@ -78,7 +78,7 @@ string rpmListIndex::ReleaseURI(string Type) const
 // rpmListIndex::ReleaseInfo - One liner describing the index URI	/*{{{*/
 // ---------------------------------------------------------------------
 /* */
-string rpmListIndex::ReleaseInfo(string Type) const 
+string rpmListIndex::ReleaseInfo(string Type) const
 {
    string Info = ::URI::SiteOnly(URI) + ' ';
    if (Dist[Dist.size() - 1] == '/')
@@ -87,7 +87,7 @@ string rpmListIndex::ReleaseInfo(string Type) const
 	 Info += Dist;
    }
    else
-      Info += Dist;   
+      Info += Dist;
    Info += " ";
    Info += Type;
    return Info;
@@ -109,7 +109,7 @@ bool rpmListIndex::GetReleases(pkgAcquire *Owner) const
 // rpmListIndex::Info - One liner describing the index URI		/*{{{*/
 // ---------------------------------------------------------------------
 /* */
-string rpmListIndex::Info(string Type) const 
+string rpmListIndex::Info(string Type) const
 {
    string Info = ::URI::SiteOnly(URI) + ' ';
    if (Dist[Dist.size() - 1] == '/')
@@ -118,7 +118,7 @@ string rpmListIndex::Info(string Type) const
 	 Info += Dist;
    }
    else
-      Info += Dist + '/' + Section;   
+      Info += Dist + '/' + Section;
    Info += " ";
    Info += Type;
    return Info;
@@ -141,19 +141,19 @@ string rpmListIndex::IndexURI(string Type) const
    {
       if (Dist != "/")
 	 Res = URI + Dist;
-      else 
+      else
 	 Res = URI;
    }
    else
       Res = URI + Dist + "/base/";
-   
+
    Res += Type + '.' + Section;
 
    if (rpmdata->HasIndexTranslation() == true)
    {
       map<string,string> Dict;
       Dict["uri"] = URI;
-      Dict["dist"] = Dist; 
+      Dict["dist"] = Dist;
       Dict["sect"] = Section;
       Dict["type"] = Type;
       rpmdata->TranslateIndex(Res, Dict);
@@ -207,10 +207,10 @@ string rpmSrcListIndex::SourceInfo(pkgSrcRecords::Parser const &Record,
    {
       if (Dist != "/")
 	 Res += Dist;
-   }      
+   }
    else
       Res += Dist + '/' + Section;
-   
+
    Res += " ";
    Res += Record.Package();
    Res += " ";
@@ -226,7 +226,7 @@ string rpmSrcListIndex::ArchiveURI(string File) const
 {
    RPMPackageData *rpmdata = RPMPackageData::Singleton();
    string Res;
-   
+
    if (Dist[Dist.size() - 1] == '/')
    {
       if (Dist != "/")
@@ -236,7 +236,7 @@ string rpmSrcListIndex::ArchiveURI(string File) const
    }
    else
       Res = URI + Dist;
-   
+
    if (File.find("/") != string::npos)
       Res += '/' + File;
    else
@@ -246,17 +246,17 @@ string rpmSrcListIndex::ArchiveURI(string File) const
    {
       map<string,string> Dict;
       Dict["uri"] = URI;
-      Dict["dist"] = Dist; 
+      Dict["dist"] = Dist;
       Dict["sect"] = Section;
       string::size_type pos = File.rfind("/");
       if (pos != string::npos)
 	 Dict["file"] = string(File, pos+1);
       else
 	 Dict["file"] = File;
-      
+
       rpmdata->TranslateSource(Res, Dict);
    }
-	 
+
    return Res;
 }
 									/*}}}*/
@@ -274,7 +274,7 @@ pkgSrcRecords::Parser *rpmSrcListIndex::CreateSrcParser() const
 bool rpmSrcListIndex::GetIndexes(pkgAcquire *Owner) const
 {
    // Ignore indexes for repositories that could not be authenticated
-   if (Repository->IsAuthenticated() == true && 
+   if (Repository->IsAuthenticated() == true &&
        Repository->HasRelease() == false)
       return true;
    new pkgAcqIndex(Owner,Repository,IndexURI("srclist"),Info("srclist"),
@@ -296,7 +296,7 @@ string rpmPkgListIndex::ArchiveInfo(pkgCache::VerIterator Ver) const
    }
    else
       Res += Dist + '/' + Section;
-   
+
    Res += " ";
    Res += Ver.ParentPkg().Name();
    Res += " ";
@@ -329,7 +329,7 @@ string rpmPkgListIndex::ArchiveURI(string File) const
    {
       map<string,string> Dict;
       Dict["uri"] = URI;
-      Dict["dist"] = Dist; 
+      Dict["dist"] = Dist;
       Dict["sect"] = Section;
       string::size_type pos = File.rfind("/");
       if (pos != string::npos)
@@ -338,7 +338,7 @@ string rpmPkgListIndex::ArchiveURI(string File) const
 	 Dict["file"] = File;
       rpmdata->TranslateBinary(Res, Dict);
    }
-	 
+
    return Res;
 }
 									/*}}}*/
@@ -348,7 +348,7 @@ string rpmPkgListIndex::ArchiveURI(string File) const
 bool rpmPkgListIndex::GetIndexes(pkgAcquire *Owner) const
 {
    // Ignore indexes for repositories that could not be authenticated
-   if (Repository->IsAuthenticated() == true && 
+   if (Repository->IsAuthenticated() == true &&
        Repository->HasRelease() == false)
       return true;
    new pkgAcqIndex(Owner,Repository,IndexURI("pkglist"),Info("pkglist"),
@@ -377,27 +377,27 @@ bool rpmPkgListIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
    // Store the IMS information
    pkgCache::PkgFileIterator File = Gen.GetCurFile();
    struct stat St;
-   if (stat(PackageFile.c_str(),&St) != 0) 
+   if (stat(PackageFile.c_str(),&St) != 0)
    {
       delete Handler;
       return _error->Errno("stat",_("Failed to stat %s"), PackageFile.c_str());
    }
    File->Size = St.st_size;
    File->mtime = St.st_mtime;
-   
+
    rpmListParser Parser(Handler);
-   if (_error->PendingError() == true) 
+   if (_error->PendingError() == true)
    {
       delete Handler;
       return _error->Error(_("Problem opening %s"),PackageFile.c_str());
    }
-   
+
    if (Gen.MergeList(Parser) == false)
    {
       delete Handler;
       return _error->Error(_("Problem with MergeList %s"),PackageFile.c_str());
    }
-   
+
    delete Handler;
 
    // Check the release file
@@ -447,7 +447,7 @@ pkgCache::PkgFileIterator rpmPkgListIndex::FindInCache(pkgCache &Cache) const
    {
       if (FileName != File.FileName())
 	 continue;
-      
+
       struct stat St;
       if (stat(File.FileName(),&St) != 0)
 	 return pkgCache::PkgFileIterator(Cache);
@@ -456,7 +456,7 @@ pkgCache::PkgFileIterator rpmPkgListIndex::FindInCache(pkgCache &Cache) const
 	 return pkgCache::PkgFileIterator(Cache);
       return File;
    }
-   
+
    return File;
 }
 									/*}}}*/
@@ -566,7 +566,7 @@ bool rpmDatabaseIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
    rpmListParser Parser(Handler);
    if (_error->PendingError() == true)
       return _error->Error(_("Problem opening RPM database"));
-   
+
    Prog.SubProgress(0,"RPM Database");
    if (Gen.SelectFile(Handler->DataPath(false),string(),*this,pkgCache::Flag::NotSource) == false)
       return _error->Error(_("Problem with SelectFile RPM Database"));
@@ -578,7 +578,7 @@ bool rpmDatabaseIndex::Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const
       return _error->Errno("fstat",_("Failed to stat %s"), Handler->DataPath(false).c_str());
    CFile->Size = St.st_size;
    CFile->mtime = Handler->Mtime();
-   
+
    if (Gen.MergeList(Parser) == false)
       return _error->Error(_("Problem with MergeList %s"),
 			   Handler->DataPath(false).c_str());
@@ -619,7 +619,7 @@ pkgCache::PkgFileIterator rpmDatabaseIndex::FindInCache(pkgCache &Cache) const
       if ((unsigned)St.st_size != File->Size || St.st_mtime != File->mtime)
 	 return pkgCache::PkgFileIterator(Cache);
       return File;
-   }   
+   }
    return File;
 }
 									/*}}}*/
@@ -634,16 +634,16 @@ class rpmSLTypeGen : public pkgSourceList::Type
    {
       Name = "rpm";
       Label = "Standard RPM source tree";
-   }   
+   }
 
    pkgRepository *FindRepository(string URI,string Dist,
 				 const pkgSourceList::Vendor *Vendor) const
    {
       for (vector<pkgRepository *>::const_iterator iter = RepList.begin();
-	   iter != RepList.end(); iter++) 
+	   iter != RepList.end(); iter++)
       {
-	 if ((*iter)->URI == URI && (*iter)->Dist == Dist) 
-	 {	 
+	 if ((*iter)->URI == URI && (*iter)->Dist == Dist)
+	 {
 	    if (Vendor != NULL)
 	       (*iter)->FingerPrint = Vendor->FingerPrint;
 	    return *iter;
@@ -664,7 +664,7 @@ class rpmSLTypeGen : public pkgSourceList::Type
       {
 	 if (Dist != "/")
 	    BaseURI = URI + Dist;
-	 else 
+	 else
 	    BaseURI = URI + '/';
       }
       else
@@ -683,7 +683,7 @@ class rpmSLTypeRpm : public rpmSLTypeGen
 
    bool CreateItem(vector<pkgIndexFile *> &List,
 		   string URI, string Dist, string Section,
-		   pkgSourceList::Vendor const *Vendor) const 
+		   pkgSourceList::Vendor const *Vendor) const
    {
       pkgRepository *Rep = GetRepository(URI,Dist,Vendor);
       List.push_back(new rpmPkgListIndex(URI,Dist,Section,Rep));
@@ -694,7 +694,7 @@ class rpmSLTypeRpm : public rpmSLTypeGen
    {
       Name = "rpm";
       Label = "Standard RPM binary tree";
-   }   
+   }
 };
 
 class rpmSLTypeSrpm : public rpmSLTypeGen
@@ -703,18 +703,18 @@ class rpmSLTypeSrpm : public rpmSLTypeGen
 
    bool CreateItem(vector<pkgIndexFile *> &List,
 		   string URI, string Dist, string Section,
-		   pkgSourceList::Vendor const *Vendor) const 
+		   pkgSourceList::Vendor const *Vendor) const
    {
       pkgRepository *Rep = GetRepository(URI,Dist,Vendor);
       List.push_back(new rpmSrcListIndex(URI,Dist,Section,Rep));
       return true;
-   };  
-   
+   };
+
    rpmSLTypeSrpm()
    {
       Name = "rpm-src";
       Label = "Standard RPM source tree";
-   }   
+   }
 };
 
 class rpmSLTypeRpmDir : public rpmSLTypeGen
@@ -723,7 +723,7 @@ class rpmSLTypeRpmDir : public rpmSLTypeGen
 
    bool CreateItem(vector<pkgIndexFile *> &List,
 		   string URI, string Dist, string Section,
-		   pkgSourceList::Vendor const *Vendor) const 
+		   pkgSourceList::Vendor const *Vendor) const
    {
       pkgRepository *Rep = GetRepository(URI,Dist,Vendor);
       List.push_back(new rpmPkgDirIndex(URI,Dist,Section,Rep));
@@ -734,7 +734,7 @@ class rpmSLTypeRpmDir : public rpmSLTypeGen
    {
       Name = "rpm-dir";
       Label = "Local RPM directory tree";
-   }   
+   }
 };
 
 class rpmSLTypeSrpmDir : public rpmSLTypeGen
@@ -743,7 +743,7 @@ class rpmSLTypeSrpmDir : public rpmSLTypeGen
 
    bool CreateItem(vector<pkgIndexFile *> &List,
 		   string URI, string Dist, string Section,
-		   pkgSourceList::Vendor const *Vendor) const 
+		   pkgSourceList::Vendor const *Vendor) const
    {
       pkgRepository *Rep = GetRepository(URI,Dist,Vendor);
       List.push_back(new rpmSrcDirIndex(URI,Dist,Section,Rep));
@@ -754,7 +754,7 @@ class rpmSLTypeSrpmDir : public rpmSLTypeGen
    {
       Name = "rpm-src-dir";
       Label = "Local SRPM directory tree";
-   }   
+   }
 };
 
 rpmSLTypeRpm _apt_rpmType;
@@ -766,13 +766,13 @@ rpmSLTypeSrpmDir _apt_rpmSrcDirType;
 class rpmIFTypeSrc : public pkgIndexFile::Type
 {
    public:
-   
+
    rpmIFTypeSrc() {Label = "RPM Source Index";};
 };
 class rpmIFTypePkg : public pkgIndexFile::Type
 {
    public:
-   
+
    virtual pkgRecords::Parser *CreatePkgParser(pkgCache::PkgFileIterator File) const
    {
       return new rpmRecordParser(File.FileName(),*File.Cache());
@@ -782,7 +782,7 @@ class rpmIFTypePkg : public pkgIndexFile::Type
 class rpmIFTypeDatabase : public pkgIndexFile::Type
 {
    public:
-   
+
    virtual pkgRecords::Parser *CreatePkgParser(pkgCache::PkgFileIterator File) const
    {
       return new rpmRecordParser(File.FileName(),*File.Cache());

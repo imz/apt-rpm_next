@@ -2,13 +2,13 @@
 // Description								/*{{{*/
 // $Id: apt-get.cc,v 1.126 2003/02/12 16:14:08 doogie Exp $
 /* ######################################################################
-   
+
    apt-get - Cover for dpkg
-   
+
    This is an allout cover for dpkg implementing a safer front end. It is
    based largely on libapt-pkg.
 
-   The syntax is different, 
+   The syntax is different,
       apt-get [opt] command [things]
    Where command is:
       update - Resyncronize the package files from their sources
@@ -45,7 +45,7 @@
 
 // CNC:2003-03-17
 #include <apt-pkg/luaiface.h>
-    
+
 #include "acqprogress.h"
 
 // CNC:2003-02-14 - apti18n.h includes libintl.h which includes locale.h,
@@ -86,10 +86,10 @@ class CacheFile : public pkgCacheFile
    static pkgCache *SortCache;
    static int NameComp(const void *a,const void *b);
    bool IsRoot;
-   
+
    public:
    pkgCache::Package **List;
-   
+
    void Sort();
    bool CheckDeps(bool AllowBroken = false);
    bool BuildCaches()
@@ -99,7 +99,7 @@ class CacheFile : public pkgCacheFile
 	 return false;
       return true;
    }
-   bool Open() 
+   bool Open()
    {
       OpTextProgress Prog(*_config);
       if (pkgCacheFile::Open(Prog,IsRoot) == false)
@@ -197,11 +197,11 @@ bool YnPrompt()
                  REG_EXTENDED|REG_ICASE|REG_NOSUB);
 
    if (Res != 0) {
-      char Error[300];        
+      char Error[300];
       regerror(Res,&Pattern,Error,sizeof(Error));
       return _error->Error(_("Regex compilation error - %s"),Error);
    }
-   
+
    Res = regexec(&Pattern, response, 0, NULL, 0);
    if (Res == 0)
       return true;
@@ -222,7 +222,7 @@ bool AnalPrompt(const char *Text)
 									/*}}}*/
 // ShowList - Show a list						/*{{{*/
 // ---------------------------------------------------------------------
-/* This prints out a string of space separated words with a title and 
+/* This prints out a string of space separated words with a title and
    a two space indent line wraped to the current screen width. */
 bool ShowList(ostream &out,string Title,string List,string VersionsList)
 {
@@ -239,7 +239,7 @@ bool ShowList(ostream &out,string Title,string List,string VersionsList)
 
    // Acount for the leading space
    int ScreenWidth = ::ScreenWidth - 3;
-      
+
    out << Title << endl;
    string::size_type Start = 0;
    string::size_type VersionsStart = 0;
@@ -249,12 +249,12 @@ bool ShowList(ostream &out,string Title,string List,string VersionsList)
          VersionsList.size() > 0) {
          string::size_type End;
          string::size_type VersionsEnd;
-         
+
          End = List.find(' ',Start);
          VersionsEnd = VersionsList.find('\n', VersionsStart);
 
-         out << "   " << string(List,Start,End - Start) << " (" << 
-            string(VersionsList,VersionsStart,VersionsEnd - VersionsStart) << 
+         out << "   " << string(List,Start,End - Start) << " (" <<
+            string(VersionsList,VersionsStart,VersionsEnd - VersionsStart) <<
             ")" << endl;
 
 	 if (End == string::npos || End < Start)
@@ -275,7 +275,7 @@ bool ShowList(ostream &out,string Title,string List,string VersionsList)
          out << "  " << string(List,Start,End - Start) << endl;
          Start = End + 1;
       }
-   }   
+   }
 
    return false;
 }
@@ -283,14 +283,14 @@ bool ShowList(ostream &out,string Title,string List,string VersionsList)
 // ShowBroken - Debugging aide						/*{{{*/
 // ---------------------------------------------------------------------
 /* This prints out the names of all the packages that are broken along
-   with the name of each each broken dependency and a quite version 
+   with the name of each each broken dependency and a quite version
    description.
-   
+
    The output looks like:
  The following packages have unmet dependencies:
      exim: Depends: libc6 (>= 2.1.94) but 2.1.3-10 is to be installed
            Depends: libldap2 (>= 2.0.2-2) but it is not going to be installed
-           Depends: libsasl7 but it is not going to be installed   
+           Depends: libsasl7 but it is not going to be installed
  */
 void ShowBroken(ostream &out,CacheFile &Cache,bool Now,pkgDepCache::State *State=NULL)
 {
@@ -298,7 +298,7 @@ void ShowBroken(ostream &out,CacheFile &Cache,bool Now,pkgDepCache::State *State
    for (unsigned J = 0; J < Cache->Head().PackageCount; J++)
    {
       pkgCache::PkgIterator I(Cache,Cache.List[J]);
-      
+
       if (Now == true)
       {
 	 if (Cache[I].NowBroken() == false)
@@ -309,24 +309,24 @@ void ShowBroken(ostream &out,CacheFile &Cache,bool Now,pkgDepCache::State *State
 	 if (Cache[I].InstBroken() == false)
 	    continue;
       }
-      
+
       // Print out each package and the failed dependencies
       out <<"  " <<  I.Name() << ":";
       unsigned Indent = strlen(I.Name()) + 3;
       bool First = true;
       pkgCache::VerIterator Ver;
-      
+
       if (Now == true)
 	 Ver = I.CurrentVer();
       else
 	 Ver = Cache[I].InstVerIter(Cache);
-      
+
       if (Ver.end() == true)
       {
 	 out << endl;
 	 continue;
       }
-      
+
       for (pkgCache::DepIterator D = Ver.DependsList(); D.end() == false;)
       {
 	 // Compute a single dependency element (glob or)
@@ -344,7 +344,7 @@ void ShowBroken(ostream &out,CacheFile &Cache,bool Now,pkgDepCache::State *State
 	 if (End.IsCritical() == false)
 	    continue;
 #endif
-	 
+
 	 if (Now == true)
 	 {
 	    if ((Cache[End] & pkgDepCache::DepGNow) == pkgDepCache::DepGNow)
@@ -355,7 +355,7 @@ void ShowBroken(ostream &out,CacheFile &Cache,bool Now,pkgDepCache::State *State
 	    if ((Cache[End] & pkgDepCache::DepGInstall) == pkgDepCache::DepGInstall)
 	       continue;
 	 }
-	 
+
 	 bool FirstOr = true;
 	 while (1)
 	 {
@@ -372,15 +372,15 @@ void ShowBroken(ostream &out,CacheFile &Cache,bool Now,pkgDepCache::State *State
 	    else
 	       out << ' ' << End.DepType() << ": ";
 	    FirstOr = false;
-	    
+
 	    out << Start.TargetPkg().Name();
-	 
+
 	    // Show a quick summary of the version requirements
 	    if (Start.TargetVer() != 0)
 	       out << " (" << Start.CompType() << " " << Start.TargetVer() << ")";
-	    
+
 	    /* Show a summary of the target package if possible. In the case
-	       of virtual packages we show nothing */	 
+	       of virtual packages we show nothing */
 	    pkgCache::PkgIterator Targ = Start.TargetPkg();
 	    if (Targ->ProvidesList == 0)
 	    {
@@ -388,14 +388,14 @@ void ShowBroken(ostream &out,CacheFile &Cache,bool Now,pkgDepCache::State *State
 	       pkgCache::VerIterator Ver = Cache[Targ].InstVerIter(Cache);
 	       if (Now == true)
 		  Ver = Targ.CurrentVer();
-	       	    
+
 	       if (Ver.end() == false)
 	       {
 		  if (Now == true)
 		     ioprintf(out,_("but %s is installed"),Ver.VerStr());
 		  else
 		     ioprintf(out,_("but %s is to be installed"),Ver.VerStr());
-	       }	       
+	       }
 	       else
 	       {
 		  if (Cache[Targ].CandidateVerIter(Cache).end() == true)
@@ -404,22 +404,22 @@ void ShowBroken(ostream &out,CacheFile &Cache,bool Now,pkgDepCache::State *State
 			out << _("but it is not installable");
 		     else
 			out << _("but it is a virtual package");
-		  }		  
+		  }
 		  else
 		     out << (Now?_("but it is not installed"):_("but it is not going to be installed"));
-	       }	       
+	       }
 	    }
-	    
+
 	    if (Start != End)
 	       out << _(" or");
 	    out << endl;
-	    
+
 	    if (Start == End)
 	       break;
 	    Start++;
-	 }	 
-      }	    
-   }   
+	 }
+      }
+   }
 }
 									/*}}}*/
 // ShowNew - Show packages to newly install				/*{{{*/
@@ -440,7 +440,7 @@ void ShowNew(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL)
          VersionsList += string(Cache[I].CandVersion) + "\n";
       }
    }
-   
+
    ShowList(out,_("The following NEW packages will be installed:"),List,VersionsList);
 }
 									/*}}}*/
@@ -487,12 +487,12 @@ void ShowDel(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL)
 	    else
 	       List += string(I.Name()) + " ";
 	 }
-     
+
      // CNC:2004-03-09
      VersionsList += string(I.CurrentVer().VerStr())+ "\n";
       }
    }
-   
+
    // CNC:2002-07-25
    ShowList(out,_("The following packages will be REPLACED:"),RepList,VersionsList);
    ShowList(out,_("The following packages will be REMOVED:"),List,VersionsList);
@@ -506,9 +506,9 @@ void ShowKept(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL)
    string List;
    string VersionsList;
    for (unsigned J = 0; J < Cache->Head().PackageCount; J++)
-   {	 
+   {
       pkgCache::PkgIterator I(Cache,Cache.List[J]);
-      
+
       if (State == NULL) {
 	 // Not interesting
 	 if (Cache[I].Upgrade() == true || Cache[I].Upgradable() == false ||
@@ -520,7 +520,7 @@ void ShowKept(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL)
 	       (Cache[I].Delete() == false && (*State)[I].Delete() == true)))
 	    continue;
       }
-      
+
       List += string(I.Name()) + " ";
       VersionsList += string(Cache[I].CurVersion) + " => " + Cache[I].CandVersion + "\n";
    }
@@ -537,7 +537,7 @@ void ShowUpgraded(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL)
    for (unsigned J = 0; J < Cache->Head().PackageCount; J++)
    {
       pkgCache::PkgIterator I(Cache,Cache.List[J]);
-      
+
       if (State == NULL) {
 	 // Not interesting
 	 if (Cache[I].Upgrade() == false || Cache[I].NewInstall() == true)
@@ -548,7 +548,7 @@ void ShowUpgraded(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL)
 	     !(Cache[I].Upgrade() == true && (*State)[I].Upgrade() == false))
 	    continue;
       }
-      
+
       List += string(I.Name()) + " ";
       VersionsList += string(Cache[I].CurVersion) + " => " + Cache[I].CandVersion + "\n";
    }
@@ -565,7 +565,7 @@ bool ShowDowngraded(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL
    for (unsigned J = 0; J < Cache->Head().PackageCount; J++)
    {
       pkgCache::PkgIterator I(Cache,Cache.List[J]);
-      
+
       if (State == NULL) {
 	 // Not interesting
 	 if (Cache[I].Downgrade() == false || Cache[I].NewInstall() == true)
@@ -576,7 +576,7 @@ bool ShowDowngraded(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL
 	     !(Cache[I].Downgrade() == true && (*State)[I].Downgrade() == false))
 	    continue;
       }
-      
+
       List += string(I.Name()) + " ";
       VersionsList += string(Cache[I].CurVersion) + " => " + Cache[I].CandVersion + "\n";
    }
@@ -608,7 +608,7 @@ bool ShowHold(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL)
 // ShowEssential - Show an essential package warning			/*{{{*/
 // ---------------------------------------------------------------------
 /* This prints out a warning message that is not to be ignored. It shows
-   all essential packages and their dependents that are to be removed. 
+   all essential packages and their dependents that are to be removed.
    It is insanely risky to remove the dependents of an essential package! */
 bool ShowEssential(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL)
 {
@@ -617,14 +617,14 @@ bool ShowEssential(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL)
    bool *Added = new bool[Cache->Head().PackageCount];
    for (unsigned int I = 0; I != Cache->Head().PackageCount; I++)
       Added[I] = false;
-   
+
    for (unsigned J = 0; J < Cache->Head().PackageCount; J++)
    {
       pkgCache::PkgIterator I(Cache,Cache.List[J]);
       if ((I->Flags & pkgCache::Flag::Essential) != pkgCache::Flag::Essential &&
 	  (I->Flags & pkgCache::Flag::Important) != pkgCache::Flag::Important)
 	 continue;
-      
+
       // The essential package is being removed
       if (Cache[I].Delete() == true &&
 	  (State == NULL || (*State)[I].Delete() == false))
@@ -653,7 +653,7 @@ bool ShowEssential(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL)
         //VersionsList += string(Cache[I].CurVersion) + "\n"; ???
 	 }
       }
-      
+
       if (I->CurrentVer == 0)
 	 continue;
 
@@ -664,7 +664,7 @@ bool ShowEssential(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL)
 	 if (D->Type != pkgCache::Dep::PreDepends &&
 	     D->Type != pkgCache::Dep::Depends)
 	    continue;
-	 
+
 	 pkgCache::PkgIterator P = D.SmartTargetPkg();
 	 if (Cache[P].Delete() == true &&
 	     (State == NULL || (*State)[P].Delete() == false))
@@ -691,15 +691,15 @@ bool ShowEssential(ostream &out,CacheFile &Cache,pkgDepCache::State *State=NULL)
 	       continue;
 
 	    Added[P->ID] = true;
-	    
+
 	    char S[300];
 	    snprintf(S,sizeof(S),_("%s (due to %s) "),P.Name(),I.Name());
 	    List += S;
         //VersionsList += "\n"; ???
-	 }	 
-      }      
+	 }
+      }
    }
-   
+
    delete [] Added;
    return ShowList(out,_("WARNING: The following essential packages will be removed\n"
 			 "This should NOT be done unless you know exactly what you are doing!"),List,VersionsList);
@@ -765,11 +765,11 @@ void Stats(ostream &out,pkgDepCache &Dep,pkgDepCache::State *State=NULL)
       else if ((Dep[I].iFlags & pkgDepCache::ReInstall) == pkgDepCache::ReInstall &&
 	       (State == NULL || !((*State)[I].iFlags & pkgDepCache::ReInstall)))
 	 ReInstall++;
-   }   
+   }
 
    ioprintf(out,_("%lu upgraded, %lu newly installed, "),
 	    Upgrade,Install);
-   
+
    if (ReInstall != 0)
       ioprintf(out,_("%lu reinstalled, "),ReInstall);
    if (Downgrade != 0)
@@ -785,7 +785,7 @@ void Stats(ostream &out,pkgDepCache &Dep,pkgDepCache::State *State=NULL)
    else
       ioprintf(out,_("%lu removed and %lu kept.\n"),Remove,Keep);
 
-   
+
    if (Dep.BadCount() != 0)
       ioprintf(out,_("%lu not fully installed or removed.\n"),
 	       Dep.BadCount());
@@ -868,7 +868,7 @@ int CacheFile::NameComp(const void *a,const void *b)
 {
    if (*(pkgCache::Package **)a == 0 || *(pkgCache::Package **)b == 0)
       return *(pkgCache::Package **)a - *(pkgCache::Package **)b;
-   
+
    const pkgCache::Package &A = **(pkgCache::Package **)a;
    const pkgCache::Package &B = **(pkgCache::Package **)b;
 
@@ -903,11 +903,11 @@ bool CacheFile::CheckDeps(bool AllowBroken)
    // Check that the system is OK
    //if (DCache->DelCount() != 0 || DCache->InstCount() != 0)
    //   return _error->Error("Internal Error, non-zero counts");
-   
+
    // Apply corrections for half-installed packages
    if (pkgApplyStatus(*DCache) == false)
       return false;
-   
+
    // Nothing is broken
    if (DCache->BrokenCount() == 0 || AllowBroken == true)
       return true;
@@ -925,7 +925,7 @@ bool CacheFile::CheckDeps(bool AllowBroken)
       }
       if (pkgMinimizeUpgrade(*DCache) == false)
 	 return _error->Error(_("Unable to minimize the upgrade set"));
-      
+
       c1out << _(" Done") << endl;
    }
    else
@@ -935,7 +935,7 @@ bool CacheFile::CheckDeps(bool AllowBroken)
 
       return _error->Error(_("Unmet dependencies. Try using --fix-broken."));
    }
-      
+
    return true;
 }
 									/*}}}*/
@@ -946,7 +946,7 @@ bool DoAutoClean(CommandLine &CmdL);
 
 // InstallPackages - Actually download and install the packages		/*{{{*/
 // ---------------------------------------------------------------------
-/* This displays the informative messages describing what is going to 
+/* This displays the informative messages describing what is going to
    happen and then calls the download routines */
 bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
 		     bool Saftey = true)
@@ -960,10 +960,10 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
 	    Cache->MarkDelete(I,true);
       }
    }
-   
+
    bool Fail = false;
    bool Essential = false;
-   
+
    // Show all the various warning indicators
    // CNC:2002-03-06 - Change Show-Upgraded default to true, and move upwards.
    if (_config->FindB("APT::Get::Show-Upgraded",true) == true)
@@ -977,7 +977,7 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
    Essential = !ShowEssential(c1out,Cache);
    Fail |= Essential;
    Stats(c1out,Cache);
-   
+
    // Sanity check
    if (Cache->BrokenCount() != 0)
    {
@@ -992,7 +992,7 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
    // No remove flag
    if (Cache->DelCount() != 0 && _config->FindB("APT::Get::Remove",true) == false)
       return _error->Error(_("Packages need to be removed but Remove is disabled."));
-       
+
    // Run the simulator ..
    if (_config->FindB("APT::Get::Simulate") == true)
    {
@@ -1004,12 +1004,12 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
 	 return _error->Error("Internal Error, Ordering didn't finish");
       return true;
    }
-   
+
    // Create the text record parser
    pkgRecords Recs(Cache);
    if (_error->PendingError() == true)
       return false;
-   
+
    // Lock the archive directory
    FileFd Lock;
    if (_config->FindB("Debug::NoLocking",false) == false &&
@@ -1019,19 +1019,19 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
       if (_error->PendingError() == true)
 	 return _error->Error(_("Unable to lock the download directory"));
    }
-   
+
    // Create the download object
-   AcqTextStatus Stat(ScreenWidth,_config->FindI("quiet",0));   
+   AcqTextStatus Stat(ScreenWidth,_config->FindI("quiet",0));
    pkgAcquire Fetcher(&Stat);
 
    // Read the source list
    pkgSourceList List;
    if (List.ReadMainList() == false)
       return _error->Error(_("The list of sources could not be read."));
-   
+
    // Create the package manager and prepare to download
    SPtr<pkgPackageManager> PM= _system->CreatePM(Cache);
-   if (PM->GetArchives(&Fetcher,&List,&Recs) == false || 
+   if (PM->GetArchives(&Fetcher,&List,&Recs) == false ||
        _error->PendingError() == true)
       return false;
 
@@ -1044,7 +1044,7 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
       c0out << DebBytes << ',' << Cache->DebSize() << endl;
       c0out << "How odd.. The sizes didn't match, email apt@packages.debian.org" << endl;
    }
-   
+
    // Number of bytes
    if (DebBytes != FetchBytes)
       ioprintf(c1out,_("Need to get %sB/%sB of archives.\n"),
@@ -1079,20 +1079,20 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
 	 return _error->Error(_("You don't have enough free space in %s."),
 			      OutputDir.c_str());
    }
-   
+
    // Fail safe check
    if (_config->FindI("quiet",0) >= 2 ||
        _config->FindB("APT::Get::Assume-Yes",false) == true)
    {
       if (Fail == true && _config->FindB("APT::Get::Force-Yes",false) == false)
 	 return _error->Error(_("There are problems and -y was used without --force-yes"));
-   }         
+   }
 
    if (Essential == true && Saftey == true)
    {
       if (_config->FindB("APT::Get::Trivial-Only",false) == true)
 	 return _error->Error(_("Trivial Only specified but this is not a trivial operation."));
-      
+
       const char *Prompt = _("Yes, do as I say!");
       ioprintf(c2out,
 	       _("You are about to do something potentially harmful\n"
@@ -1103,36 +1103,36 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
       {
 	 c2out << _("Abort.") << endl;
 	 exit(1);
-      }     
+      }
    }
    else
-   {      
+   {
       // Prompt to continue
       if (Ask == true || Fail == true)
-      {            
+      {
 	 if (_config->FindB("APT::Get::Trivial-Only",false) == true)
 	    return _error->Error(_("Trivial Only specified but this is not a trivial operation."));
-	 
+
 	 if (_config->FindI("quiet",0) < 2 &&
 	     _config->FindB("APT::Get::Assume-Yes",false) == false)
 	 {
 	    c2out << _("Do you want to continue? [Y/n] ") << flush;
-	 
+
 	    if (YnPrompt() == false)
 	    {
 	       c2out << _("Abort.") << endl;
 	       exit(1);
-	    }     
-	 }	 
-      }      
+	    }
+	 }
+      }
    }
-   
+
    // Just print out the uris an exit if the --print-uris flag was used
    if (_config->FindB("APT::Get::Print-URIs") == true)
    {
       pkgAcquire::UriIterator I = Fetcher.UriBegin();
       for (; I != Fetcher.UriEnd(); I++)
-	 cout << '\'' << I->URI << "' " << flNotDir(I->Owner->DestFile) << ' ' << 
+	 cout << '\'' << I->URI << "' " << flNotDir(I->Owner->DestFile) << ' ' <<
 	       I->Owner->FileSize << ' ' << I->Owner->MD5Sum() << endl;
       return true;
    }
@@ -1146,7 +1146,7 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
    bool Ret = true;
 
    AutoReOpenCache CacheGuard(GCache);
-   
+
    // Run it
    while (1)
    {
@@ -1165,19 +1165,19 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
 	    (*I)->Finished();
 	    if ((*I)->Complete == false)
 	       Transient = true;
-	    
+
 	    // Clear it out of the fetch list
 	    delete *I;
 	    I = Fetcher.ItemsBegin();
-	 }	 
+	 }
       }
-      
+
       if (Fetcher.Run() == pkgAcquire::Failed)
 	 return false;
 
       // CNC:2003-02-24
       _error->PopState();
-      
+
       // Print out errors
       bool Failed = false;
       for (pkgAcquire::ItemIterator I = Fetcher.ItemsBegin(); I != Fetcher.ItemsEnd(); I++)
@@ -1185,7 +1185,7 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
 	 if ((*I)->Status == pkgAcquire::Item::StatDone &&
 	     (*I)->Complete == true)
 	    continue;
-	 
+
 	 if ((*I)->Status == pkgAcquire::Item::StatIdle)
 	 {
 	    Transient = true;
@@ -1199,7 +1199,7 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
       }
 
       /* If we are in no download mode and missing files and there were
-         'failures' then the user must specify -m. Furthermore, there 
+         'failures' then the user must specify -m. Furthermore, there
          is no such thing as a transient error in no-download mode! */
       if (Transient == true &&
 	  _config->FindB("APT::Get::Download",true) == false)
@@ -1207,7 +1207,7 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
 	 Transient = false;
 	 Failed = true;
       }
-      
+
       if (_config->FindB("APT::Get::Download-Only",false) == true)
       {
 	 if (Failed == true && _config->FindB("APT::Get::Fix-Missing",false) == false)
@@ -1215,15 +1215,15 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
 	 c1out << _("Download complete and in download only mode") << endl;
 	 return true;
       }
-      
+
       if (Failed == true && _config->FindB("APT::Get::Fix-Missing",false) == false)
       {
 	 return _error->Error(_("Unable to fetch some archives, maybe run apt-get update or try with --fix-missing?"));
       }
-      
+
       if (Transient == true && Failed == true)
 	 return _error->Error(_("--fix-missing and media swapping is not currently supported"));
-      
+
       // Try to deal with missing package files
       if (Failed == true && PM->FixMissing() == false)
       {
@@ -1250,24 +1250,24 @@ bool InstallPackages(CacheFile &Cache,bool ShwKept,bool Ask = true,
 	 if (Res == pkgPackageManager::Completed)
 	 {
 	    CommandLine *CmdL = NULL; // Watch out! If used will blow up!
-	    if (_config->FindB("APT::Post-Install::Clean",false) == true) 
+	    if (_config->FindB("APT::Post-Install::Clean",false) == true)
 	       Ret &= DoClean(*CmdL);
-	    else if (_config->FindB("APT::Post-Install::AutoClean",false) == true) 
+	    else if (_config->FindB("APT::Post-Install::AutoClean",false) == true)
 	       Ret &= DoAutoClean(*CmdL);
 	    return Ret;
 	 }
-	 
+
 	 _system->Lock();
       }
 
       // CNC:2003-02-24
       _error->PushState();
-      
+
       // Reload the fetcher object and loop again for media swapping
       Fetcher.Shutdown();
       if (PM->GetArchives(&Fetcher,&List,&Recs) == false)
 	 return false;
-   }   
+   }
 }
 									/*}}}*/
 #define MODE_INSTALL 0
@@ -1394,7 +1394,7 @@ bool TryToInstall(pkgCache::PkgIterator Pkg,pkgDepCache &Cache,
 	 return false;
       }
    }
-   
+
    // Handle the no-upgrade case
    if (_config->FindB("APT::Get::upgrade",true) == false &&
        Pkg->CurrentVer != 0)
@@ -1404,7 +1404,7 @@ bool TryToInstall(pkgCache::PkgIterator Pkg,pkgDepCache &Cache,
 		  Pkg.Name());
       return true;
    }
-   
+
    // Check if there is something at all to install
    pkgDepCache::StateCache &State = Cache[Pkg];
    if (Mode == MODE_REMOVE && Pkg->CurrentVer == 0)
@@ -1412,33 +1412,33 @@ bool TryToInstall(pkgCache::PkgIterator Pkg,pkgDepCache &Cache,
       Fix.Clear(Pkg);
       Fix.Protect(Pkg);
       Fix.Remove(Pkg);
-      
+
       /* We want to continue searching for regex hits, so we return false here
          otherwise this is not really an error. */
       if (AllowFail == false)
 	 return false;
-      
+
       ioprintf(c1out,_("Package %s is not installed, so not removed\n"),Pkg.Name());
       return true;
    }
-   
+
    if (State.CandidateVer == 0 && Mode == MODE_INSTALL)
    {
       if (AllowFail == false)
 	 return false;
-      
+
 // CNC:2004-03-03 - Improved virtual package handling.
 #if 0
       if (Pkg->ProvidesList != 0)
       {
 	 ioprintf(c1out,_("Package %s is a virtual package provided by:\n"),
 		  Pkg.Name());
-	 
+
 	 pkgCache::PrvIterator I = Pkg.ProvidesList();
 	 for (; I.end() == false; I++)
 	 {
 	    pkgCache::PkgIterator Pkg = I.OwnerPkg();
-	    
+
 	    if (Cache[Pkg].CandidateVerIter(Cache) == I.OwnerVer())
 	    {
 	       if (Cache[Pkg].Install() == true && Cache[Pkg].NewInstall() == false)
@@ -1446,7 +1446,7 @@ bool TryToInstall(pkgCache::PkgIterator Pkg,pkgDepCache &Cache,
 		  _(" [Installed]") << endl;
 	       else
 		  c1out << "  " << Pkg.Name() << " " << I.OwnerVer().VerStr() << endl;
-	    }      
+	    }
 	 }
 	 c1out << _("You should explicitly select one to install.") << endl;
       }
@@ -1458,7 +1458,7 @@ bool TryToInstall(pkgCache::PkgIterator Pkg,pkgDepCache &Cache,
 	   "This typically means that the package was mentioned in a dependency and\n"
 	   "never uploaded, has been obsoleted or is not available with the contents\n"
 	   "of sources.list\n"),Pkg.Name());
-	 
+
 	 string List;
 	 string VersionsList;
 	 SPtrArray<bool> Seen = new bool[Cache.Head().PackageCount];
@@ -1475,29 +1475,29 @@ bool TryToInstall(pkgCache::PkgIterator Pkg,pkgDepCache &Cache,
 	    Seen[Dep.ParentPkg()->ID] = true;
 	    List += string(Dep.ParentPkg().Name()) + " ";
             //VersionsList += string(Dep.ParentPkg().CurVersion) + "\n"; ???
-	 }	    
+	 }
 	 ShowList(c1out,_("However the following packages replace it:"),List,VersionsList);
       }
-      
+
       _error->Error(_("Package %s has no installation candidate"),Pkg.Name());
       return false;
    }
 
    Fix.Clear(Pkg);
-   Fix.Protect(Pkg);   
+   Fix.Protect(Pkg);
 
    if (Mode == MODE_KEEP) {
       Cache.MarkKeep(Pkg);
       return true;
    }
-   
+
    if (Mode == MODE_REMOVE)
    {
       Fix.Remove(Pkg);
       Cache.MarkDelete(Pkg,_config->FindB("APT::Get::Purge",false));
       return true;
    }
-   
+
    // Install it
    Cache.MarkInstall(Pkg,false);
    if (State.Install() == false)
@@ -1509,17 +1509,17 @@ bool TryToInstall(pkgCache::PkgIterator Pkg,pkgDepCache &Cache,
 		     Pkg.Name());
 	 else
 	    Cache.SetReInstall(Pkg,true);
-      }      
+      }
       else
       {
 	 if (AllowFail == true)
 	    ioprintf(c1out,_("%s is already the newest version.\n"),
 		     Pkg.Name());
-      }      
-   }   
+      }
+   }
    else
       ExpectedInst++;
-   
+
    // Install it with autoinstalling enabled.
    if (State.InstBroken() == true && BrokenFix == false)
       Cache.MarkInstall(Pkg,true);
@@ -1550,11 +1550,11 @@ bool TryToChangeVer(pkgCache::PkgIterator &Pkg,pkgDepCache &Cache,
  		    int VerOp,const char *VerTag,bool IsRel)
 {
    // CNC:2003-11-05
-   pkgVersionMatch Match(VerTag,(IsRel == true?pkgVersionMatch::Release : 
+   pkgVersionMatch Match(VerTag,(IsRel == true?pkgVersionMatch::Release :
  				 pkgVersionMatch::Version),VerOp);
-   
+
    pkgCache::VerIterator Ver = Match.Find(Pkg);
-			 
+
    if (Ver.end() == true)
    {
       // CNC:2003-11-05
@@ -1564,7 +1564,7 @@ bool TryToChangeVer(pkgCache::PkgIterator &Pkg,pkgDepCache &Cache,
       return _error->Error(_("Version %s'%s' for '%s' was not found"),
 			   op2str(VerOp),VerTag,Pkg.Name());
    }
-   
+
    if (strcmp(VerTag,Ver.VerStr()) != 0)
    {
       // CNC:2003-11-11
@@ -1575,7 +1575,7 @@ bool TryToChangeVer(pkgCache::PkgIterator &Pkg,pkgDepCache &Cache,
 	 ioprintf(c1out,_("Selected version %s for %s\n"),
 		  Ver.VerStr(),Pkg.Name());
    }
-   
+
    Cache.SetCandidateVersion(Ver);
    // CNC:2003-11-11
    Pkg = Ver.ParentPkg();
@@ -1598,41 +1598,41 @@ pkgSrcRecords::Parser *FindSrc(const char *Name,pkgRecords &Recs,
       VerTag = string(TmpSrc.begin() + Slash + 1,TmpSrc.end());
       TmpSrc = string(TmpSrc.begin(),TmpSrc.begin() + Slash);
    }
-   
+
    /* Lookup the version of the package we would install if we were to
       install a version and determine the source package name, then look
       in the archive for a source package of the same name. In theory
       we could stash the version string as well and match that too but
       today there aren't multi source versions in the archive. */
-   if (_config->FindB("APT::Get::Only-Source") == false && 
+   if (_config->FindB("APT::Get::Only-Source") == false &&
        VerTag.empty() == true)
    {
       pkgCache::PkgIterator Pkg = Cache.FindPkg(TmpSrc);
       if (Pkg.end() == false)
       {
-	 pkgCache::VerIterator Ver = Cache.GetCandidateVer(Pkg);      
+	 pkgCache::VerIterator Ver = Cache.GetCandidateVer(Pkg);
 	 if (Ver.end() == false)
 	 {
 	    pkgRecords::Parser &Parse = Recs.Lookup(Ver.FileList());
 	    Src = Parse.SourcePkg();
 	 }
-      }   
+      }
    }
-   
+
    // No source package name..
    if (Src.empty() == true)
       Src = TmpSrc;
-   
+
    // The best hit
    pkgSrcRecords::Parser *Last = 0;
    unsigned long Offset = 0;
    string Version;
    bool IsMatch = false;
-   
+
    // If we are matching by version then we need exact matches to be happy
    if (VerTag.empty() == false)
       IsMatch = true;
-   
+
    /* Iterate over all of the hits, which includes the resulting
       binary packages in the search */
    pkgSrcRecords::Parser *Parse;
@@ -1640,40 +1640,40 @@ pkgSrcRecords::Parser *FindSrc(const char *Name,pkgRecords &Recs,
    while ((Parse = SrcRecs.Find(Src.c_str(),false)) != 0)
    {
       string Ver = Parse->Version();
-      
+
       // Skip name mismatches
       if (IsMatch == true && Parse->Package() != Src)
 	 continue;
-      
+
       if (VerTag.empty() == false)
       {
-	 /* Don't want to fall through because we are doing exact version 
+	 /* Don't want to fall through because we are doing exact version
 	    matching. */
 	 if (Cache.VS().CmpVersion(VerTag,Ver) != 0)
 	    continue;
-	 
+
 	 Last = Parse;
 	 Offset = Parse->Offset();
 	 break;
       }
-				  
+
       // Newer version or an exact match
-      if (Last == 0 || Cache.VS().CmpVersion(Version,Ver) < 0 || 
+      if (Last == 0 || Cache.VS().CmpVersion(Version,Ver) < 0 ||
 	  (Parse->Package() == Src && IsMatch == false))
       {
 	 IsMatch = Parse->Package() == Src;
 	 Last = Parse;
 	 Offset = Parse->Offset();
 	 Version = Ver;
-      }      
+      }
    }
-   
+
    if (Last == 0)
       return 0;
-   
+
    if (Last->Jump(Offset) == false)
       return 0;
-   
+
    return Last;
 }
 									/*}}}*/
@@ -1686,10 +1686,10 @@ pkgSrcRecords::Parser *FindSrc(const char *Name,pkgRecords &Recs,
 class UpdateLogCleaner : public pkgArchiveCleaner
 {
    protected:
-   virtual void Erase(const char *File,string Pkg,string Ver,struct stat &St) 
+   virtual void Erase(const char *File,string Pkg,string Ver,struct stat &St)
    {
       c1out << "Del " << Pkg << " " << Ver << " [" << SizeToStr(St.st_size) << "B]" << endl;
-      unlink(File);      
+      unlink(File);
    };
 };
 
@@ -1738,7 +1738,7 @@ bool DoUpdate(CommandLine &CmdL)
    _lua->RunScripts("Scripts::AptGet::Update::Pre");
    _lua->ResetCaches();
 #endif
-   
+
    // Create the download object
    AcqTextStatus Stat(ScreenWidth,_config->FindI("quiet",0));
    pkgAcquire Fetcher(&Stat);
@@ -1761,21 +1761,21 @@ bool DoUpdate(CommandLine &CmdL)
       if (Failed == true)
 	 _error->Warning(_("Release files for some repositories could not be retrieved or authenticated. Such repositories are being ignored."));
    }
-   
+
    // Populate it with the source selection
    if (List.GetIndexes(&Fetcher) == false)
 	 return false;
-   
+
    // Just print out the uris an exit if the --print-uris flag was used
    if (_config->FindB("APT::Get::Print-URIs") == true)
    {
       pkgAcquire::UriIterator I = Fetcher.UriBegin();
       for (; I != Fetcher.UriEnd(); I++)
-	 cout << '\'' << I->URI << "' " << flNotDir(I->Owner->DestFile) << ' ' << 
+	 cout << '\'' << I->URI << "' " << flNotDir(I->Owner->DestFile) << ' ' <<
 	       I->Owner->FileSize << ' ' << I->Owner->MD5Sum() << endl;
       return true;
    }
-   
+
    // Run it
    if (Fetcher.Run() == pkgAcquire::Failed)
       return false;
@@ -1786,12 +1786,12 @@ bool DoUpdate(CommandLine &CmdL)
 	 continue;
 
       (*I)->Finished();
-      
+
       fprintf(stderr,_("Failed to fetch %s  %s\n"),(*I)->DescURI().c_str(),
 	      (*I)->ErrorText.c_str());
       Failed = true;
    }
-   
+
    // Clean out any old list files
    if (_config->FindB("APT::Get::List-Cleanup",true) == true)
    {
@@ -1819,10 +1819,10 @@ bool DoUpdate(CommandLine &CmdL)
       Cleaner.Go(_config->FindDir("Dir::Cache::archives") + "partial/",
 	         *GCache);
    }
-   
+
    if (Failed == true)
       return _error->Error(_("Some index files failed to download, they have been ignored, or old ones used instead."));
-   
+
    return true;
 }
 									/*}}}*/
@@ -1834,15 +1834,15 @@ bool DoUpgrade(CommandLine &CmdL)
 {
    if (CheckHelp(CmdL, 0) == true)
       return true;
-   
+
    CacheFile &Cache = *GCache;
    if (GCache->CanCommit() == false) {
       _error->Error(_("You have no permissions for that"));
       return false;
    }
-   
+
    AutoRestore StateGuard(Cache);
-   
+
    if (GCache->CheckDeps() == false)
       return false;
 
@@ -1861,7 +1861,7 @@ bool DoUpgrade(CommandLine &CmdL)
 #endif
 
    ConfirmChanges(Cache, StateGuard);
-   
+
    return true;
 }
 									/*}}}*/
@@ -1885,11 +1885,11 @@ bool DoInstall(CommandLine &CmdL)
    bool BrokenFix = false;
    if (Cache->BrokenCount() != 0)
       BrokenFix = true;
-   
+
    unsigned int ExpectedInst = 0;
    unsigned int Packages = 0;
    pkgProblemResolver Fix(Cache);
-   
+
    int DefMode = MODE_INSTALL;
    if (strcasecmp(CmdL.FileList[0],"remove") == 0)
       DefMode = MODE_REMOVE;
@@ -1906,11 +1906,11 @@ bool DoInstall(CommandLine &CmdL)
       if (Length >= sizeof(S))
 	 continue;
       strcpy(S,*I);
-      
+
       // CNC:2003-03-15
       char OrigS[300];
       strcpy(OrigS,S);
-      
+
       // See if we are removing and special indicators..
       int Mode = DefMode;
       char *VerTag = 0;
@@ -1926,14 +1926,14 @@ bool DoInstall(CommandLine &CmdL)
 	    S[--Length] = 0;
 	    continue;
 	 }
-	 
+
 	 if (Length >= 1 && S[Length - 1] == '+')
 	 {
 	    Mode = MODE_INSTALL;
 	    S[--Length] = 0;
 	    continue;
 	 }
-	 
+
 	 // CNC:2003-11-05
 	 char *sep = strpbrk(S,"=><");
 	 if (sep)
@@ -1974,7 +1974,7 @@ bool DoInstall(CommandLine &CmdL)
 	    *sep = '\0';
 	    VerTag = p;
 	 }
-	 
+
 	 // CNC:2003-11-21 - Try to handle unknown file items.
 	 if (S[0] == '/')
 	 {
@@ -2006,10 +2006,10 @@ bool DoInstall(CommandLine &CmdL)
 	    *Slash = 0;
 	    VerTag = Slash + 1;
 	 }
-	 
+
 	 break;
       }
-      
+
       // Locate the package
       pkgCache::PkgIterator Pkg = Cache->FindPkg(S);
       Packages++;
@@ -2054,11 +2054,11 @@ bool DoInstall(CommandLine &CmdL)
 
 	       ioprintf(c1out,_("Selecting %s for '%s'\n"),
 			Pkg.Name(),OrigS);
-	    
+
 	       Hit |= TryToInstall(Pkg,Cache,Fix,Mode,BrokenFix,
 				   ExpectedInst,true);
 	    }
-	 
+
 	    if (Hit == true)
 	       continue;
 #endif
@@ -2067,40 +2067,40 @@ bool DoInstall(CommandLine &CmdL)
 
 	 // Regexs must always be confirmed
 	 ExpectedInst += 1000;
-	 
+
 	 // Compile the regex pattern
 	 regex_t Pattern;
 	 int Res;
 	 if ((Res = regcomp(&Pattern,S,REG_EXTENDED | REG_ICASE |
 		     REG_NOSUB)) != 0)
 	 {
-	    char Error[300];	    
+	    char Error[300];
 	    regerror(Res,&Pattern,Error,sizeof(Error));
 	    return _error->Error(_("Regex compilation error - %s"),Error);
 	 }
-	 
+
 	 // Run over the matches
 	 bool Hit = false;
 	 for (Pkg = Cache->PkgBegin(); Pkg.end() == false; Pkg++)
 	 {
 	    if (regexec(&Pattern,Pkg.Name(),0,0,0) != 0)
 	       continue;
-	    
+
 	    // CNC:2003-11-23
 	    ioprintf(c1out,_("Selecting %s for '%s'\n"),
 		     Pkg.Name(),S);
 	    StateGuard->Ignore(Pkg);
-	    
+
 	    if (VerTag != 0)
 	       // CNC:2003-11-05
 	       if (TryToChangeVer(Pkg,Cache,VerOp,VerTag,VerIsRel) == false)
 		  return false;
-	    
+
 	    Hit |= TryToInstall(Pkg,Cache,Fix,Mode,BrokenFix,
 				ExpectedInst,false);
 	 }
 	 regfree(&Pattern);
-	 
+
 	 if (Hit == false)
 	    return _error->Error(_("Couldn't find package %s"),S);
       }
@@ -2164,17 +2164,17 @@ bool DoInstall(CommandLine &CmdL)
    // Now we check the state of the packages,
    if (Cache->BrokenCount() != 0)
    {
-      c1out << 
-       _("Some packages could not be installed. This may mean that you have\n" 
-	 "requested an impossible situation or if you are using the unstable\n" 
+      c1out <<
+       _("Some packages could not be installed. This may mean that you have\n"
+	 "requested an impossible situation or if you are using the unstable\n"
 	 "distribution that some required packages have not yet been created\n"
 	 "or been moved out of Incoming.") << endl;
       if (Packages == 1)
       {
 	 c1out << endl;
-	 c1out << 
+	 c1out <<
 	  _("Since you only requested a single operation it is extremely likely that\n"
-	    "the package is simply not installable and a bug report against\n" 
+	    "the package is simply not installable and a bug report against\n"
 	    "that package should be filed.") << endl;
       }
 
@@ -2223,9 +2223,9 @@ bool DoDistUpgrade(CommandLine &CmdL)
    _lua->RunScripts("Scripts::AptGet::DistUpgrade");
    _lua->ResetCaches();
 #endif
-   
+
    c0out << _("Done") << endl;
-   
+
    ConfirmChanges(Cache, StateGuard);
 
    return true;
@@ -2244,12 +2244,12 @@ bool DoDSelectUpgrade(CommandLine &CmdL)
       _error->Error(_("You have no permissions for that"));
       return false;
    }
-   
+
    AutoRestore StateGuard(Cache);
-   
+
    if (GCache->CheckDeps() == false)
       return false;
-   
+
    // Install everything with the install flag set
    pkgCache::PkgIterator I = Cache->PkgBegin();
    for (;I.end() != true; I++)
@@ -2269,11 +2269,11 @@ bool DoDSelectUpgrade(CommandLine &CmdL)
       if (I->SelectedState == pkgCache::State::Install)
 	 Cache->MarkInstall(I,true);
    }
-   
+
    // Apply erasures now, they override everything else.
    for (I = Cache->PkgBegin();I.end() != true; I++)
    {
-      // Remove packages 
+      // Remove packages
       if (I->SelectedState == pkgCache::State::DeInstall ||
 	  I->SelectedState == pkgCache::State::Purge)
 	 Cache->MarkDelete(I,I->SelectedState == pkgCache::State::Purge);
@@ -2282,7 +2282,7 @@ bool DoDSelectUpgrade(CommandLine &CmdL)
    /* Resolve any problems that dselect created, allupgrade cannot handle
       such things. We do so quite agressively too.. */
    if (Cache->BrokenCount() != 0)
-   {      
+   {
       pkgProblemResolver Fix(Cache);
 
       // Hold back held packages.
@@ -2297,7 +2297,7 @@ bool DoDSelectUpgrade(CommandLine &CmdL)
 	    }
 	 }
       }
-   
+
       if (Fix.Resolve() == false)
       {
 	 ShowBroken(c1out,Cache,false);
@@ -2313,7 +2313,7 @@ bool DoDSelectUpgrade(CommandLine &CmdL)
    }
 
    ConfirmChanges(Cache, StateGuard);
-   
+
    return true;
 }
 									/*}}}*/
@@ -2331,7 +2331,7 @@ bool DoClean(CommandLine &CmdL)
 	 _config->FindDir("Dir::Cache::archives") << "partial/*" << endl;
       return true;
    }
-   
+
    // Lock the archive directory
    FileFd Lock;
    if (_config->FindB("Debug::NoLocking",false) == false)
@@ -2340,7 +2340,7 @@ bool DoClean(CommandLine &CmdL)
       if (_error->PendingError() == true)
 	 return _error->Error(_("Unable to lock the download directory"));
    }
-   
+
    pkgAcquire Fetcher;
    Fetcher.Clean(_config->FindDir("Dir::Cache::archives"));
    Fetcher.Clean(_config->FindDir("Dir::Cache::archives") + "partial/");
@@ -2349,17 +2349,17 @@ bool DoClean(CommandLine &CmdL)
 									/*}}}*/
 // DoAutoClean - Smartly remove downloaded archives			/*{{{*/
 // ---------------------------------------------------------------------
-/* This is similar to clean but it only purges things that cannot be 
+/* This is similar to clean but it only purges things that cannot be
    downloaded, that is old versions of cached packages. */
 class LogCleaner : public pkgArchiveCleaner
 {
    protected:
-   virtual void Erase(const char *File,string Pkg,string Ver,struct stat &St) 
+   virtual void Erase(const char *File,string Pkg,string Ver,struct stat &St)
    {
       c1out << "Del " << Pkg << " " << Ver << " [" << SizeToStr(St.st_size) << "B]" << endl;
-      
+
       if (_config->FindB("APT::Get::Simulate") == false)
-	 unlink(File);      
+	 unlink(File);
    };
 };
 
@@ -2376,15 +2376,15 @@ bool DoAutoClean(CommandLine &CmdL)
       if (_error->PendingError() == true)
 	 return _error->Error(_("Unable to lock the download directory"));
    }
-   
+
    CacheFile &Cache = *GCache;
 #if 0
    if (Cache.Open() == false)
       return false;
 #endif
-   
+
    LogCleaner Cleaner;
-   
+
    return Cleaner.Go(_config->FindDir("Dir::Cache::archives"),*Cache) &&
       Cleaner.Go(_config->FindDir("Dir::Cache::archives") + "partial/",*Cache);
 }
@@ -2403,13 +2403,13 @@ bool DoCheck(CommandLine &CmdL)
 
    if (GCache->CheckDeps() == false)
       return false;
-   
+
    return true;
 }
 									/*}}}*/
 // DoBuildDep - Install/removes packages to satisfy build dependencies  /*{{{*/
 // ---------------------------------------------------------------------
-/* This function will look at the build depends list of the given source 
+/* This function will look at the build depends list of the given source
    package and install the necessary packages to make it true, or fail. */
 bool DoBuildDep(CommandLine &CmdL)
 {
@@ -2421,20 +2421,20 @@ bool DoBuildDep(CommandLine &CmdL)
       _error->Error(_("You have no permissions for that"));
       return false;
    }
-   
+
    AutoRestore StateGuard(Cache);
-   
+
    if (GCache->CheckDeps() == false)
       return false;
 
    if (CmdL.FileSize() <= 1)
       return _error->Error(_("Must specify at least one package to check builddeps for"));
-   
+
    // Read the source list
    pkgSourceList List;
    if (List.ReadMainList() == false)
       return _error->Error(_("The list of sources could not be read."));
-   
+
    // Create the text record parsers
    pkgRecords Recs(Cache);
    pkgSrcRecords SrcRecs(List);
@@ -2442,7 +2442,7 @@ bool DoBuildDep(CommandLine &CmdL)
       return false;
 
    // Create the download object
-   AcqTextStatus Stat(ScreenWidth,_config->FindI("quiet",0));   
+   AcqTextStatus Stat(ScreenWidth,_config->FindI("quiet",0));
    pkgAcquire Fetcher(&Stat);
 
    unsigned J = 0;
@@ -2452,15 +2452,15 @@ bool DoBuildDep(CommandLine &CmdL)
       pkgSrcRecords::Parser *Last = FindSrc(*I,Recs,SrcRecs,Src,*Cache);
       if (Last == 0)
 	 return _error->Error(_("Unable to find a source package for %s"),Src.c_str());
-            
+
       // Process the build-dependencies
       vector<pkgSrcRecords::Parser::BuildDepRec> BuildDeps;
       if (Last->BuildDepends(BuildDeps, _config->FindB("APT::Get::Arch-Only",false)) == false)
       	return _error->Error(_("Unable to get build-dependency information for %s"),Src.c_str());
-   
+
       // Also ensure that build-essential packages are present
       Configuration::Item const *Opts = _config->Tree("APT::Build-Essential");
-      if (Opts) 
+      if (Opts)
 	 Opts = Opts->Child;
       for (; Opts; Opts = Opts->Next)
       {
@@ -2479,7 +2479,7 @@ bool DoBuildDep(CommandLine &CmdL)
 	 ioprintf(c1out,_("%s has no build depends.\n"),Src.c_str());
 	 continue;
       }
-      
+
       // Install the requested packages
       unsigned int ExpectedInst = 0;
       vector <pkgSrcRecords::Parser::BuildDepRec>::iterator D;
@@ -2506,11 +2506,11 @@ bool DoBuildDep(CommandLine &CmdL)
 
             pkgCache::VerIterator IV = (*Cache)[Pkg].InstVerIter(*Cache);
 
-            /* 
-             * Remove if we have an installed version that satisfies the 
+            /*
+             * Remove if we have an installed version that satisfies the
              * version criteria
              */
-            if (IV.end() == false && 
+            if (IV.end() == false &&
                 Cache->VS().CheckDep(IV.VerStr(),(*D).Op,(*D).Version.c_str()) == true)
                TryToInstall(Pkg,Cache,Fix,MODE_REMOVE,false,ExpectedInst);
          }
@@ -2559,12 +2559,12 @@ bool DoBuildDep(CommandLine &CmdL)
              *
              * TODO: this means that if there's a build-dep on A|B and B is
              * installed, we'll still try to install A; more importantly,
-             * if A is currently broken, we cannot go back and try B. To fix 
-             * this would require we do a Resolve cycle for each package we 
+             * if A is currently broken, we cannot go back and try B. To fix
+             * this would require we do a Resolve cycle for each package we
              * add to the install list. Ugh
              */
-                       
-	    /* 
+
+	    /*
 	     * If this is a virtual package, we need to check the list of
 	     * packages that provide it and see if any of those are
 	     * installed
@@ -2578,7 +2578,7 @@ bool DoBuildDep(CommandLine &CmdL)
 	       if ((*Cache)[Prv.OwnerPkg()].InstVerIter(*Cache).end() == false)
 	          break;
             }
-            
+
             // Get installed version and version we are going to install
 	    pkgCache::VerIterator IV = (*Cache)[Pkg].InstVerIter(*Cache);
 
@@ -2663,19 +2663,19 @@ bool DoBuildDep(CommandLine &CmdL)
                                     Src.c_str(),
                                     (*D).Package.c_str());
             }
-	 }	       
+	 }
       }
-      
+
       Fix.InstallProtect();
       if (Fix.Resolve(true) == false)
 	 _error->Discard();
-      
+
       // Now we check the state of the packages,
       if (Cache->BrokenCount() != 0)
 	 return _error->Error(_("Some broken packages were found while trying to process build-dependencies for %s.\n"
 				"You might want to run `apt-get --fix-broken install' to correct these."),*I);
    }
-  
+
    ConfirmChanges(Cache, StateGuard);
 
    return true;
@@ -2722,14 +2722,14 @@ int LocalityCompare(const void *a, const void *b)
 {
    pkgCache::VerFile *A = *(pkgCache::VerFile **)a;
    pkgCache::VerFile *B = *(pkgCache::VerFile **)b;
-   
+
    if (A == 0 && B == 0)
       return 0;
    if (A == 0)
       return 1;
    if (B == 0)
       return -1;
-   
+
    if (A->File == B->File)
       return A->Offset - B->Offset;
    return A->File - B->File;
@@ -2737,7 +2737,7 @@ int LocalityCompare(const void *a, const void *b)
 
 void LocalitySort(pkgCache::VerFile **begin,
 		  unsigned long Count,size_t Size)
-{   
+{
    qsort(begin,Count,Size,LocalityCompare);
 }
 									/*}}}*/
@@ -2753,7 +2753,7 @@ bool Depends(CommandLine &CmdL)
    pkgCache &Cache = *GCache;
    SPtrArray<unsigned> Colours = new unsigned[Cache.Head().PackageCount];
    memset(Colours,0,sizeof(*Colours)*Cache.Head().PackageCount);
-   
+
    for (const char **I = CmdL.FileList + 1; *I != 0; I++)
    {
       pkgCache::PkgIterator Pkg = Cache.FindPkg(*I);
@@ -2764,7 +2764,7 @@ bool Depends(CommandLine &CmdL)
       }
       Colours[Pkg->ID] = 1;
    }
-   
+
    bool Recurse = _config->FindB("APT::Cache::RecurseDepends",false);
    bool Installed = _config->FindB("APT::Cache::Installed",false);
    bool DidSomething;
@@ -2777,17 +2777,17 @@ bool Depends(CommandLine &CmdL)
 	    continue;
 	 Colours[Pkg->ID] = 2;
 	 DidSomething = true;
-	 
+
 	 pkgCache::VerIterator Ver = Pkg.VersionList();
 	 if (Ver.end() == true)
 	 {
 	    cout << '<' << Pkg.Name() << '>' << endl;
 	    continue;
 	 }
-	 
+
 	 // CNC:2003-03-03
 	 cout << Pkg.Name() << "-" << Ver.VerStr() << endl;
-	 
+
 	 for (pkgCache::DepIterator D = Ver.DependsList(); D.end() == false; D++)
 	 {
 
@@ -2800,7 +2800,7 @@ bool Depends(CommandLine &CmdL)
 		  cout << " |";
 		else
 		  cout << "  ";
-	    
+
 		// Show the package
 	        if (Trg->VersionList == 0)
 	           cout << D.DepType() << ": <" << Trg.Name() << ">" << endl;
@@ -2810,12 +2810,12 @@ bool Depends(CommandLine &CmdL)
 	        else
 	           cout << D.DepType() << ": " << Trg.Name()
 		        << " " << D.CompType() << " " << D.TargetVer() << endl;
-	    
+
 		if (Recurse == true)
 		  Colours[D.TargetPkg()->ID]++;
 
 	      }
-	    
+
 	    // Display all solutions
 	    SPtrArray<pkgCache::Version *> List = D.AllTargets();
 	    pkgPrioSortList(Cache,List);
@@ -2828,15 +2828,15 @@ bool Depends(CommandLine &CmdL)
 	       // CNC:2003-03-03
 	       cout << "    " << V.ParentPkg().Name()
 		    << "-" << V.VerStr() << endl;
-	       
+
 	       if (Recurse == true)
 		  Colours[D.ParentPkg()->ID]++;
 	    }
 	 }
-      }      
-   }   
+      }
+   }
    while (DidSomething == true);
-   
+
    return true;
 }
 									/*}}}*/
@@ -2851,7 +2851,7 @@ bool RDepends(CommandLine &CmdL)
    pkgCache &Cache = *GCache;
    SPtrArray<unsigned> Colours = new unsigned[Cache.Head().PackageCount];
    memset(Colours,0,sizeof(*Colours)*Cache.Head().PackageCount);
-   
+
    for (const char **I = CmdL.FileList + 1; *I != 0; I++)
    {
       pkgCache::PkgIterator Pkg = Cache.FindPkg(*I);
@@ -2862,7 +2862,7 @@ bool RDepends(CommandLine &CmdL)
       }
       Colours[Pkg->ID] = 1;
    }
-   
+
    bool Recurse = _config->FindB("APT::Cache::RecurseDepends",false);
    bool Installed = _config->FindB("APT::Cache::Installed",false);
    bool DidSomething;
@@ -2875,19 +2875,19 @@ bool RDepends(CommandLine &CmdL)
 	    continue;
 	 Colours[Pkg->ID] = 2;
 	 DidSomething = true;
-	 
+
 	 pkgCache::VerIterator Ver = Pkg.VersionList();
 	 if (Ver.end() == true)
 	 {
 	    cout << '<' << Pkg.Name() << '>' << endl;
 	    continue;
 	 }
-	 
+
 	 cout << Pkg.Name() << endl;
-	 
+
 	 cout << "Reverse Depends:" << endl;
 	 for (pkgCache::DepIterator D = Pkg.RevDependsList(); D.end() == false; D++)
-	 {	    
+	 {
 	    // Show the package
 	    pkgCache::PkgIterator Trg = D.ParentPkg();
 
@@ -2908,7 +2908,7 @@ bool RDepends(CommandLine &CmdL)
 		  Colours[D.ParentPkg()->ID]++;
 
 	      }
-	    
+
 	    // Display all solutions
 	    SPtrArray<pkgCache::Version *> List = D.AllTargets();
 	    pkgPrioSortList(Cache,List);
@@ -2919,15 +2919,15 @@ bool RDepends(CommandLine &CmdL)
 		   V->ParentPkg == D->Package)
 		  continue;
 	       cout << "    " << V.ParentPkg().Name() << endl;
-	       
+
 	       if (Recurse == true)
 		  Colours[D.ParentPkg()->ID]++;
 	    }
 	 }
-      }      
-   }   
+      }
+   }
    while (DidSomething == true);
-   
+
    return true;
 }
 
@@ -2944,7 +2944,7 @@ bool WhatDepends(CommandLine &CmdL)
    pkgCache &Cache = *GCache;
    SPtrArray<unsigned> Colours = new unsigned[Cache.Head().PackageCount];
    memset(Colours,0,sizeof(*Colours)*Cache.Head().PackageCount);
-   
+
    for (const char **I = CmdL.FileList + 1; *I != 0; I++)
    {
       pkgCache::PkgIterator Pkg = Cache.FindPkg(*I);
@@ -2955,7 +2955,7 @@ bool WhatDepends(CommandLine &CmdL)
       }
       Colours[Pkg->ID] = 1;
    }
-   
+
    bool Recurse = _config->FindB("APT::Cache::RecurseDepends",false);
    bool DidSomething;
    do
@@ -2967,17 +2967,17 @@ bool WhatDepends(CommandLine &CmdL)
 	    continue;
 	 Colours[Pkg->ID] = 2;
 	 DidSomething = true;
-	 
+
 	 pkgCache::VerIterator Ver = Pkg.VersionList();
 	 if (Ver.end() == true)
 	    cout << '<' << Pkg.Name() << '>' << endl;
 	 else
 	    cout << Pkg.Name() << "-" << Ver.VerStr() << endl;
 
-	 SPtrArray<unsigned> LocalColours = 
+	 SPtrArray<unsigned> LocalColours =
 		     new unsigned[Cache.Head().PackageCount];
 	 memset(LocalColours,0,sizeof(*LocalColours)*Cache.Head().PackageCount);
-	    
+
 	 // Display all dependencies directly on the package.
 	 for (pkgCache::DepIterator RD = Pkg.RevDependsList();
 	      RD.end() == false; RD++)
@@ -2987,7 +2987,7 @@ bool WhatDepends(CommandLine &CmdL)
 	    if (LocalColours[Parent->ID] == 1)
 	       continue;
 	    LocalColours[Parent->ID] = 1;
-	       
+
 	    if (Ver.end() == false && RD.TargetVer() &&
 	        Cache.VS->CheckDep(Ver.VerStr(),RD) == false)
 	       continue;
@@ -3057,7 +3057,7 @@ bool WhatDepends(CommandLine &CmdL)
 		     continue;
 		  cout << "      " << V.ParentPkg().Name()
 		       << "-" << V.VerStr() << endl;
-		  
+
 		  if (Recurse == true)
 		     Colours[D.ParentPkg()->ID]++;
 	       }
@@ -3080,7 +3080,7 @@ bool WhatDepends(CommandLine &CmdL)
 	       if (LocalColours[Parent->ID] == 1)
 		  continue;
 	       LocalColours[Parent->ID] = 1;
-		  
+
 	       if (Ver.end() == false &&
 		   Cache.VS->CheckDep(Ver.VerStr(),RD) == false)
 		  continue;
@@ -3130,17 +3130,17 @@ bool WhatDepends(CommandLine &CmdL)
 			continue;
 		     cout << "      " << V.ParentPkg().Name()
 			  << "-" << V.VerStr() << endl;
-		     
+
 		     if (Recurse == true)
 			Colours[D.ParentPkg()->ID]++;
 		  }
 	       }
 	    }
 	 }
-      } 
+      }
    }
    while (DidSomething == true);
-   
+
    return true;
 }
 									/*}}}*/
@@ -3154,7 +3154,7 @@ bool UnMet(CommandLine &CmdL)
 
    pkgCache &Cache = *GCache;
    bool Important = _config->FindB("APT::Cache::Important",false);
-   
+
    for (pkgCache::PkgIterator P = Cache.PkgBegin(); P.end() == false; P++)
    {
       for (pkgCache::VerIterator V = P.VersionList(); V.end() == false; V++)
@@ -3166,10 +3166,10 @@ bool UnMet(CommandLine &CmdL)
 	    pkgCache::DepIterator Start;
 	    pkgCache::DepIterator End;
 	    D.GlobOr(Start,End);
-	    
+
 	    // Skip conflicts and replaces
 	    if (End->Type != pkgCache::Dep::PreDepends &&
-		End->Type != pkgCache::Dep::Depends && 
+		End->Type != pkgCache::Dep::Depends &&
 		End->Type != pkgCache::Dep::Suggests &&
 		End->Type != pkgCache::Dep::Recommends)
 	       continue;
@@ -3179,7 +3179,7 @@ bool UnMet(CommandLine &CmdL)
 	       if (End->Type != pkgCache::Dep::PreDepends &&
 		   End->Type != pkgCache::Dep::Depends)
 		  continue;
-	    
+
 	    // Verify the or group
 	    bool OK = false;
 	    pkgCache::DepIterator RealStart = Start;
@@ -3194,7 +3194,7 @@ bool UnMet(CommandLine &CmdL)
 		  break;
 	       }
 	       delete [] VList;
-	       
+
 	       if (Start == End)
 		  break;
 	       Start++;
@@ -3204,13 +3204,13 @@ bool UnMet(CommandLine &CmdL)
 	    // The group is OK
 	    if (OK == true)
 	       continue;
-	    
+
 	    // Oops, it failed..
 	    if (Header == false)
 	       ioprintf(cout,_("Package %s version %s has an unmet dep:\n"),
 			P.Name(),V.VerStr());
 	    Header = true;
-	    
+
 	    // Print out the dep type
 	    cout << " " << End.DepType() << ": ";
 
@@ -3228,11 +3228,11 @@ bool UnMet(CommandLine &CmdL)
 	       Start++;
 	    }
 	    while (1);
-	    
+
 	    cout << endl;
-	 }	 
+	 }
       }
-   }   
+   }
    return true;
 }
 									/*}}}*/
@@ -3240,7 +3240,7 @@ bool UnMet(CommandLine &CmdL)
 // ---------------------------------------------------------------------
 /* */
 bool DumpPackage(CommandLine &CmdL)
-{   
+{
    if (CheckHelp(CmdL) == true)
       return true;
 
@@ -3263,9 +3263,9 @@ bool DumpPackage(CommandLine &CmdL)
 	    cout << "(" << Vf.File().FileName() << ")";
 	 cout << endl;
       }
-      
+
       cout << endl;
-      
+
       cout << "Reverse Depends: " << endl;
       for (pkgCache::DepIterator D = Pkg.RevDependsList(); D.end() != true; D++)
       {
@@ -3275,7 +3275,7 @@ bool DumpPackage(CommandLine &CmdL)
 	 else
 	    cout << endl;
       }
-      
+
       cout << "Dependencies: " << endl;
       for (pkgCache::VerIterator Cur = Pkg.VersionList(); Cur.end() != true; Cur++)
       {
@@ -3283,7 +3283,7 @@ bool DumpPackage(CommandLine &CmdL)
 	 for (pkgCache::DepIterator Dep = Cur.DependsList(); Dep.end() != true; Dep++)
 	    cout << Dep.TargetPkg().Name() << " (" << (int)Dep->CompareOp << " " << DeNull(Dep.TargetVer()) << ") ";
 	 cout << endl;
-      }      
+      }
 
       cout << "Provides: " << endl;
       for (pkgCache::VerIterator Cur = Pkg.VersionList(); Cur.end() != true; Cur++)
@@ -3295,7 +3295,7 @@ bool DumpPackage(CommandLine &CmdL)
       }
       cout << "Reverse Provides: " << endl;
       for (pkgCache::PrvIterator Prv = Pkg.ProvidesList(); Prv.end() != true; Prv++)
-	 cout << Prv.OwnerPkg().Name() << " " << Prv.OwnerVer().VerStr() << endl;            
+	 cout << Prv.OwnerPkg().Name() << " " << Prv.OwnerVer().VerStr() << endl;
    }
 
    return true;
@@ -3303,7 +3303,7 @@ bool DumpPackage(CommandLine &CmdL)
 									/*}}}*/
 // DisplayRecord - Displays the complete record for the package		/*{{{*/
 // ---------------------------------------------------------------------
-/* This displays the package record from the proper package index file. 
+/* This displays the package record from the proper package index file.
    It is not used by DumpAvail for performance reasons. */
 bool DisplayRecord(pkgCache::VerIterator V)
 {
@@ -3314,7 +3314,7 @@ bool DisplayRecord(pkgCache::VerIterator V)
 	 break;
    if (Vf.end() == true)
       Vf = V.FileList();
-      
+
 // CNC:2002-07-24
 #if HAVE_RPM
    pkgRecords Recs(*GCache);
@@ -3329,11 +3329,11 @@ bool DisplayRecord(pkgCache::VerIterator V)
    pkgCache::PkgFileIterator I = Vf.File();
    if (I.IsOk() == false)
       return _error->Error(_("Package file %s is out of sync."),I.FileName());
-   
+
    FileFd PkgF(I.FileName(),FileFd::ReadOnly);
    if (_error->PendingError() == true)
       return false;
-   
+
    // Read the record and then write it out again.
    unsigned char *Buffer = new unsigned char[GCache->HeaderP->MaxVerFileSize+1];
    Buffer[V.FileList()->Size] = '\n';
@@ -3344,7 +3344,7 @@ bool DisplayRecord(pkgCache::VerIterator V)
       delete [] Buffer;
       return false;
    }
-   
+
    delete [] Buffer;
 #endif
 
@@ -3369,27 +3369,27 @@ bool Search(CommandLine &CmdL)
    bool ShowFull = _config->FindB("APT::Cache::ShowFull",false);
    bool NamesOnly = _config->FindB("APT::Cache::NamesOnly",false);
    unsigned NumPatterns = CmdL.FileSize() -1;
-   
+
    pkgDepCache::Policy Plcy;
-   
+
    // Make sure there is at least one argument
    if (NumPatterns < 1)
       return _error->Error(_("You must give exactly one pattern"));
-   
+
    // Compile the regex pattern
    regex_t *Patterns = new regex_t[NumPatterns];
    memset(Patterns,0,sizeof(*Patterns)*NumPatterns);
    for (unsigned I = 0; I != NumPatterns; I++)
    {
-      if (regcomp(&Patterns[I],CmdL.FileList[I+1],REG_EXTENDED | REG_ICASE | 
+      if (regcomp(&Patterns[I],CmdL.FileList[I+1],REG_EXTENDED | REG_ICASE |
 		  REG_NOSUB) != 0)
       {
 	 for (; I != 0; I--)
 	    regfree(&Patterns[I]);
 	 return _error->Error("Regex compilation error");
-      }      
+      }
    }
-   
+
    // Create the text record parser
    pkgRecords Recs(Cache);
    if (_error->PendingError() == true)
@@ -3398,7 +3398,7 @@ bool Search(CommandLine &CmdL)
 	 regfree(&Patterns[I]);
       return false;
    }
-   
+
    ExVerFile *VFList = new ExVerFile[Cache.HeaderP->PackageCount+1];
    memset(VFList,0,sizeof(*VFList)*Cache.HeaderP->PackageCount+1);
 
@@ -3413,17 +3413,17 @@ bool Search(CommandLine &CmdL)
 	 else
 	    VFList[P->ID].NameMatch = false;
       }
-        
+
       // Doing names only, drop any that dont match..
       if (NamesOnly == true && VFList[P->ID].NameMatch == false)
 	 continue;
-	 
-      // Find the proper version to use. 
+
+      // Find the proper version to use.
       pkgCache::VerIterator V = Plcy.GetCandidateVer(P);
       if (V.end() == false)
 	 VFList[P->ID].Vf = V.FileList();
    }
-      
+
    // Include all the packages that provide matching names too
    for (pkgCache::PkgIterator P = Cache.PkgBegin(); P.end() == false; P++)
    {
@@ -3464,7 +3464,7 @@ bool Search(CommandLine &CmdL)
 	       Match = false;
 	 }
       }
-      
+
       if (Match == true)
       {
 	 if (ShowFull == true)
@@ -3474,12 +3474,12 @@ bool Search(CommandLine &CmdL)
 	    P.GetRec(Start,End);
 	    fwrite(Start,End-Start,1,stdout);
 	    putc('\n',stdout);
-	 }	 
+	 }
 	 else
 	    printf("%s - %s\n",P.Name().c_str(),P.ShortDesc().c_str());
       }
    }
-   
+
    delete [] VFList;
    for (unsigned I = 0; I != NumPatterns; I++)
       regfree(&Patterns[I]);
@@ -3647,7 +3647,7 @@ bool DoList(CommandLine &CmdL)
 	 c2out << endl;
       }
    }
-   
+
    return true;
 }
 									/*}}}*/
@@ -3655,7 +3655,7 @@ bool DoList(CommandLine &CmdL)
 // ---------------------------------------------------------------------
 /* */
 bool ShowPackage(CommandLine &CmdL)
-{   
+{
    if (CheckHelp(CmdL) == true)
       return true;
 
@@ -3663,7 +3663,7 @@ bool ShowPackage(CommandLine &CmdL)
    pkgDepCache::Policy Plcy;
 
    unsigned found = 0;
-   
+
    for (const char **I = CmdL.FileList + 1; *I != 0; I++)
    {
       pkgCache::PkgIterator Pkg = Cache.FindPkg(*I);
@@ -3692,7 +3692,7 @@ bool ShowPackage(CommandLine &CmdL)
 	    continue;
 	 if (DisplayRecord(V) == false)
 	    return false;
-      }      
+      }
    }
 
    if (found > 0)
@@ -3718,11 +3718,11 @@ bool ShowHelp(CommandLine &CmdL)
 
    ioprintf(cout,_("%s %s for %s %s compiled on %s %s\n"),PACKAGE,VERSION,
 	    COMMON_OS,COMMON_CPU,__DATE__,__TIME__);
-	    
+
    if (_config->FindB("version") == true)
    {
       cout << _("Supported Modules:") << endl;
-      
+
       for (unsigned I = 0; I != pkgVersioningSystem::GlobalListLen; I++)
       {
 	 pkgVersioningSystem *VS = pkgVersioningSystem::GlobalList[I];
@@ -3731,8 +3731,8 @@ bool ShowHelp(CommandLine &CmdL)
 	 else
 	    cout << ' ';
 	 cout << "Ver: " << VS->Label << endl;
-	 
-	 /* Print out all the packaging systems that will work with 
+
+	 /* Print out all the packaging systems that will work with
 	    this VS */
 	 for (unsigned J = 0; J != pkgSystem::GlobalListLen; J++)
 	 {
@@ -3745,23 +3745,23 @@ bool ShowHelp(CommandLine &CmdL)
 	       cout << "Pkg:  " << Sys->Label << " (Priority " << Sys->Score(*_config) << ")" << endl;
 	 }
       }
-      
+
       for (unsigned I = 0; I != pkgSourceList::Type::GlobalListLen; I++)
       {
 	 pkgSourceList::Type *Type = pkgSourceList::Type::GlobalList[I];
 	 cout << " S.L: '" << Type->Name << "' " << Type->Label << endl;
-      }      
-      
+      }
+
       for (unsigned I = 0; I != pkgIndexFile::Type::GlobalListLen; I++)
       {
 	 pkgIndexFile::Type *Type = pkgIndexFile::Type::GlobalList[I];
 	 cout << " Idx: " << Type->Label << endl;
-      }      
-      
+      }
+
       return true;
    }
-   
-   cout << 
+
+   cout <<
     _("\n"
       "Main commands:\n"
       "   status - Show the current selections\n"
@@ -4071,7 +4071,7 @@ void SigWinch(int)
    // Riped from GNU ls
 #ifdef TIOCGWINSZ
    struct winsize ws;
-  
+
    if (ioctl(1, TIOCGWINSZ, &ws) != -1 && ws.ws_col >= 5)
       ScreenWidth = ws.ws_col - 1;
 #endif
@@ -4166,7 +4166,7 @@ unsigned long ReadLineHashCmd(const char *Cmd, const char *CmdEnd)
       Hash = 5*Hash + *Cmd;
    return Hash;
 }
-   
+
 char **ReadLineCompletion(const char *Text, int Start, int End)
 {
    char **Matches = (char **)NULL;
@@ -4253,7 +4253,7 @@ CommandLine::Args *CommandArgs(const char *Name)
       {'q',"quiet","quiet",CommandLine::IntLevel},
       {'q',"silent","quiet",CommandLine::IntLevel},
       {'y',"yes","APT::Get::Assume-Yes",0},
-      {'y',"assume-yes","APT::Get::Assume-Yes",0},      
+      {'y',"assume-yes","APT::Get::Assume-Yes",0},
       {'s',"simulate","APT::Get::Simulate",0},
       {'s',"just-print","APT::Get::Simulate",0},
       {'s',"recon","APT::Get::Simulate",0},
@@ -4267,7 +4267,7 @@ CommandLine::Args *CommandArgs(const char *Name)
       {0,"reinstall","APT::Get::ReInstall",0},
       {0,"upgrade","APT::Get::upgrade",0},
       {0,"force-yes","APT::Get::Force-Yes",0},
-      {0,"ignore-hold","APT::Ignore-Hold",0},      
+      {0,"ignore-hold","APT::Ignore-Hold",0},
       {0,"purge","APT::Get::Purge",0},
       {0,"remove","APT::Get::Remove",0},
       {0,"arch-only","APT::Get::Arch-Only",0},
@@ -4280,7 +4280,7 @@ CommandLine::Args *CommandArgs(const char *Name)
       {'q',"quiet","quiet",CommandLine::IntLevel},
       {'q',"silent","quiet",CommandLine::IntLevel},
       {'y',"yes","APT::Get::Assume-Yes",0},
-      {'y',"assume-yes","APT::Get::Assume-Yes",0},      
+      {'y',"assume-yes","APT::Get::Assume-Yes",0},
       {'d',"download-only","APT::Get::Download-Only",0},
       {'s',"simulate","APT::Get::Simulate",0},
       {'s',"just-print","APT::Get::Simulate",0},
@@ -4406,7 +4406,7 @@ int main(int argc,const char *argv[])
    {
       if (_config->FindB("version") == true)
 	 ShowHelp(CmdL);
-	 
+
       _error->DumpErrors();
       return 100;
    }
@@ -4475,7 +4475,7 @@ int main(int argc,const char *argv[])
 	 _error->DumpErrors();
 	 continue;
       }
-      
+
       line = readline(_config->Find("APT::Shell::Prompt", "apt> ").c_str());
       if (!line || !*line) {
 	 free(line);
@@ -4534,7 +4534,7 @@ int main(int argc,const char *argv[])
       if (largc == 1 || _error->empty() == false)
 	 continue;
       largv[largc] = 0;
-      
+
       // Make our own copy of the configuration.
       delete _config;
       _config = new Configuration(GlobalConfig);
@@ -4563,7 +4563,7 @@ int main(int argc,const char *argv[])
 
       if (_error->PendingError() == false)
 	 CmdL.DispatchArg(Cmds);
-      
+
       free(line);
    }
 
@@ -4578,8 +4578,8 @@ int main(int argc,const char *argv[])
       _error->DumpErrors();
       return Errors == true?100:0;
    }
-   
-   return 0;   
+
+   return 0;
 }
 
 // vim:sts=3:sw=3

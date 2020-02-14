@@ -6,7 +6,7 @@
    RPM Version - Versioning system for RPM
 
    This implements the RPM versioning system.
-   
+
    ##################################################################### */
 									/*}}}*/
 #ifndef PKGLIB_RPMVERSION_H
@@ -14,18 +14,18 @@
 
 #ifdef __GNUG__
 #pragma interface "apt-pkg/rpmversion.h"
-#endif 
+#endif
 
 #include <apt-pkg/version.h>
-#include <apt-pkg/strutl.h>    
-    
+#include <apt-pkg/strutl.h>
+
 class rpmVersioningSystem : public pkgVersioningSystem
-{     
-   void ParseVersion(const char *V, const char *VEnd, 
+{
+   void ParseVersion(const char *V, const char *VEnd,
 		     char **Epoch, char **Version, char **Release);
-   
+
    public:
-   
+
    // Compare versions..
    virtual int DoCmpVersion(const char *A,const char *Aend,
 			    const char *B,const char *Bend);
@@ -39,7 +39,7 @@ class rpmVersioningSystem : public pkgVersioningSystem
 			     const char *B,const char *Bend)
    {
       return DoCmpVersion(A,Aend,B,Bend);
-   }   
+   }
    virtual string UpstreamVersion(const char *A);
 
    rpmVersioningSystem();

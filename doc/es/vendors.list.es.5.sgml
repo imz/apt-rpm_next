@@ -6,7 +6,7 @@
 
 ]>
 
-<!-- 
+<!--
 (c) 2003 Software in the Public Interest
 Esta traducción ha sido realizada por Rubén Porras Campo <nahoo@inicia.es>
 Está basada en la página de manual original:
@@ -16,20 +16,20 @@ versión 1.2 del CVS de
 
 <refentry lang=es>
  &apt-docinfo;
- 
+
  <refmeta>
    <refentrytitle>vendors.list</>
    <manvolnum>5</>
  </refmeta>
- 
+
  <!-- Man page title -->
  <refnamediv>
     <refname>vendors.list</>
     <refpurpose>Configuración de claves de seguridad de APT</>
  </refnamediv>
- 
+
  <RefSect1><Title>Descripción</>
-   <para>   
+   <para>
    La lista de proveedores de paquetes contiene una lista de todos los
    proveedores cuyos paquetes descargados desee autenticar.
    Debe de tener la huella digital PGP correspondiente a cada
@@ -56,24 +56,24 @@ versión 1.2 del CVS de
    identifica al proveedor. Es una cadena arbitraria y obligatoria que
    debe proporcionar para identificar inequívocamente al proveedor
    listado en este fichero.
-   
+
    Ejemplo:
-<informalexample><programlisting>   
+<informalexample><programlisting>
 simple-key "juan"
 {
    Fingerprint "0987AB4378FSD872343298787ACC";
    Name "Juan Gándara &lt;juan@gandara.com&gt;";
-}						    
+}
 </programlisting></informalexample>
-   
+
  </RefSect1>
 
  <RefSect1><Title>El tipo simple-key</>
-   <para>   
+   <para>
    Este tipo de verificación se usa cuando el proveedor tiene una sola
    clave asegurada que se debe usar para firmar el fichero <literal>
    Release</literal>. Los siguiente elementos deben de estar presentes:
-   
+
    <VariableList>
      <VarListEntry><Term>Fingerprint</Term>
      <ListItem><Para>
@@ -83,7 +83,7 @@ simple-key "juan"
      <command/gpg/</RefEntryTitle><ManVolNum/1/</CiteRefEntry>
      mostrará la huella digital de la clave o claves seleccionadas.
      </VarListEntry>
-     
+
      <VarListEntry><Term>Name</Term>
      <ListItem><Para>
      Cadena de caracteres que contiene una descripción del propietario
@@ -91,7 +91,7 @@ simple-key "juan"
      y su <foreignphrase>email</foreignphrase>. La cadena debe de ir
      entre comillas dobles.
      </VarListEntry>
-     
+
    </VariableList>
  </RefSect1>
 
@@ -99,7 +99,7 @@ simple-key "juan"
    <para>
    <filename>/etc/apt/vendors.list</>
  </RefSect1>
- 
+
  <RefSect1><Title>Véase también</>
    <para>
    &sources-list;
@@ -117,4 +117,4 @@ simple-key "juan"
   </refsect1>
 
 </refentry>
-   
+

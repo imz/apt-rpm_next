@@ -6,7 +6,7 @@
    Debian Version - Versioning system for Debian
 
    This implements the standard Debian versioning system.
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -35,7 +35,7 @@ debVersioningSystem::debVersioningSystem()
 
 // debVS::CmpFragment - Compare versions			        /*{{{*/
 // ---------------------------------------------------------------------
-/* This compares a fragment of the version. This is a slightly adapted 
+/* This compares a fragment of the version. This is a slightly adapted
    version of what dpkg uses. */
 #define order(x) ((x) == '~' ? -1    \
 		: isdigit((x)) ? 0   \
@@ -125,12 +125,12 @@ int debVersioningSystem::CmpFragment(const char *A,const char *AEnd,
 									/*}}}*/
 // debVS::CmpVersion - Comparison for versions				/*{{{*/
 // ---------------------------------------------------------------------
-/* This fragments the version into E:V-R triples and compares each 
+/* This fragments the version into E:V-R triples and compares each
    portion separately. */
 int debVersioningSystem::DoCmpVersion(const char *A,const char *AEnd,
 				      const char *B,const char *BEnd)
 {
-   // Strip off the epoch and compare it 
+   // Strip off the epoch and compare it
    const char *lhs = A;
    const char *rhs = B;
    for (;lhs != AEnd && *lhs != ':'; lhs++);
@@ -139,7 +139,7 @@ int debVersioningSystem::DoCmpVersion(const char *A,const char *AEnd,
       lhs = A;
    if (rhs == BEnd)
       rhs = B;
-   
+
    // Compare the epoch
    int Res = CmpFragment(A,lhs,B,rhs);
    if (Res != 0)
@@ -150,8 +150,8 @@ int debVersioningSystem::DoCmpVersion(const char *A,const char *AEnd,
       lhs++;
    if (rhs != B)
       rhs++;
-   
-   // Find the last - 
+
+   // Find the last -
    const char *dlhs = AEnd-1;
    const char *drhs = BEnd-1;
    for (;dlhs > lhs && *dlhs != '-'; dlhs--);
@@ -161,24 +161,24 @@ int debVersioningSystem::DoCmpVersion(const char *A,const char *AEnd,
       dlhs = AEnd;
    if (drhs == rhs)
       drhs = BEnd;
-   
+
    // Compare the main version
    Res = CmpFragment(lhs,dlhs,rhs,drhs);
    if (Res != 0)
       return Res;
-   
+
    // Skip the -
    if (dlhs != lhs)
       dlhs++;
    if (drhs != rhs)
       drhs++;
-   
+
    return CmpFragment(dlhs,AEnd,drhs,BEnd);
 }
 									/*}}}*/
 // debVS::CheckDep - Check a single dependency				/*{{{*/
 // ---------------------------------------------------------------------
-/* This simply preforms the version comparison and switch based on 
+/* This simply preforms the version comparison and switch based on
    operator. If DepVer is 0 then we are comparing against a provides
    with no version. */
 bool debVersioningSystem::CheckDep(const char *PkgVer,
@@ -188,7 +188,7 @@ bool debVersioningSystem::CheckDep(const char *PkgVer,
       return true;
    if (PkgVer == 0 || PkgVer[0] == 0)
       return false;
-   
+
    // Perform the actual comparision.
    int Res = CmpVersion(PkgVer,DepVer);
    switch (Op & 0x0F)
@@ -197,27 +197,27 @@ bool debVersioningSystem::CheckDep(const char *PkgVer,
       if (Res <= 0)
 	 return true;
       break;
-      
+
       case pkgCache::Dep::GreaterEq:
       if (Res >= 0)
 	 return true;
       break;
-      
+
       case pkgCache::Dep::Less:
       if (Res < 0)
 	 return true;
       break;
-      
+
       case pkgCache::Dep::Greater:
       if (Res > 0)
 	 return true;
       break;
-      
+
       case pkgCache::Dep::Equals:
       if (Res == 0)
 	 return true;
       break;
-      
+
       case pkgCache::Dep::NotEquals:
       if (Res != 0)
 	 return true;
@@ -237,14 +237,14 @@ string debVersioningSystem::UpstreamVersion(const char *Ver)
    for (; *I != 0 && *I != ':'; I++);
    if (*I == ':')
       Ver = I + 1;
-   
+
    // Chop off the trailing -
    I = Ver;
    unsigned Last = strlen(Ver);
    for (; *I != 0; I++)
       if (*I == '-')
 	 Last = I - Ver;
-   
+
    return string(Ver,Last);
 }
 									/*}}}*/

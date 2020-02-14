@@ -31,7 +31,7 @@
 #define CRPMTAG_TIMESTAMP   1012345
 
 int tags[] =  {
-       RPMTAG_NAME, 
+       RPMTAG_NAME,
        RPMTAG_EPOCH,
        RPMTAG_VERSION,
        RPMTAG_RELEASE,
@@ -42,23 +42,23 @@ int tags[] =  {
        RPMTAG_SIZE,
        RPMTAG_VENDOR,
        RPMTAG_OS,
-       
-       RPMTAG_DESCRIPTION, 
-       RPMTAG_SUMMARY, 
+
+       RPMTAG_DESCRIPTION,
+       RPMTAG_SUMMARY,
        /*RPMTAG_HEADERI18NTABLE*/ HEADER_I18NTABLE,
-       
-       RPMTAG_REQUIREFLAGS, 
+
+       RPMTAG_REQUIREFLAGS,
        RPMTAG_REQUIRENAME,
        RPMTAG_REQUIREVERSION,
-       
+
        RPMTAG_CONFLICTFLAGS,
        RPMTAG_CONFLICTNAME,
        RPMTAG_CONFLICTVERSION,
-       
+
        RPMTAG_PROVIDENAME,
        RPMTAG_PROVIDEFLAGS,
        RPMTAG_PROVIDEVERSION,
-       
+
        RPMTAG_OBSOLETENAME,
        RPMTAG_OBSOLETEFLAGS,
        RPMTAG_OBSOLETEVERSION,
@@ -80,13 +80,13 @@ typedef struct {
 static inline int usefullFile(char *a)
 {
    int l = strlen(a);
-   
+
    if (strstr(a, "bin") || strstr(a, "/etc") || strncmp(a, "/lib", 4) == 0)
        return 1;
-   
+
    if (l < 3)
        return 0;
-   
+
    if (strcmp(a + l - 3, ".so") == 0
        || strstr(a, ".so."))
        return 1;
@@ -98,7 +98,7 @@ static void copyStrippedFileList(Header header, Header newHeader)
 {
    int i;
    int i1, i2;
-   
+
    int type1, type2, type3;
    int count1, count2, count3;
    char **dirnames = NULL, **basenames = NULL;
@@ -106,16 +106,16 @@ static void copyStrippedFileList(Header header, Header newHeader)
    char **dnames, **bnames;
    int_32 *dindexes;
    int res1, res2, res3;
-   
+
 #define FREE(a) if (a) free(a);
-   
-   res1 = headerGetEntry(header, RPMTAG_DIRNAMES, &type1, 
+
+   res1 = headerGetEntry(header, RPMTAG_DIRNAMES, &type1,
 			 (void**)&dirnames, &count1);
-   res2 = headerGetEntry(header, RPMTAG_BASENAMES, &type2, 
+   res2 = headerGetEntry(header, RPMTAG_BASENAMES, &type2,
 			 (void**)&basenames, &count2);
-   res3 = headerGetEntry(header, RPMTAG_DIRINDEXES, &type3, 
+   res3 = headerGetEntry(header, RPMTAG_DIRINDEXES, &type3,
 			 (void**)&dirindexes, &count3);
-   
+
    if (res1 != 1 || res2 != 1 || res3 != 1) {
       FREE(dirnames);
       FREE(basenames);
@@ -125,17 +125,17 @@ static void copyStrippedFileList(Header header, Header newHeader)
    dnames = dirnames;
    bnames = basenames;
    dindexes = (int_32*)malloc(sizeof(int_32)*count3);
-   
+
    i1 = 0;
    i2 = 0;
-   for (i = 0; i < count2 ; i++) 
+   for (i = 0; i < count2 ; i++)
    {
       int ok = 0;
-      
+
       ok = usefullFile(basenames[i]);
-      if (!ok) 
+      if (!ok)
 	  ok = usefullFile(dirnames[dirindexes[i]]);
-      
+
       if (!ok) {
 	 int k = i;
 	 while (dirindexes[i] == dirindexes[k] && i < count2)
@@ -143,12 +143,12 @@ static void copyStrippedFileList(Header header, Header newHeader)
 	 i--;
 	 continue;
       }
-      
-      
+
+
       if (ok)
       {
 	 int j;
-	 
+
 	 bnames[i1] = basenames[i];
 	 for (j = 0; j < i2; j++)
 	 {
@@ -158,7 +158,7 @@ static void copyStrippedFileList(Header header, Header newHeader)
 	       break;
 	    }
 	 }
-	 if (j == i2) 
+	 if (j == i2)
 	 {
 	    dnames[i2] = dirnames[dirindexes[i]];
 	    dindexes[i1] = i2;
@@ -166,22 +166,22 @@ static void copyStrippedFileList(Header header, Header newHeader)
 	 }
 	 assert(i2 <= count1);
 	 i1++;
-      } 
+      }
    }
-   
+
    if (i1 == 0) {
       FREE(dirnames);
       FREE(basenames);
       FREE(dindexes);
       return;
    }
-   
+
    headerAddEntry(newHeader, RPMTAG_DIRNAMES, type1, dnames, i2);
-   
+
    headerAddEntry(newHeader, RPMTAG_BASENAMES, type2, bnames, i1);
-   
+
    headerAddEntry(newHeader, RPMTAG_DIRINDEXES, type3, dindexes, i1);
-   
+
    FREE(dirnames);
    FREE(basenames);
    FREE(dindexes);
@@ -194,15 +194,15 @@ static void copyStrippedFileList(Header header, Header newHeader)
 bool loadUpdateInfo(char *path, map<string,UpdateInfo> &map)
 {
    FileFd F(path, FileFd::ReadOnly);
-   if (_error->PendingError()) 
+   if (_error->PendingError())
    {
       return false;
    }
-   
+
    pkgTagFile Tags(&F);
    pkgTagSection Section;
-   
-   while (Tags.Step(Section)) 
+
+   while (Tags.Step(Section))
    {
       string file = Section.FindS("File");
       UpdateInfo info;
@@ -234,13 +234,13 @@ bool copyFields(Header h, Header newHeader,
    int_32 size[1];
 
    size[0] = filesize;
-   
+
    // the std tags
    for (i = 0; i < numTags; i++) {
       int_32 type, count;
       void *data;
       int res;
-      
+
       // Copy raw entry, so that internationalized strings
       // will get copied correctly.
       res = headerGetRawEntry(h, tags[i], &type, &data, &count);
@@ -248,18 +248,18 @@ bool copyFields(Header h, Header newHeader,
 	 continue;
       headerAddEntry(newHeader, tags[i], type, data, count);
    }
- 
+
    if (fullFileList) {
       int type1, type2, type3;
       int count1, count2, count3;
       char **dnames, **bnames, **dindexes;
       int res;
-   
-      res = headerGetEntry(h, RPMTAG_DIRNAMES, &type1, 
+
+      res = headerGetEntry(h, RPMTAG_DIRNAMES, &type1,
 			   (void**)&dnames, &count1);
-      res = headerGetEntry(h, RPMTAG_BASENAMES, &type2, 
+      res = headerGetEntry(h, RPMTAG_BASENAMES, &type2,
 			   (void**)&bnames, &count2);
-      res = headerGetEntry(h, RPMTAG_DIRINDEXES, &type3, 
+      res = headerGetEntry(h, RPMTAG_DIRINDEXES, &type3,
 			   (void**)&dindexes, &count3);
 
       if (res == 1) {
@@ -270,17 +270,17 @@ bool copyFields(Header h, Header newHeader,
    } else {
        copyStrippedFileList(h, newHeader);
    }
-   
+
    // update index of srpms
    if (idxfile) {
       int_32 type, count;
       char *srpm;
       char *name;
       int res;
-      
-      res = headerGetEntry(h, RPMTAG_NAME, &type, 
+
+      res = headerGetEntry(h, RPMTAG_NAME, &type,
 			   (void**)&name, &count);
-      res = headerGetEntry(h, RPMTAG_SOURCERPM, &type, 
+      res = headerGetEntry(h, RPMTAG_SOURCERPM, &type,
 			   (void**)&srpm, &count);
       if (res == 1) {
 	 fprintf(idxfile, "%s %s\n", srpm, name);
@@ -289,16 +289,16 @@ bool copyFields(Header h, Header newHeader,
    // our additional tags
    headerAddEntry(newHeader, CRPMTAG_DIRECTORY, RPM_STRING_TYPE,
 		  directory, 1);
-   headerAddEntry(newHeader, CRPMTAG_FILENAME, RPM_STRING_TYPE, 
+   headerAddEntry(newHeader, CRPMTAG_FILENAME, RPM_STRING_TYPE,
 		  filename, 1);
    headerAddEntry(newHeader, CRPMTAG_FILESIZE, RPM_INT32_TYPE,
 		  size, 1);
-      
+
    // update description tags
    if (updateInfo.find(string(filename)) != updateInfo.end()) {
       const char *tmp;
       string name = string(filename);
-      
+
       tmp = updateInfo[name].summary.c_str();
       headerAddEntry(newHeader, CRPMTAG_UPDATE_SUMMARY,
 		     RPM_STRING_TYPE,
@@ -316,7 +316,7 @@ bool copyFields(Header h, Header newHeader,
 		     RPM_STRING_TYPE,
 		     tmp, 1);
    }
-   
+
    return true;
 }
 
@@ -325,7 +325,7 @@ int selectDirent(const struct dirent *ent)
 {
    int state = 0;
    const char *p = ent->d_name;
-   
+
    while (1) {
       if (*p == '.') {
 	  state = 1;
@@ -372,8 +372,8 @@ int alphasort(const void * a, const void * b)
                  (*(struct dirent **) b)->d_name);
 }
 
-int scandir(const char * dir, struct dirent *** namelist, 
-        int (* select)(struct dirent *), 
+int scandir(const char * dir, struct dirent *** namelist,
+        int (* select)(struct dirent *),
         int (* cmp)(const void *, const void *))
 
 {
@@ -448,7 +448,7 @@ int scandir(const char * dir, struct dirent *** namelist,
 #endif /* !HAVE_SCANDIR */
 
 
-int main(int argc, char ** argv) 
+int main(int argc, char ** argv)
 {
    string rpmsdir;
    string pkglist_path;
@@ -467,7 +467,7 @@ int main(int argc, char ** argv)
    bool progressBar = false;
    const char *pkgListSuffix = NULL;
    bool pkgListAppend = false;
-   
+
    putenv("LC_ALL="); // Is this necessary yet (after i18n was supported)?
    for (i = 1; i < argc; i++) {
       if (strcmp(argv[i], "--index") == 0) {
@@ -527,7 +527,7 @@ int main(int argc, char ** argv)
    if (argc != i) {
       usage();
    }
-   
+
    if (op_update) {
       if (!loadUpdateInfo(op_update, updateInfo)) {
 	 cerr << "genpkglist: error reading update info from file " << op_update << endl;
@@ -545,10 +545,10 @@ int main(int argc, char ** argv)
    } else {
       idxfile = NULL;
    }
-   
+
    {
       char cwd[200];
-      
+
       getcwd(cwd, 200);
       if (*op_dir != '/') {
 	 rpmsdir = string(cwd) + "/" + string(op_dir);
@@ -567,15 +567,15 @@ int main(int argc, char ** argv)
 	  << strerror(errno);
       return 1;
    }
-   
+
    chdir(rpmsdir.c_str());
-   
+
    if (pkgListSuffix != NULL)
 	   pkglist_path = pkglist_path + "/base/pkglist." + pkgListSuffix;
    else
 	   pkglist_path = pkglist_path + "/base/pkglist." + op_suf;
-   
-   
+
+
    if (pkgListAppend == true && FileExists(pkglist_path)) {
       outfd = fdOpen(pkglist_path.c_str(), O_WRONLY|O_APPEND, 0644);
    } else {
@@ -596,7 +596,7 @@ int main(int argc, char ** argv)
    rpmtsSetVSFlags(ts, (rpmVSFlags_e)-1);
 #else
    int isSource;
-#endif   
+#endif
 
    for (entry_cur = 0; entry_cur < entry_no; entry_cur++) {
       struct stat sb;
@@ -609,7 +609,7 @@ int main(int argc, char ** argv)
       }
 
       if (stat(dirEntries[entry_cur]->d_name, &sb) < 0) {
-	    cerr << "\nWarning: " << strerror(errno) << ": " << 
+	    cerr << "\nWarning: " << strerror(errno) << ": " <<
 		    dirEntries[entry_cur]->d_name << endl;
 	    continue;
       }
@@ -617,15 +617,15 @@ int main(int argc, char ** argv)
       {
 	 Header h;
 	 int rc;
-	 
+
 	 fd = fdOpen(dirEntries[entry_cur]->d_name, O_RDONLY, 0666);
 
 	 if (!fd) {
-	    cerr << "\nWarning: " << strerror(errno) << ": " << 
+	    cerr << "\nWarning: " << strerror(errno) << ": " <<
 		    dirEntries[entry_cur]->d_name << endl;
 	    continue;
 	 }
-	 
+
 #if RPM_VERSION >= 0x040100
 	 rc = rpmReadPackageFile(ts, fd, dirEntries[entry_cur]->d_name, &h);
 	 if (rc == RPMRC_OK || rc == RPMRC_NOTTRUSTED || rc == RPMRC_NOKEY) {
@@ -635,23 +635,23 @@ int main(int argc, char ** argv)
 #endif
 	    Header newHeader;
 	    char md5[34];
-	    
+
 	    newHeader = headerNew();
-	    
+
 	    copyFields(h, newHeader, idxfile, dirtag.c_str(),
 		       dirEntries[entry_cur]->d_name,
 		       sb.st_size, updateInfo, fullFileList);
 
-	    md5cache->MD5ForFile(string(dirEntries[entry_cur]->d_name), 
+	    md5cache->MD5ForFile(string(dirEntries[entry_cur]->d_name),
 				 sb.st_mtime, md5);
 	    headerAddEntry(newHeader, CRPMTAG_MD5, RPM_STRING_TYPE, md5, 1);
 
 	    headerWrite(outfd, newHeader, HEADER_MAGIC_YES);
-	    
+
 	    headerFree(newHeader);
 	    headerFree(h);
 	 } else {
-	    cerr << "\nWarning: Skipping malformed RPM: " << 
+	    cerr << "\nWarning: Skipping malformed RPM: " <<
 		    dirEntries[entry_cur]->d_name << endl;
 	 }
 	 Fclose(fd);
@@ -663,7 +663,7 @@ int main(int argc, char ** argv)
 #if RPM_VERSION >= 0x040100
    ts = rpmtsFree(ts);
 #endif
-   
+
    delete md5cache;
 
    return 0;

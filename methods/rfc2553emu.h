@@ -5,18 +5,18 @@
 
    RFC 2553 Emulation - Provides emulation for RFC 2553 getaddrinfo,
                         freeaddrinfo and getnameinfo
-   
+
    These functions are necessary to write portable protocol independent
-   networking. They transparently support IPv4, IPv6 and probably many 
-   other protocols too. This implementation is needed when the host does 
-   not support these standards. It implements a simple wrapper that 
-   basically supports only IPv4. 
+   networking. They transparently support IPv4, IPv6 and probably many
+   other protocols too. This implementation is needed when the host does
+   not support these standards. It implements a simple wrapper that
+   basically supports only IPv4.
 
    Perfect emulation is not provided, but it is passable..
-   
+
    Originally written by Jason Gunthorpe <jgg@debian.org> and placed into
    the Public Domain, do with it what you will.
-  
+
    ##################################################################### */
 									/*}}}*/
 #ifndef RFC2553EMU_H
@@ -40,7 +40,7 @@
 #ifndef HAVE_GETADDRINFO
   // Renamed to advoid type clashing.. (for debugging)
   struct addrinfo_emu
-  {   
+  {
      int     ai_flags;     /* AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST */
      int     ai_family;    /* PF_xxx */
      int     ai_socktype;  /* SOCK_xxx */
@@ -60,7 +60,7 @@
   #ifndef AI_PASSIVE
   #define AI_PASSIVE (1<<1)
   #endif
-  
+
   #ifndef EAI_NONAME
   #define EAI_NONAME     -1
   #define EAI_AGAIN      -2
@@ -74,7 +74,7 @@
   #define EAI_MEMORY     -11
   #endif
 
-  /* If we don't have getaddrinfo then we probably don't have 
+  /* If we don't have getaddrinfo then we probably don't have
      sockaddr_storage either (same RFC) so we definately will not be
      doing any IPv6 stuff. Do not use the members of this structure to
      retain portability, cast to a sockaddr. */

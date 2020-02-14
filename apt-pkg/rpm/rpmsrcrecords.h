@@ -2,10 +2,10 @@
 // Description								/*{{{*/
 // $Id: rpmsrcrecords.h,v 1.5 2002/08/08 20:07:33 niemeyer Exp $
 /* ######################################################################
-   
+
    SRPM Records - Parser implementation for RPM style source indexes
-   
-   ##################################################################### 
+
+   #####################################################################
  */
 									/*}}}*/
 #ifndef PKGLIB_RPMSRCRECORDS_H
@@ -13,13 +13,13 @@
 
 #ifdef __GNUG__
 #pragma interface "apt-pkg/rpmsrcrecords.h"
-#endif 
+#endif
 
 #include <apt-pkg/srcrecords.h>
 #include <apt-pkg/fileutl.h>
 #include <rpm/rpmlib.h>
 
-  
+
 class RPMHandler;
 
 class rpmSrcRecordParser : public pkgSrcRecords::Parser
@@ -32,7 +32,7 @@ class rpmSrcRecordParser : public pkgSrcRecords::Parser
    char *Buffer;
    unsigned int BufSize;
    unsigned int BufUsed;
-   
+
    void BufCat(char *text);
    void BufCat(char *begin, char *end);
    void BufCatTag(char *tag, char *value);
@@ -41,7 +41,7 @@ class rpmSrcRecordParser : public pkgSrcRecords::Parser
 
 public:
    virtual bool Restart();
-   virtual bool Step(); 
+   virtual bool Step();
    virtual bool Jump(unsigned long Off);
 
    virtual string Package() const;

@@ -17,18 +17,18 @@ versión 1.5 del CVS de
 
 <refentry lang=es>
  &apt-docinfo;
- 
+
  <refmeta>
    <refentrytitle>apt.conf</>
    <manvolnum>5</>
  </refmeta>
- 
+
  <!-- Man page title -->
  <refnamediv>
     <refname>apt.conf</>
     <refpurpose>Archivo de configuración de APT</>
  </refnamediv>
- 
+
  <RefSect1><Title>Descripción</>
    <para>
    <filename/apt.conf/es el fichero principal de configuración del conjunto de
@@ -50,10 +50,10 @@ versión 1.5 del CVS de
    <para>
    Sintácticamente, el lenguaje de configuración es modelado como en utilidades
    ISC, como bind y dhcp. Cada línea es de la forma
-   <literallayout>APT::Get::Assume-Yes "true";</literallayout>. Los 
+   <literallayout>APT::Get::Assume-Yes "true";</literallayout>. Los
    espacios entre los dos puntos son requeridos, y las comillas son
    opcionales. Un nuevo ámbito puede ser abierto con las llaves, como:
-<informalexample><programlisting>   
+<informalexample><programlisting>
 APT {
   Get {
     Assume-Yes "true";
@@ -65,7 +65,7 @@ APT {
    crearse abriendo un nuevo ámbito e incluyendo una única palabra acotada
    entre comillas seguido de un punto y coma. Pueden ser incluidas múltiples
    entradas, cada una separada por un punto y coma.
-<informalexample><programlisting>   
+<informalexample><programlisting>
 DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
 </programlisting></informalexample>
    <para>
@@ -73,7 +73,7 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
    <filename>&docdir;examples/apt.conf</> &configureindex; es una buena guía
    para entender su aspecto.
    <para>
-   Se permiten dos valores especiales, <literal/#include/ y <literal/#clear/. 
+   Se permiten dos valores especiales, <literal/#include/ y <literal/#clear/.
    <literal/#include/ incluirá el fichero dado, a menos que el final del nombre
    del fichero acabe en una barra, entonces se incluye el directorio entero.
    <literal/#clear/ se usa para suprimir la lista de nombres.
@@ -87,7 +87,7 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
    </RefSect1>
 
  <RefSect1><Title>El grupo APT</>
-   <para>   
+   <para>
    Este grupo de opciones controlan la conducta general de APT así como el
    mantenimiento de las opciones para todas las utilidades.
    <VariableList>
@@ -97,7 +97,7 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
      los ficheros y se analicen las listas de paquetes. El valor por defecto es
      la arquitectura para la que ha sido compilado apt.
      </VarListEntry>
-     
+
      <VarListEntry><Term>Ignore-Hold</Term>
      <ListItem><Para>
      Ignorar paquetes retenidos: Esta opción global causa que el solucionador de
@@ -167,7 +167,7 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
  </RefSect1>
 
  <RefSect1><Title>El grupo Acquire</>
-   <para>   
+   <para>
    El grupo de opciones <literal/Acquire/ controla la descarga de paquete y los
    manejadores de URI.
    <VariableList>
@@ -196,8 +196,8 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
      <ListItem><Para>
      HTTP URIs; http::Proxy es el proxy http predeterminado a usar. Usa el
      formato general <literal>http://[[usuario][:clave]@]puesto[:puerto]/</>.
-     También se puede especificar un proxy por cada puesto usando la forma 
-     <literal/http::Proxy::&lt;puesto&gt;/ con la palabra especial <literal/DIRECT/ 
+     También se puede especificar un proxy por cada puesto usando la forma
+     <literal/http::Proxy::&lt;puesto&gt;/ con la palabra especial <literal/DIRECT/
      queriendo decir que no se use proxy. La variable de entorno
      <envar/http_proxy/ modifica todas las preferencias.
      <para>
@@ -219,11 +219,11 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
      Se proporciona una opción para controlar la profundidad de la tubería en
      casos en que el servidor no cumpla con RFC o tenga fallos (como pasa con
      Squid 2.0.2).
-     <literal/Acquire::http::Pipeline-Depth/ puede ser un valor entre 0 y 5 
+     <literal/Acquire::http::Pipeline-Depth/ puede ser un valor entre 0 y 5
      indicando cuantas peticiones sin resolver puede envíar APT. Debe
      especificarse un valor de cero DEBE especificarse si el puesto remoto no
      demora apropiadamente las conexiones TCP - de otro modo los datos se
-     corromperán. Los puesto que necesiten esto violan RFC 2068.     
+     corromperán. Los puesto que necesiten esto violan RFC 2068.
      </VarListEntry>
 
      <VarListEntry><Term>ftp</Term>
@@ -239,7 +239,7 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
      son <literal/$(PROXY_USER)/, <literal/$(PROXY_PASS)/,
      <literal/$(SITE_USER)/, <literal/$(SITE_PASS)/, <literal/$(SITE)/, y
      <literal/$(SITE_PORT)/. Cada una se toma del componete de la URI
-     correspondiente. 
+     correspondiente.
      <para>
      La opción <literal/timeout/ establece el tiempo máximo de espera del
      método, esto se aplica a todo, incluyendo el tiempo de espera para realizar
@@ -257,7 +257,7 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
      método http de arriba para la sintaxis. No se puede habilitar en el fichero
      de configuración y no se recomienda su uso debido a su poca eficiencia.
      <para>
-     La opción <literal/ForceExtended/ controla el uso de las órdenes de RFC2428 
+     La opción <literal/ForceExtended/ controla el uso de las órdenes de RFC2428
      <literal/EPSV/ y <literal/EPRT/. Por omisión es false, que quiere decir que
      sólo se usan si el control de conexión es IPv6. Poniéndolo a true fuerza su
      uso incluso en conexiones IPv4. Dese cuenta que la mayoría de los
@@ -279,7 +279,7 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
  </RefSect1>
 
  <RefSect1><Title>Directorios</>
-   <para>   
+   <para>
    La sección <literal/Dir::State/ contiene directorios que pertenecen a
    información del estado local. <literal/lists/ es el directorio donde se
    almacenan las listas de paquetes descargados y <literal/status/ es el nombre
@@ -290,15 +290,15 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
    <filename>/</> o <filename>./</>.
    <para>
    <literal/Dir::Cache/ contiene lugares pertenecientes a información de la
-   caché local, como las dos cachés de paquetes <literal/srcpkgcache/ y 
-   <literal/pkgcache/ o como el lugar donde se guardan los ficheros descargados, 
+   caché local, como las dos cachés de paquetes <literal/srcpkgcache/ y
+   <literal/pkgcache/ o como el lugar donde se guardan los ficheros descargados,
    <literal/Dir::Cache::archives/. La generación de cachés puede desactivarse
    dejando sus nombres en blanco. Ésto enlentecerá el arranque pero ahorrará
    espacio. Normalmente se prefiere deshabilitar pkgcache en vez de
    srcpkgcache. Al igual que con <literal/Dir::State/ el directorio
    predeterminado está en <literal/Dir::Cache/
    <para>
-   <literal/Dir::Etc/ contiene el lugar de los ficheros de configuración, 
+   <literal/Dir::Etc/ contiene el lugar de los ficheros de configuración,
    <literal/sourcelist/ contiene el lugar de sourcelist y <literal/main/ es el
    fichero de configuración predeterminado (esta opción de configuración no
    tiene ningún efecto a menos que se realice desde el fichero de configuración
@@ -314,19 +314,19 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
    <literal/apt-get/, <literal/dpkg-source/, <literal/dpkg-buildpackage/ y
    <literal/apt-cache/ especifican la localización de los respectivos programas.
  </RefSect1>
- 
+
  <RefSect1><Title>APT con DSelect</>
-   <para>   
+   <para>
    Cuando APT se usa como método de &dselect; varias directivas de configuración
    controlan el comportamiento predeterminado. Se encuentran en la sección
    <literal/DSelect/.
-   
+
    <VariableList>
      <VarListEntry><Term>Clean</Term>
      <ListItem><Para>
      Modo de borrado de caché; este valor puede ser always, prompt, auto,
      pre-auto y never. always y prompt borrarán todos los paquetes de la caché
-     después de actualizar, prompt (predeterminado) pregunta primero. 
+     después de actualizar, prompt (predeterminado) pregunta primero.
      auto borra sólo aquellos paquetes que ya no se pueden descargar (han sido
      reemplazados por otra versión, por ejemplo). pre-auto realiza esta última
      acción antes de descargar los paquetes nuevos.
@@ -351,9 +351,9 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
      </VarListEntry>
    </VariableList>
  </RefSect1>
- 
+
   <RefSect1><Title>Como APT llama a dpkg</>
-   <para>   
+   <para>
    Varias directivas de configuración controlan como APT llama a &dpkg;. Se
    encuentran en la sección <literal/DPkg/.
 
@@ -364,7 +364,7 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
      usando la notación de lista y cada elemento de la lista se pasa a &dpkg;
      como un sólo argumento.
      </VarListEntry>
-     
+
      <VarListEntry><Term>Pre-Invoke</Term><Term>Post-Invoke</Term>
      <ListItem><Para>
      Es una lista de órdenes de shell que se ejecutarán antes de llamar a
@@ -405,7 +405,7 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
  </RefSect1>
 
  <RefSect1><Title>Opciones de depuración</>
-   <para>   
+   <para>
    La mayoría de las opciones de la sección <literal/debug/ no son interesantes
    para el usuario normal, sin embargo <literal/Debug::pkgProblemResolver/
    muestra una salida interesante acerca de las decisiones que realiza
@@ -415,18 +415,18 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
    dpkg. <literal/Debug::IdentCdrom/ deshabilitará la inclusión de datos de
    statfs <!--¿ésto es correcto-->en los ID's de los CDROM.
  </RefSect1>
- 
+
  <RefSect1><Title>Ejemplos</>
    <para>
    &configureindex; contiene un fichero de configuración de ejemplo mostrando
    los valores predeterminados para todas las opciones posibles.
  </RefSect1>
- 
+
  <RefSect1><Title>Ficheros</>
    <para>
    <filename>/etc/apt/apt.conf</>
  </RefSect1>
- 
+
  <RefSect1><Title>Véase también</>
    <para>
    &apt-cache;, &apt-config;<!-- ? reading apt.conf -->, &apt-preferences;.
@@ -442,5 +442,5 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
       &lt;debian-l10n-spanish@lists.debian.org&gt;
     </para>
   </refsect1>
- 
+
 </refentry>

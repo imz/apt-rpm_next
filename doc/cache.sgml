@@ -8,12 +8,12 @@
 
 <abstract>
 This document describes the complete implementation and format of the APT
-Cache file. The APT Cache file is a way for APT to parse and store a 
-large number of package files for display in the UI. It's primary design 
-goal is to make display of a single package in the tree very fast by 
+Cache file. The APT Cache file is a way for APT to parse and store a
+large number of package files for display in the UI. It's primary design
+goal is to make display of a single package in the tree very fast by
 pre-linking important things like dependencies and provides.
 
-The specification doubles as documentation for one of the in-memory 
+The specification doubles as documentation for one of the in-memory
 structures used by the package library and the APT GUI.
 
 </abstract>
@@ -40,7 +40,7 @@ For more details, on Debian GNU/Linux systems, see the file
 
 <p>
 This document describes the implementation of an architecture
-dependent binary cache file. The goal of this cache file is two fold, 
+dependent binary cache file. The goal of this cache file is two fold,
 firstly to speed loading and processing of the package file array and
 secondly to reduce memory consumption of the package file array.
 
@@ -62,7 +62,7 @@ any information.
 
 <p>
 Also the structures and storage layout is optimized for use by the APT
-GUI and may not be suitable for all purposes. However it should be possible 
+GUI and may not be suitable for all purposes. However it should be possible
 to extend it with associate cache files that contain other information.
 
 <p>
@@ -83,7 +83,7 @@ What this means is that once the files is mmaped every data access has to
 go through a fixup stage to get a real memory pointer. This is done
 by taking the index, multiplying it by the type size and then adding
 it to the start address of the memory block. This sounds complex, but
-in C it is a single array dereference. Because all items are aligned to 
+in C it is a single array dereference. Because all items are aligned to
 their size and indexes are stored as multiples of the size of the structure
 the format is immediately portable to all possible architectures - BUT the
 generated files are -NOT-.
@@ -100,7 +100,7 @@ This scheme allows code like this to be written:
 <p>
 Notice the lack of casting or multiplication. The net result is to return
 the name of the first package in the first hash bucket, without error
-checks. 
+checks.
 
 <p>
 The generator uses allocation pools to group similarly sized structures in
@@ -125,7 +125,7 @@ This is the first item in the file.
       short MajorVersion;
       short MinorVersion;
       bool Dirty;
-       
+
       // Size of structure values
       unsigned short HeaderSz;
       unsigned short PackageSz;
@@ -134,20 +134,20 @@ This is the first item in the file.
       unsigned short DependencySz;
       unsigned short ProvidesSz;
       unsigned short VerFileSz;
-      
+
       // Structure counts
       unsigned long PackageCount;
       unsigned long VersionCount;
       unsigned long DependsCount;
       unsigned long PackageFileCount;
-      
+
       // Offsets
       unsigned long FileList;              // PackageFile
       unsigned long StringList;            // StringItem
       unsigned long VerSysName;            // StringTable
       unsigned long Architecture;          // StringTable
       unsigned long MaxVerFileSize;
-      
+
       // Allocation pools
       struct
       {
@@ -192,8 +192,8 @@ the client should refuse the load the file.
 <tag>VersionCount
 <tag>DependsCount
 <tag>PackageFileCount<item>
-These indicate the number of each structure contained in the cache. 
-PackageCount is especially useful for generating user state structures. 
+These indicate the number of each structure contained in the cache.
+PackageCount is especially useful for generating user state structures.
 See Package::Id for more info.
 
 <tag>VerSysName<item>
@@ -203,7 +203,7 @@ String representing the version system used for this cache
 Architecture the cache was built against.
 
 <tag>MaxVerFileSize<item>
-The maximum size of a raw entry from the original Package file 
+The maximum size of a raw entry from the original Package file
 (i.e. VerFile::Size) is stored here.
 
 <tag>FileList<item>
@@ -212,17 +212,17 @@ structures are singly linked lists that represent all package files that
 have been merged into the cache.
 
 <tag>StringList<item>
-This contains a list of all the unique strings (string item type strings) in 
-the cache. The parser reads this list into memory so it can match strings 
+This contains a list of all the unique strings (string item type strings) in
+the cache. The parser reads this list into memory so it can match strings
 against it.
 
 <tag>Pools<item>
 The Pool structures manage the allocation pools that the generator uses.
 Start indicates the first byte of the pool, Count is the number of objects
 remaining in the pool and ItemSize is the structure size (alignment factor)
-of the pool. An ItemSize of 0 indicates the pool is empty. There should be 
-the same number of pools as there are structure types. The generator 
-stores this information so future additions can make use of any unused pool 
+of the pool. An ItemSize of 0 indicates the pool is empty. There should be
+the same number of pools as there are structure types. The generator
+stores this information so future additions can make use of any unused pool
 blocks.
 
 <tag>HashTable<item>
@@ -239,9 +239,9 @@ function:
    }
 </example>
 <p>
-By iterating over each entry in the hash table it is possible to iterate over 
+By iterating over each entry in the hash table it is possible to iterate over
 the entire list of packages. Hash Collisions are handled with a singly linked
-list of packages based at the hash item. The linked list contains only 
+list of packages based at the hash item. The linked list contains only
 packages that match the hashing function.
 
 </taglist>
@@ -252,7 +252,7 @@ packages that match the hashing function.
 <p>
 This contains information for a single unique package. There can be any
 number of versions of a given package. Package exists in a singly
-linked list of package records starting at the hash index of the name in 
+linked list of package records starting at the hash index of the name in
 the Header->HashTable.
 <example>
    struct Pacakge
@@ -262,12 +262,12 @@ the Header->HashTable.
       unsigned long VersionList;       // Version
       unsigned long CurrentVer;        // Version
       unsigned long Section;           // StringTable (StringItem)
-      
-      // Linked lists 
+
+      // Linked lists
       unsigned long NextPackage;       // Package
       unsigned long RevDepends;        // Dependency
       unsigned long ProvidesList;      // Provides
-       
+
       // Install/Remove/Purge etc
       unsigned char SelectedState;     // What
       unsigned char InstState;         // Flags
@@ -277,14 +277,14 @@ the Header->HashTable.
       unsigned short ID;
       unsigned long Flags;
    };
-</example>   
+</example>
 
 <taglist>
 <tag>Name<item>
 Name of the package.
 
 <tag>VersionList<item>
-Base of a singly linked list of version structures. Each structure 
+Base of a singly linked list of version structures. Each structure
 represents a unique version of the package. The version structures
 contain links into PackageFile and the original text file as well as
 detailed information about the size and dependencies of the specific
@@ -329,11 +329,11 @@ not installed.
 ID is a value from 0 to Header->PackageCount. It is a unique value assigned
 by the generator. This allows clients to create an array of size PackageCount
 and use it to store state information for the package map. For instance the
-status file emitter uses this to track which packages have been emitted 
+status file emitter uses this to track which packages have been emitted
 already.
 
 <tag>Flags<item>
-Flags are some useful indicators of the package's state. 
+Flags are some useful indicators of the package's state.
 
 </taglist>
 
@@ -358,7 +358,7 @@ Header.FileList
       unsigned long Architecture;    // Stringtable
       unsigned long Site;            // Stringtable
       unsigned long IndexType;       // Stringtable
-      unsigned long Size;            
+      unsigned long Size;
 
       // Linked list
       unsigned long NextFile;        // PackageFile
@@ -366,7 +366,7 @@ Header.FileList
       unsigned long Flags;
       time_t mtime;                  // Modification time
    };
-</example>   
+</example>
 <taglist>
 
 <tag>FileName<item>
@@ -379,7 +379,7 @@ Refers the the physical disk file that this PacakgeFile represents.
 <tag>Label
 <tag>Architecture
 <tag>NotAutomatic<item>
-This is the release information. Please see the files document for a 
+This is the release information. Please see the files document for a
 description of what the release information means.
 
 <tag>Site<item>
@@ -413,7 +413,7 @@ single linked list based from Package.Versionlist.
 
 <p>
 The version list is always sorted from highest version to lowest version by
-the generator. Also there may not be any duplicate entries in the list (same 
+the generator. Also there may not be any duplicate entries in the list (same
 VerStr).
 
 <example>
@@ -422,14 +422,14 @@ VerStr).
       unsigned long VerStr;            // Stringtable
       unsigned long Section;           // StringTable (StringItem)
       unsigned long Arch;              // StringTable
-      
+
       // Lists
       unsigned long FileList;          // VerFile
       unsigned long NextVer;           // Version
       unsigned long DependsList;       // Dependency
       unsigned long ParentPkg;         // Package
       unsigned long ProvidesList;      // Provides
-      
+
       unsigned long Size;
       unsigned long InstalledSize;
       unsigned long Hash;
@@ -443,9 +443,9 @@ VerStr).
 This is the complete version string.
 
 <tag>FileList<item>
-References the all the PackageFile's that this version came out of. FileList 
-can be used to determine what distribution(s) the Version applies to. If 
-FileList is 0 then this is a blank version. The structure should also have 
+References the all the PackageFile's that this version came out of. FileList
+can be used to determine what distribution(s) the Version applies to. If
+FileList is 0 then this is a blank version. The structure should also have
 a 0 in all other fields excluding VerStr and Possibly NextVer.
 
 <tag>Section<item>
@@ -495,7 +495,7 @@ linked list is Version.DependsList. All forms of dependencies are recorded
 here including Conflicts, Suggests and Recommends.
 
 <p>
-Multiple depends on the same package must be grouped together in 
+Multiple depends on the same package must be grouped together in
 the Dependency lists. Clients should assume this is always true.
 
 <example>
@@ -506,7 +506,7 @@ the Dependency lists. Clients should assume this is always true.
        unsigned long NextDepends;     // Dependency
        unsigned long NextRevDepends;  // Reverse dependency linking
        unsigned long ParentVer;       // Upwards parent version link
-       
+
        // Specific types of depends
        unsigned char Type;
        unsigned char CompareOp;
@@ -551,15 +551,15 @@ See Package::ID.
 <!-- ===================================================================== -->
 <sect>Provides
 <p>
-Provides handles virtual packages. When a Provides: line is encountered 
-a new provides record is added associating the package with a virtual 
+Provides handles virtual packages. When a Provides: line is encountered
+a new provides record is added associating the package with a virtual
 package name. The provides structures are linked off the package structures.
-This simplifies the analysis of dependencies and other aspects A provides 
-refers to a specific version of a specific package, not all versions need to 
+This simplifies the analysis of dependencies and other aspects A provides
+refers to a specific version of a specific package, not all versions need to
 provide that provides.
 
 <p>
-There is a linked list of provided package names started from each 
+There is a linked list of provided package names started from each
 version that provides packages. This is the forwards provides mechanism.
 <example>
     struct Provides
@@ -597,7 +597,7 @@ Next link in the singly linked list of provides for 'Version'.
 <!-- ===================================================================== -->
 <sect>VerFile
 <p>
-VerFile associates a version with a PackageFile, this allows a full 
+VerFile associates a version with a PackageFile, this allows a full
 description of all Versions in all files (and hence all sources) under
 consideration.
 
@@ -619,7 +619,7 @@ The next step in the linked list.
 
 <tag>Offset
 <tag>Size<item>
-These describe the exact position in the package file for the section from 
+These describe the exact position in the package file for the section from
 this version.
 </taglist>
 
@@ -629,7 +629,7 @@ this version.
 <sect>StringItem
 <p>
 StringItem is used for generating single instances of strings. Some things
-like Section Name are are useful to have as unique tags. It is part of 
+like Section Name are are useful to have as unique tags. It is part of
 a linked list based at Header::StringList.
 <example>
    struct StringItem
@@ -766,15 +766,15 @@ file into the cache file.
 
 <p>
 The generator assumes any package declaration with a
-Status: line is a 'Status of the package' type of package declaration. 
+Status: line is a 'Status of the package' type of package declaration.
 A Package with a Target-Version field should also really have a status field.
 The processing of a Target-Version field can create a place-holder Version
 structure that is empty to refer to the specified version (See Version
 for info on what a empty Version looks like). The Target-Version syntax
-allows the specification of a specific version and a target distribution. 
+allows the specification of a specific version and a target distribution.
 
 <p>
-Different section names on different versions is supported, but I 
+Different section names on different versions is supported, but I
 do not expect to use it. To simplify the GUI it will merely use the section
 in the Package structure. This should be okay as I hope sections do not change
 much.
@@ -809,7 +809,7 @@ large, and quite full of blank space. This could be fixed with sparse files.
 <p>
 Some good directions to take the cache file is into a cache directory that
 contains many associated caches that cache other important bits of
-information. (/var/cache/apt, FHS2) 
+information. (/var/cache/apt, FHS2)
 
 <p>
 Caching of the info/*.list is an excellent place to start, by generating all

@@ -41,7 +41,7 @@ RPMPackageData::RPMPackageData()
    // Populate priorities
    string FileName = _config->FindFile("Dir::Etc::rpmpriorities");
    FileFd F(FileName, FileFd::ReadOnly);
-   if (_error->PendingError()) 
+   if (_error->PendingError())
    {
       _error->Error(_("could not open package priority file %s"),
 		    FileName.c_str());
@@ -50,15 +50,15 @@ RPMPackageData::RPMPackageData()
    pkgTagFile Tags(&F);
    pkgTagSection Section;
 
-   if (!Tags.Step(Section)) 
+   if (!Tags.Step(Section))
    {
       _error->Error(_("no data in %s"), FileName.c_str());
        return;
    }
-   
-   for (int i = 0; i != 6; i++) 
+
+   for (int i = 0; i != 6; i++)
    {
-      const char *priorities[] = 
+      const char *priorities[] =
       {
 	 "Essential", "Important", "Required", "Standard", "Optional", "Extra"
       };
@@ -80,7 +80,7 @@ RPMPackageData::RPMPackageData()
       };
 
       string Packages = Section.FindS(priorities[i]);
-      if (Packages.empty()) 
+      if (Packages.empty())
 	 continue;
 
       const char *C = Packages.c_str();

@@ -245,9 +245,9 @@ const char *RPMDirHandler::nextFileName()
 	 continue;
 
       sFileName = name;
-      
+
       return name;
-   } 
+   }
    return NULL;
 }
 
@@ -353,7 +353,7 @@ RPMDBHandler::RPMDBHandler(bool WriteLock)
    RpmIter = NULL;
 #endif
    string Dir = _config->Find("RPM::RootDir");
-   
+
    rpmReadConfigFiles(NULL, NULL);
    ID = DataPath(false);
 
@@ -454,7 +454,7 @@ string RPMDBHandler::DataPath(bool DirectoryOnly)
 
 #if RPM_VERSION >= 0x040000
    if (rpmExpandNumeric("%{_dbapi}") >= 3)
-      File = "Packages";       
+      File = "Packages";
 #endif
    if (DirectoryOnly == true)
        return DBPath;
@@ -512,7 +512,7 @@ void RPMDBHandler::Rewind()
 #if RPM_VERSION >= 0x040000
    if (RpmIter == NULL)
       return;
-   rpmdbFreeIterator(RpmIter);   
+   rpmdbFreeIterator(RpmIter);
    RpmIter = rpmxxInitIterator(Handler, RPMDBI_PACKAGES, NULL, 0);
 #else
    if (HeaderP != NULL)

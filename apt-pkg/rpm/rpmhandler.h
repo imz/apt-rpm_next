@@ -1,6 +1,6 @@
 
 /* ######################################################################
-  
+
    RPM database and hdlist related handling
 
    ######################################################################
@@ -53,7 +53,7 @@ class RPMHandler
 
 
 class RPMFileHandler : public RPMHandler
-{   
+{
    protected:
 
    FD_t FD;
@@ -76,7 +76,7 @@ class RPMFileHandler : public RPMHandler
 };
 
 class RPMSingleFileHandler : public RPMFileHandler
-{   
+{
    protected:
 
    string sFilePath;
@@ -131,7 +131,7 @@ class RPMDBHandler : public RPMHandler
 };
 
 class RPMDirHandler : public RPMHandler
-{   
+{
    protected:
 
    DIR *Dir;

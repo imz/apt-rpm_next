@@ -6,7 +6,7 @@
    System - Abstraction for running on different systems.
 
    Basic general structure..
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -21,7 +21,7 @@
 #include <apt-pkg/configuration.h>
 #include <apt-pkg/error.h>
 #include <apt-pkg/fileutl.h>
-    
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
@@ -37,7 +37,7 @@ debSystem::debSystem()
 {
    LockFD = -1;
    LockCount = 0;
-   
+
    Label = "Debian dpkg interface";
    VS = &debVS;
 }
@@ -75,7 +75,7 @@ bool debSystem::Lock()
 	 return _error->Error("Unable to lock the administration directory (%s), "
 			      "are you root?",AdminDir.c_str());
    }
-   
+
    // See if we need to abort with a dirty journal
    if (CheckUpdates() == true)
    {
@@ -86,7 +86,7 @@ bool debSystem::Lock()
    }
 
 	 LockCount++;
-      
+
    return true;
 }
 									/*}}}*/
@@ -97,7 +97,7 @@ bool debSystem::UnLock(bool NoErrors)
 {
    if (LockCount == 0 && NoErrors == true)
       return false;
-   
+
    if (LockCount < 1)
       return _error->Error("Not locked");
    if (--LockCount == 0)
@@ -105,13 +105,13 @@ bool debSystem::UnLock(bool NoErrors)
       close(LockFD);
       LockCount = 0;
    }
-   
+
    return true;
 }
 									/*}}}*/
 // System::CheckUpdates - Check if the updates dir is dirty		/*{{{*/
 // ---------------------------------------------------------------------
-/* This does a check of the updates directory (dpkg journal) to see if it has 
+/* This does a check of the updates directory (dpkg journal) to see if it has
    any entries in it. */
 bool debSystem::CheckUpdates()
 {
@@ -120,8 +120,8 @@ bool debSystem::CheckUpdates()
    DIR *DirP = opendir(File.c_str());
    if (DirP == 0)
       return false;
-   
-   /* We ignore any files that are not all digits, this skips .,.. and 
+
+   /* We ignore any files that are not all digits, this skips .,.. and
       some tmp files dpkg will leave behind.. */
    bool Damaged = false;
    for (struct dirent *Ent = readdir(DirP); Ent != 0; Ent = readdir(DirP))
@@ -163,7 +163,7 @@ bool debSystem::Initialize(Configuration &Cnf)
    Cnf.CndSet("Dir::State::userstatus","status.user"); // Defunct
    Cnf.CndSet("Dir::State::status","/var/lib/dpkg/status");
    Cnf.CndSet("Dir::Bin::dpkg","/usr/bin/dpkg");
-   
+
    return true;
 }
 									/*}}}*/
@@ -218,7 +218,7 @@ bool debSystem::FindIndex(pkgCache::PkgFileIterator File,
       Found = StatusFile;
       return true;
    }
-   
+
    return false;
 }
 									/*}}}*/

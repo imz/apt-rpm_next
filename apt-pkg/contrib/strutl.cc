@@ -7,11 +7,11 @@
 
    These have been collected from here and there to do all sorts of useful
    things to strings. They are useful in file parsers, URI handlers and
-   especially in APT methods.   
-   
+   especially in APT methods.
+
    This source is placed in the Public Domain, do with it what you will
    It was originally written by Jason Gunthorpe <jgg@gpu.srv.ualberta.ca>
-   
+
    ##################################################################### */
 									/*}}}*/
 // Includes								/*{{{*/
@@ -24,7 +24,7 @@
 #include <apt-pkg/error.h>
 
 #include <apti18n.h>
-    
+
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -40,7 +40,7 @@ using namespace std;
 
 // strstrip - Remove white space from the front and back of a string	/*{{{*/
 // ---------------------------------------------------------------------
-/* This is handy to use when parsing a file. It also removes \n's left 
+/* This is handy to use when parsing a file. It also removes \n's left
    over from fgets and company */
 char *_strstrip(char *String)
 {
@@ -85,7 +85,7 @@ char *_strtabexpand(char *String,size_t Len)
 	 *I = ' ';
 	 continue;
       }
-      
+
       memmove(I + Len,I + 1,strlen(I) + 1);
       for (char *J = I; J + Len != I; *I = ' ', I++);
    }
@@ -96,7 +96,7 @@ char *_strtabexpand(char *String,size_t Len)
 // ---------------------------------------------------------------------
 /* This grabs a single word, converts any % escaped characters to their
    proper values and advances the pointer. Double quotes are understood
-   and striped out as well. This is for URI/URL parsing. It also can 
+   and striped out as well. This is for URI/URL parsing. It also can
    understand [] brackets.*/
 bool ParseQuoteWord(const char *&String,string &Res)
 {
@@ -105,7 +105,7 @@ bool ParseQuoteWord(const char *&String,string &Res)
    for (;*C != 0 && *C == ' '; C++);
    if (*C == 0)
       return false;
-   
+
    // Jump to the next word
    for (;*C != 0 && isspace(*C) == 0; C++)
    {
@@ -147,7 +147,7 @@ bool ParseQuoteWord(const char *&String,string &Res)
    }
    *I = 0;
    Res = Buffer;
-   
+
    // Skip ending white space
    for (;*C != 0 && isspace(*C) != 0; C++);
    String = C;
@@ -156,7 +156,7 @@ bool ParseQuoteWord(const char *&String,string &Res)
 									/*}}}*/
 // ParseCWord - Parses a string like a C "" expression			/*{{{*/
 // ---------------------------------------------------------------------
-/* This expects a series of space separated strings enclosed in ""'s. 
+/* This expects a series of space separated strings enclosed in ""'s.
    It concatenates the ""'s into a single string. */
 bool ParseCWord(const char *&String,string &Res)
 {
@@ -165,25 +165,25 @@ bool ParseCWord(const char *&String,string &Res)
    for (;*C != 0 && *C == ' '; C++);
    if (*C == 0)
       return false;
-   
+
    char Buffer[1024];
    char *Buf = Buffer;
    if (strlen(String) >= sizeof(Buffer))
        return false;
-       
+
    for (; *C != 0; C++)
    {
       if (*C == '"')
       {
 	 for (C++; *C != 0 && *C != '"'; C++)
 	    *Buf++ = *C;
-	 
+
 	 if (*C == 0)
 	    return false;
-	 
+
 	 continue;
-      }      
-      
+      }
+
       if (C != String && isspace(*C) != 0 && isspace(C[-1]) != 0)
 	 continue;
       if (isspace(*C) == 0)
@@ -204,7 +204,7 @@ string QuoteString(string Str,const char *Bad)
    string Res;
    for (string::iterator I = Str.begin(); I != Str.end(); I++)
    {
-      if (strchr(Bad,*I) != 0 || isprint(*I) == 0 || 
+      if (strchr(Bad,*I) != 0 || isprint(*I) == 0 ||
 	  *I <= 0x20 || *I >= 0x7F)
       {
 	 char Buf[10];
@@ -238,13 +238,13 @@ string DeQuoteString(string Str)
       else
 	 Res += *I;
    }
-   return Res;   
+   return Res;
 }
 
                                                                         /*}}}*/
 // SizeToStr - Convert a long into a human readable size		/*{{{*/
 // ---------------------------------------------------------------------
-/* A max of 4 digits are shown before conversion to the next highest unit. 
+/* A max of 4 digits are shown before conversion to the next highest unit.
    The max length of the string will be 5 chars unless the size is > 10
    YottaBytes (E24) */
 string SizeToStr(double Size)
@@ -255,8 +255,8 @@ string SizeToStr(double Size)
       ASize = Size;
    else
       ASize = -1*Size;
-   
-   /* bytes, KiloBytes, MegaBytes, GigaBytes, TeraBytes, PetaBytes, 
+
+   /* bytes, KiloBytes, MegaBytes, GigaBytes, TeraBytes, PetaBytes,
       ExaBytes, ZettaBytes, YottaBytes */
    char Ext[] = {'\0','k','M','G','T','P','E','Z','Y'};
    int I = 0;
@@ -267,7 +267,7 @@ string SizeToStr(double Size)
          sprintf(S,"%.1f%c",ASize,Ext[I]);
 	 break;
       }
-      
+
       if (ASize < 10000)
       {
          sprintf(S,"%.0f%c",ASize,Ext[I]);
@@ -276,7 +276,7 @@ string SizeToStr(double Size)
       ASize /= 1000.0;
       I++;
    }
-   
+
    return S;
 }
 									/*}}}*/
@@ -286,7 +286,7 @@ string SizeToStr(double Size)
 string TimeToStr(unsigned long Sec)
 {
    char S[300];
-   
+
    while (1)
    {
       if (Sec > 60*60*24)
@@ -294,23 +294,23 @@ string TimeToStr(unsigned long Sec)
 	 sprintf(S,"%lid %lih%lim%lis",Sec/60/60/24,(Sec/60/60) % 24,(Sec/60) % 60,Sec % 60);
 	 break;
       }
-      
+
       if (Sec > 60*60)
       {
 	 sprintf(S,"%lih%lim%lis",Sec/60/60,(Sec/60) % 60,Sec % 60);
 	 break;
       }
-      
+
       if (Sec > 60)
       {
 	 sprintf(S,"%lim%lis",Sec/60,Sec % 60);
 	 break;
       }
-      
+
       sprintf(S,"%lis",Sec);
       break;
    }
-   
+
    return S;
 }
 									/*}}}*/
@@ -322,17 +322,17 @@ string SubstVar(string Str,string Subst,string Contents)
    string::size_type Pos = 0;
    string::size_type OldPos = 0;
    string Temp;
-   
-   while (OldPos < Str.length() && 
+
+   while (OldPos < Str.length() &&
 	  (Pos = Str.find(Subst,OldPos)) != string::npos)
    {
       Temp += string(Str,OldPos,Pos) + Contents;
-      OldPos = Pos + Subst.length();      
+      OldPos = Pos + Subst.length();
    }
-   
+
    if (OldPos == 0)
       return Str;
-   
+
    return Temp + string(Str,OldPos);
 }
 
@@ -355,12 +355,12 @@ string URItoFileName(string URI)
    U.User = string();
    U.Password = string();
    U.Access = "";
-   
+
    // "\x00-\x20{}|\\\\^\\[\\]<>\"\x7F-\xFF";
    URI = QuoteString(U,"\\|{}[]<>\"^~_=!@#$%^&*");
    string::iterator J = URI.begin();
    for (; J != URI.end(); J++)
-      if (*J == '/') 
+      if (*J == '/')
 	 *J = '_';
    return URI;
 }
@@ -369,7 +369,7 @@ string URItoFileName(string URI)
 // ---------------------------------------------------------------------
 /* This routine performs a base64 transformation on a string. It was ripped
    from wget and then patched and bug fixed.
- 
+
    This spec can be found in rfc2045 */
 string Base64Encode(string S)
 {
@@ -382,7 +382,7 @@ string Base64Encode(string S)
                           'o','p','q','r','s','t','u','v',
                           'w','x','y','z','0','1','2','3',
                           '4','5','6','7','8','9','+','/'};
-   
+
    // Pre-allocate some space
    string Final;
    Final.reserve((4*S.length() + 2)/3 + 2);
@@ -400,15 +400,15 @@ string Base64Encode(string S)
 
       Final += tbl[Bits[0] >> 2];
       Final += tbl[((Bits[0] & 3) << 4) + (Bits[1] >> 4)];
-      
+
       if (I + 1 >= S.end())
 	 break;
-      
+
       Final += tbl[((Bits[1] & 0xf) << 2) + (Bits[2] >> 6)];
-      
+
       if (I + 2 >= S.end())
 	 break;
-      
+
       Final += tbl[Bits[2] & 0x3f];
    }
 
@@ -418,20 +418,20 @@ string Base64Encode(string S)
       Final += '=';
    if (S.length() % 3 == 1)
       Final += "==";
-   
+
    return Final;
 }
 									/*}}}*/
 // stringcmp - Arbitary string compare					/*{{{*/
 // ---------------------------------------------------------------------
-/* This safely compares two non-null terminated strings of arbitary 
+/* This safely compares two non-null terminated strings of arbitary
    length */
 int stringcmp(const char *A,const char *AEnd,const char *B,const char *BEnd)
 {
    for (; A != AEnd && B != BEnd; A++, B++)
       if (*A != *B)
 	 break;
-   
+
    if (A == AEnd && B == BEnd)
       return 0;
    if (A == AEnd)
@@ -450,7 +450,7 @@ int stringcmp(string::const_iterator A,string::const_iterator AEnd,
    for (; A != AEnd && B != BEnd; A++, B++)
       if (*A != *B)
 	 break;
-   
+
    if (A == AEnd && B == BEnd)
       return 0;
    if (A == AEnd)
@@ -467,7 +467,7 @@ int stringcmp(string::const_iterator A,string::const_iterator AEnd,
    for (; A != AEnd && B != BEnd; A++, B++)
       if (*A != *B)
 	 break;
-   
+
    if (A == AEnd && B == BEnd)
       return 0;
    if (A == AEnd)
@@ -538,7 +538,7 @@ int stringcasecmp(string::const_iterator A,string::const_iterator AEnd,
 									/*}}}*/
 // LookupTag - Lookup the value of a tag in a taged string		/*{{{*/
 // ---------------------------------------------------------------------
-/* The format is like those used in package files and the method 
+/* The format is like those used in package files and the method
    communication system */
 string LookupTag(string Message,const char *Tag,const char *Default)
 {
@@ -555,13 +555,13 @@ string LookupTag(string Message,const char *Tag,const char *Default)
 	 for (; isspace(*I) != 0 && I < Message.end(); I++);
 	 for (J = I; *J != '\n' && J < Message.end(); J++);
 	 for (; J > I && isspace(J[-1]) != 0; J--);
-	 
+
 	 return string(I,J);
       }
-      
+
       for (; *I != '\n' && I < Message.end(); I++);
-   }   
-   
+   }
+
    // Failed to find a match
    if (Default == 0)
       return string();
@@ -575,10 +575,10 @@ string LookupTag(string Message,const char *Tag,const char *Default)
 int StringToBool(string Text,int Default)
 {
    char *End;
-   int Res = strtol(Text.c_str(),&End,0);   
+   int Res = strtol(Text.c_str(),&End,0);
    if (End != Text.c_str() && Res >= 0 && Res <= 1)
       return Res;
-   
+
    // Check for positives
    if (strcasecmp(Text.c_str(),"no") == 0 ||
        strcasecmp(Text.c_str(),"false") == 0 ||
@@ -586,7 +586,7 @@ int StringToBool(string Text,int Default)
        strcasecmp(Text.c_str(),"off") == 0 ||
        strcasecmp(Text.c_str(),"disable") == 0)
       return 0;
-   
+
    // Check for negatives
    if (strcasecmp(Text.c_str(),"yes") == 0 ||
        strcasecmp(Text.c_str(),"true") == 0 ||
@@ -594,7 +594,7 @@ int StringToBool(string Text,int Default)
        strcasecmp(Text.c_str(),"on") == 0 ||
        strcasecmp(Text.c_str(),"enable") == 0)
       return 1;
-   
+
    return Default;
 }
 									/*}}}*/
@@ -619,47 +619,47 @@ string TimeRFC1123(time_t Date)
 									/*}}}*/
 // ReadMessages - Read messages from the FD				/*{{{*/
 // ---------------------------------------------------------------------
-/* This pulls full messages from the input FD into the message buffer. 
+/* This pulls full messages from the input FD into the message buffer.
    It assumes that messages will not pause during transit so no
    fancy buffering is used. */
 bool ReadMessages(int Fd, vector<string> &List)
 {
    char Buffer[64000];
    char *End = Buffer;
-   
+
    while (1)
    {
       int Res = read(Fd,End,sizeof(Buffer) - (End-Buffer));
       if (Res < 0 && errno == EINTR)
 	 continue;
-      
+
       // Process is dead, this is kind of bad..
       if (Res == 0)
 	 return false;
-      
+
       // No data
       if (Res < 0 && errno == EAGAIN)
 	 return true;
       if (Res < 0)
 	 return false;
-			      
+
       End += Res;
-      
+
       // Look for the end of the message
       for (char *I = Buffer; I + 1 < End; I++)
       {
 	 if (I[0] != '\n' || I[1] != '\n')
 	    continue;
-	 
+
 	 // Pull the message out
 	 string Message(Buffer,I-Buffer);
 
 	 // Fix up the buffer
 	 for (; I < End && *I == '\n'; I++);
-	 End -= I-Buffer;	 
+	 End -= I-Buffer;
 	 memmove(Buffer,I,End-Buffer);
 	 I = Buffer;
-	 
+
 	 List.push_back(Message);
       }
       if (End == Buffer)
@@ -667,7 +667,7 @@ bool ReadMessages(int Fd, vector<string> &List)
 
       if (WaitFd(Fd) == false)
 	 return false;
-   }   
+   }
 }
 									/*}}}*/
 // MonthConv - Converts a month string into a number			/*{{{*/
@@ -676,7 +676,7 @@ bool ReadMessages(int Fd, vector<string> &List)
    Made it a bit more robust with a few touppers though. */
 static int MonthConv(char *Month)
 {
-   switch (toupper(*Month)) 
+   switch (toupper(*Month))
    {
       case 'A':
       return toupper(Month[1]) == 'P'?3:7;
@@ -700,18 +700,18 @@ static int MonthConv(char *Month)
       // Pretend it is January..
       default:
       return 0;
-   }   
+   }
 }
 									/*}}}*/
 // timegm - Internal timegm function if gnu is not available		/*{{{*/
 // ---------------------------------------------------------------------
-/* Ripped this evil little function from wget - I prefer the use of 
+/* Ripped this evil little function from wget - I prefer the use of
    GNU timegm if possible as this technique will have interesting problems
    with leap seconds, timezones and other.
-   
+
    Converts struct tm to time_t, assuming the data in tm is UTC rather
    than local timezone (mktime assumes the latter).
-   
+
    Contributed by Roger Beeman <beeman@cisco.com>, with the help of
    Mark Baushke <mdb@cisco.com> and the rest of the Gurus at CISCO. */
 
@@ -722,7 +722,7 @@ static int MonthConv(char *Month)
 static time_t timegm(struct tm *t)
 {
    time_t tl, tb;
-   
+
    tl = mktime (t);
    if (tl == -1)
       return -1;
@@ -743,10 +743,10 @@ bool StrToTime(string Val,time_t &Result)
    struct tm Tm;
    char Month[10];
    const char *I = Val.c_str();
-   
+
    // Skip the day of the week
    for (;*I != 0  && *I != ' '; I++);
-   
+
    // Handle RFC 1123 time
    Month[0] = 0;
    if (sscanf(I," %d %3s %d %d:%d:%d GMT",&Tm.tm_mday,Month,&Tm.tm_year,
@@ -767,15 +767,15 @@ bool StrToTime(string Val,time_t &Result)
 		       &Tm.tm_mday,&Tm.tm_hour,&Tm.tm_min,&Tm.tm_sec) != 6)
 	       return false;
 	    Tm.tm_mon--;
-	 }	 
+	 }
       }
    }
-   
+
    Tm.tm_isdst = 0;
    if (Month[0] != 0)
       Tm.tm_mon = MonthConv(Month);
    Tm.tm_year -= 1900;
-   
+
    // Convert to local time and then to GMT
    Result = timegm(&Tm);
    return true;
@@ -783,7 +783,7 @@ bool StrToTime(string Val,time_t &Result)
 									/*}}}*/
 // StrToNum - Convert a fixed length string to a number			/*{{{*/
 // ---------------------------------------------------------------------
-/* This is used in decoding the crazy fixed length string headers in 
+/* This is used in decoding the crazy fixed length string headers in
    tar and ar files. */
 bool StrToNum(const char *Str,unsigned long &Res,unsigned Len,unsigned Base)
 {
@@ -792,19 +792,19 @@ bool StrToNum(const char *Str,unsigned long &Res,unsigned Len,unsigned Base)
       return false;
    memcpy(S,Str,Len);
    S[Len] = 0;
-   
+
    // All spaces is a zero
    Res = 0;
    unsigned I;
    for (I = 0; S[I] == ' '; I++);
    if (S[I] == 0)
       return true;
-   
+
    char *End;
    Res = strtoul(S,&End,Base);
    if (End == S)
       return false;
-   
+
    return true;
 }
 									/*}}}*/
@@ -812,7 +812,7 @@ bool StrToNum(const char *Str,unsigned long &Res,unsigned Len,unsigned Base)
 // ---------------------------------------------------------------------
 /* Helper for Hex2Num */
 static int HexDigit(int c)
-{   
+{
    if (c >= '0' && c <= '9')
       return c - '0';
    if (c >= 'a' && c <= 'f')
@@ -829,18 +829,18 @@ bool Hex2Num(string Str,unsigned char *Num,unsigned int Length)
 {
    if (Str.length() != Length*2)
       return false;
-   
+
    // Convert each digit. We store it in the same order as the string
    int J = 0;
    for (string::const_iterator I = Str.begin(); I != Str.end();J++, I += 2)
    {
       if (isxdigit(*I) == 0 || isxdigit(I[1]) == 0)
 	 return false;
-      
+
       Num[J] = HexDigit(I[0]) << 4;
       Num[J] += HexDigit(I[1]);
    }
-   
+
    return true;
 }
 									/*}}}*/
@@ -862,24 +862,24 @@ bool TokSplitString(char Tok,char *Input,char **List,
    {
       // Skip to the next Token
       for (; Pos != Stop && *Pos != Tok; Pos++);
-      
+
       // Back remove spaces
       char *End = Pos;
       for (; End > Start && (End[-1] == Tok || isspace(End[-1]) != 0); End--);
       *End = 0;
-      
+
       List[Count++] = Start;
       if (Count >= ListMax)
       {
 	 List[Count-1] = 0;
 	 return false;
       }
-      
+
       // Advance pos
       for (; Pos != Stop && (*Pos == Tok || isspace(*Pos) != 0 || *Pos == 0); Pos++);
       Start = Pos;
    }
-   
+
    List[Count] = 0;
    return true;
 }
@@ -904,21 +904,21 @@ unsigned long RegexChoice(RxChoiceList *Rxs,const char **ListBegin,
 	    break;
       if (*I == 0)
 	 Regex = false;
-	 
+
       // Compile the regex pattern
       regex_t Pattern;
       if (Regex == true)
 	 if (regcomp(&Pattern,*ListBegin,REG_EXTENDED | REG_ICASE |
 		     REG_NOSUB) != 0)
 	    Regex = false;
-	 
+
       // Search the list
       bool Done = false;
       for (RxChoiceList *R = Rxs; R->Str != 0; R++)
       {
 	 if (R->Str[0] == 0)
 	    continue;
-	 
+
 	 if (strcasecmp(R->Str,*ListBegin) != 0)
 	 {
 	    if (Regex == false)
@@ -927,20 +927,20 @@ unsigned long RegexChoice(RxChoiceList *Rxs,const char **ListBegin,
 	       continue;
 	 }
 	 Done = true;
-	 
+
 	 if (R->Hit == false)
 	    Hits++;
-	 
+
 	 R->Hit = true;
       }
-      
+
       if (Regex == true)
 	 regfree(&Pattern);
-      
+
       if (Done == false)
 	 _error->Warning(_("Selection %s not found"),*ListBegin);
    }
-   
+
    return Hits;
 }
 									/*}}}*/
@@ -948,11 +948,11 @@ unsigned long RegexChoice(RxChoiceList *Rxs,const char **ListBegin,
 // ---------------------------------------------------------------------
 /* This is used to make the internationalization strings easier to translate
    and to allow reordering of parameters */
-void ioprintf(ostream &out,const char *format,...) 
+void ioprintf(ostream &out,const char *format,...)
 {
    va_list args;
    va_start(args,format);
-   
+
    // sprintf the description
    char S[400];
    vsnprintf(S,sizeof(S),format,args);
@@ -993,13 +993,13 @@ bool CheckDomainList(string Host,string List)
    {
       if (Cur < List.end() && *Cur != ',')
 	 continue;
-      
+
       // Match the end of the string..
       if ((Host.size() >= (unsigned)(Cur - Start)) &&
 	  Cur - Start != 0 &&
 	  stringcasecmp(Host.end() - (Cur - Start),Host.end(),Start,Cur) == 0)
 	 return true;
-      
+
       Start = Cur + 1;
    }
    return false;
@@ -1022,7 +1022,7 @@ void URI::CopyFrom(string U)
    string::const_iterator SingleSlash = I;
    if (I + 3 < U.end() && I[1] == '/' && I[2] == '/')
       SingleSlash += 3;
-   
+
    /* Find the / indicating the end of the hostname, ignoring /'s in the
       square brackets */
    bool InBracket = false;
@@ -1033,7 +1033,7 @@ void URI::CopyFrom(string U)
       if (InBracket == true && *SingleSlash == ']')
 	 InBracket = false;
    }
-   
+
    if (SingleSlash > U.end())
       SingleSlash = U.end();
 
@@ -1051,21 +1051,21 @@ void URI::CopyFrom(string U)
       FirstColon += 1;
    if (FirstColon >= U.end())
       return;
-   
+
    if (FirstColon > SingleSlash)
       FirstColon = SingleSlash;
-   
+
    // Find the colon...
    I = FirstColon + 1;
    if (I > SingleSlash)
       I = SingleSlash;
    for (; I < SingleSlash && *I != ':'; I++);
    string::const_iterator SecondColon = I;
-   
+
    // Search for the @ after the colon
    for (; I < SingleSlash && *I != '@'; I++);
    string::const_iterator At = I;
-   
+
    // Now write the host and user/pass
    if (At == SingleSlash)
    {
@@ -1078,8 +1078,8 @@ void URI::CopyFrom(string U)
       User = string(U,FirstColon - U.begin(),SecondColon - FirstColon);
       if (SecondColon < At)
 	 Password = string(U,SecondColon - U.begin() + 1,At - SecondColon - 1);
-   }   
-   
+   }
+
    // Now we parse the RFC 2732 [] hostnames.
    unsigned long PortEnd = 0;
    InBracket = false;
@@ -1091,7 +1091,7 @@ void URI::CopyFrom(string U)
 	 Host.erase(I,1);
 	 continue;
       }
-      
+
       if (InBracket == true && Host[I] == ']')
       {
 	 InBracket = false;
@@ -1101,20 +1101,20 @@ void URI::CopyFrom(string U)
       }
       I++;
    }
-   
+
    // Tsk, weird.
    if (InBracket == true)
    {
       Host = string();
       return;
    }
-   
+
    // Now we parse off a port number from the hostname
    Port = 0;
    string::size_type Pos = Host.rfind(':');
    if (Pos == string::npos || Pos < PortEnd)
       return;
-   
+
    Port = atoi(string(Host,Pos+1).c_str());
    Host = string(Host,0,Pos);
 }
@@ -1125,15 +1125,15 @@ void URI::CopyFrom(string U)
 URI::operator string()
 {
    string Res;
-   
+
    if (Access.empty() == false)
       Res = Access + ':';
-   
+
    if (Host.empty() == false)
-   {	 
+   {
       if (Access.empty() == false)
 	 Res += "//";
-          
+
       if (User.empty() == false)
       {
 	 Res +=  User;
@@ -1141,22 +1141,22 @@ URI::operator string()
 	    Res += ":" + Password;
 	 Res += "@";
       }
-      
+
       // Add RFC 2732 escaping characters
       if (Access.empty() == false &&
 	  (Host.find('/') != string::npos || Host.find(':') != string::npos))
 	 Res += '[' + Host + ']';
       else
 	 Res += Host;
-      
+
       if (Port != 0)
       {
 	 char S[30];
 	 sprintf(S,":%u",Port);
 	 Res += S;
-      }	 
+      }
    }
-   
+
    if (Path.empty() == false)
    {
       if (Path[0] != '/')
@@ -1164,7 +1164,7 @@ URI::operator string()
       else
 	 Res += Path;
    }
-   
+
    return Res;
 }
 									/*}}}*/

@@ -4,13 +4,13 @@
 /* ######################################################################
 
    Order List - Represents and Manipulates an ordered list of packages.
-   
+
    A list of packages can be ordered by a number of conflicting criteria
    each given a specific priority. Each package also has a set of flags
-   indicating some useful things about it that are derived in the 
+   indicating some useful things about it that are derived in the
    course of sorting. The pkgPackageManager class uses this class for
    all of it's installation ordering needs.
-   
+
    ##################################################################### */
 									/*}}}*/
 #ifndef PKGLIB_ORDERLIST_H
@@ -18,7 +18,7 @@
 
 #ifdef __GNUG__
 #pragma interface "apt-pkg/orderlist.h"
-#endif 
+#endif
 
 #include <apt-pkg/pkgcache.h>
 
@@ -27,7 +27,7 @@ class pkgOrderList : protected pkgCache::Namespace
 {
    protected:
 
-   pkgDepCache &Cache;   
+   pkgDepCache &Cache;
    typedef bool (pkgOrderList::*DepFunc)(DepIterator D);
 
    // These are the currently selected ordering functions
@@ -46,14 +46,14 @@ class pkgOrderList : protected pkgCache::Namespace
    int Depth;
    unsigned short *Flags;
    bool Debug;
-   
+
    // Main visit function
    bool VisitNode(PkgIterator Pkg);
    bool VisitDeps(DepFunc F,PkgIterator Pkg);
    bool VisitRDeps(DepFunc F,PkgIterator Pkg);
    bool VisitRProvides(DepFunc F,VerIterator Ver);
    bool VisitProvides(DepIterator Pkg,bool Critical);
-   
+
    // Dependency checking functions.
    bool DepUnPackCrit(DepIterator D);
    bool DepUnPackPreD(DepIterator D);
@@ -61,22 +61,22 @@ class pkgOrderList : protected pkgCache::Namespace
    bool DepUnPackDep(DepIterator D);
    bool DepConfigure(DepIterator D);
    bool DepRemove(DepIterator D);
-   
+
    // Analysis helpers
    bool AddLoop(DepIterator D);
    bool CheckDep(DepIterator D);
    bool DoRun();
-   
+
    // For pre sorting
    static pkgOrderList *Me;
    static int OrderCompareA(const void *a, const void *b);
    static int OrderCompareB(const void *a, const void *b);
    int FileCmp(PkgIterator A,PkgIterator B);
-   
+
    public:
 
    typedef Package **iterator;
-   
+
    // State flags
    enum Flags {Added = (1 << 0), AddPending = (1 << 1),
                Immediate = (1 << 2), Loop = (1 << 3),
@@ -105,7 +105,7 @@ class pkgOrderList : protected pkgCache::Namespace
    inline void pop_back() {End--;};
    inline bool empty() {return End == List;};
    inline unsigned int size() {return End - List;};
-   
+
    // Ordering modes
    bool OrderCritical();
    bool OrderUnpack(string *FileList = 0);

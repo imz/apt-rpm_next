@@ -400,7 +400,7 @@ lib/liblua_la-lstrlib.lo: lib/$(am__dirstamp) \
 	lib/$(DEPDIR)/$(am__dirstamp)
 lib/liblua_la-ltablib.lo: lib/$(am__dirstamp) \
 	lib/$(DEPDIR)/$(am__dirstamp)
-liblua.la: $(liblua_la_OBJECTS) $(liblua_la_DEPENDENCIES) 
+liblua.la: $(liblua_la_OBJECTS) $(liblua_la_DEPENDENCIES)
 	$(LINK) $(am_liblua_la_rpath) $(liblua_la_LDFLAGS) $(liblua_la_OBJECTS) $(liblua_la_LIBADD) $(LIBS)
 
 clean-noinstPROGRAMS:

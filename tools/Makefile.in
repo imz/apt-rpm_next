@@ -318,13 +318,13 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-countpkglist$(EXEEXT): $(countpkglist_OBJECTS) $(countpkglist_DEPENDENCIES) 
+countpkglist$(EXEEXT): $(countpkglist_OBJECTS) $(countpkglist_DEPENDENCIES)
 	@rm -f countpkglist$(EXEEXT)
 	$(CXXLINK) $(countpkglist_LDFLAGS) $(countpkglist_OBJECTS) $(countpkglist_LDADD) $(LIBS)
-genpkglist$(EXEEXT): $(genpkglist_OBJECTS) $(genpkglist_DEPENDENCIES) 
+genpkglist$(EXEEXT): $(genpkglist_OBJECTS) $(genpkglist_DEPENDENCIES)
 	@rm -f genpkglist$(EXEEXT)
 	$(CXXLINK) $(genpkglist_LDFLAGS) $(genpkglist_OBJECTS) $(genpkglist_LDADD) $(LIBS)
-gensrclist$(EXEEXT): $(gensrclist_OBJECTS) $(gensrclist_DEPENDENCIES) 
+gensrclist$(EXEEXT): $(gensrclist_OBJECTS) $(gensrclist_DEPENDENCIES)
 	@rm -f gensrclist$(EXEEXT)
 	$(CXXLINK) $(gensrclist_LDFLAGS) $(gensrclist_OBJECTS) $(gensrclist_LDADD) $(LIBS)
 install-binSCRIPTS: $(bin_SCRIPTS)

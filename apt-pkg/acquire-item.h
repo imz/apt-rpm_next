@@ -6,15 +6,15 @@
    Acquire Item - Item to acquire
 
    When an item is instantiated it will add it self to the local list in
-   the Owner Acquire class. Derived classes will then call QueueURI to 
-   register all the URI's they wish to fetch at the initial moment.   
-   
+   the Owner Acquire class. Derived classes will then call QueueURI to
+   register all the URI's they wish to fetch at the initial moment.
+
    Two item classes are provided to provide functionality for downloading
    of Index files and downloading of Packages.
-   
+
    A Archive class is provided for downloading .deb files. It does Md5
    checking and source location as well as a retry algorithm.
-   
+
    ##################################################################### */
 									/*}}}*/
 #ifndef PKGLIB_ACQUIRE_ITEM_H
@@ -26,22 +26,22 @@
 
 #ifdef __GNUG__
 #pragma interface "apt-pkg/acquire-item.h"
-#endif 
+#endif
 
 // Item to acquire
 class pkgAcquire::Item
-{  
+{
    protected:
-   
+
    // Some private helper methods for registering URIs
    pkgAcquire *Owner;
    inline void QueueURI(ItemDesc &Item)
                  {Owner->Enqueue(Item);};
    inline void Dequeue() {Owner->Dequeue(this);};
-   
+
    // Safe rename function with timestamp preservation
    void Rename(string From,string To);
-   
+
    public:
 
    // State of the item
@@ -50,7 +50,7 @@ class pkgAcquire::Item
    enum StatusFlags {StatIdle, StatFetching, StatDone, StatError} Status;
    string ErrorText;
    unsigned long FileSize;
-   unsigned long PartialSize;   
+   unsigned long PartialSize;
    const char *Mode;
    unsigned long ID;
    bool Complete;
@@ -58,7 +58,7 @@ class pkgAcquire::Item
 
    // Number of queues we are inserted into
    unsigned int QueueCounter;
-   
+
    // File to write the fetch into
    string DestFile;
 
@@ -70,11 +70,11 @@ class pkgAcquire::Item
    virtual string Custom600Headers() {return string();};
    virtual string DescURI() = 0;
    virtual void Finished() {};
-   
+
    // Inquire functions
    virtual string MD5Sum() {return string();};
    pkgAcquire *GetOwner() {return Owner;};
-   
+
    Item(pkgAcquire *Owner);
    virtual ~Item();
 };
@@ -86,7 +86,7 @@ class pkgRepository;
 class pkgAcqIndex : public pkgAcquire::Item
 {
    protected:
-   
+
    bool Decompression;
    bool Erase;
    pkgAcquire::ItemDesc Desc;
@@ -94,9 +94,9 @@ class pkgAcqIndex : public pkgAcquire::Item
 
    // CNC:2002-07-03
    pkgRepository *Repository;
-   
+
    public:
-   
+
    // Specialized action members
    virtual void Done(string Message,unsigned long Size,string Md5Hash,
 		     pkgAcquire::MethodConfig *Cnf);
@@ -112,25 +112,25 @@ class pkgAcqIndex : public pkgAcquire::Item
 class pkgAcqIndexRel : public pkgAcquire::Item
 {
    protected:
-   
+
    pkgAcquire::ItemDesc Desc;
    string RealURI;
- 
+
    // CNC:2002-07-03
    bool Authentication;
    bool Master;
    bool Erase;
    pkgRepository *Repository;
-   
+
    public:
-   
+
    // Specialized action members
    virtual void Failed(string Message,pkgAcquire::MethodConfig *Cnf);
    virtual void Done(string Message,unsigned long Size,string Md5Hash,
-		     pkgAcquire::MethodConfig *Cnf);   
+		     pkgAcquire::MethodConfig *Cnf);
    virtual string Custom600Headers();
    virtual string DescURI() {return RealURI;};
-   
+
    // CNC:2002-07-03
    pkgAcqIndexRel(pkgAcquire *Owner,pkgRepository *Repository,string URI,
 		  string URIDesc,string ShortDesc,bool Master=false);
@@ -140,7 +140,7 @@ class pkgAcqIndexRel : public pkgAcquire::Item
 class pkgAcqArchive : public pkgAcquire::Item
 {
    protected:
-   
+
    // State information for the retry mechanism
    pkgCache::VerIterator Version;
    pkgAcquire::ItemDesc Desc;
@@ -153,9 +153,9 @@ class pkgAcqArchive : public pkgAcquire::Item
 
    // Queue the next available file for download.
    bool QueueNext();
-   
+
    public:
-   
+
    // Specialized action members
    virtual void Failed(string Message,pkgAcquire::MethodConfig *Cnf);
    virtual void Done(string Message,unsigned long Size,string Md5Hash,
@@ -163,7 +163,7 @@ class pkgAcqArchive : public pkgAcquire::Item
    virtual string MD5Sum() {return MD5;};
    virtual string DescURI() {return Desc.URI;};
    virtual void Finished();
-   
+
    pkgAcqArchive(pkgAcquire *Owner,pkgSourceList *Sources,
 		 pkgRecords *Recs,pkgCache::VerIterator const &Version,
 		 string &StoreFilename);
@@ -175,16 +175,16 @@ class pkgAcqFile : public pkgAcquire::Item
    pkgAcquire::ItemDesc Desc;
    string Md5Hash;
    unsigned int Retries;
-   
+
    public:
-   
+
    // Specialized action members
    virtual void Failed(string Message,pkgAcquire::MethodConfig *Cnf);
    virtual void Done(string Message,unsigned long Size,string Md5Hash,
 		     pkgAcquire::MethodConfig *Cnf);
    virtual string MD5Sum() {return Md5Hash;};
    virtual string DescURI() {return Desc.URI;};
-   
+
    pkgAcqFile(pkgAcquire *Owner,string URI,string MD5,unsigned long Size,
 		  string Desc,string ShortDesc);
 };

@@ -4,24 +4,24 @@
 /* ######################################################################
 
    HTTP Aquire Method - This is the HTTP aquire method for APT.
-   
-   It uses HTTP/1.1 and many of the fancy options there-in, such as
-   pipelining, range, if-range and so on. 
 
-   It is based on a doubly buffered select loop. A groupe of requests are 
-   fed into a single output buffer that is constantly fed out the 
+   It uses HTTP/1.1 and many of the fancy options there-in, such as
+   pipelining, range, if-range and so on.
+
+   It is based on a doubly buffered select loop. A groupe of requests are
+   fed into a single output buffer that is constantly fed out the
    socket. This provides ideal pipelining as in many cases all of the
-   requests will fit into a single packet. The input socket is buffered 
+   requests will fit into a single packet. The input socket is buffered
    the same way and fed into the fd for the file (may be a pipe in future).
-   
+
    This double buffering provides fairly substantial transfer rates,
    compared to wget the http method is about 4% faster. Most importantly,
    when HTTP is compared with FTP as a protocol the speed difference is
    huge. In tests over the internet from two sites to llug (via ATM) this
-   program got 230k/s sustained http transfer rates. FTP on the other 
+   program got 230k/s sustained http transfer rates. FTP on the other
    hand topped out at 170k/s. That combined with the time to setup the
    FTP connection makes HTTP a vastly superior protocol.
-      
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -86,7 +86,7 @@ void CircleBuf::Reset()
    {
       delete Hash;
       Hash = new Hashes;
-   }   
+   }
 };
 									/*}}}*/
 // CircleBuf::Read - Read from a FD into the circular buffer		/*{{{*/
@@ -100,11 +100,11 @@ bool CircleBuf::Read(int Fd)
       // Woops, buffer is full
       if (InP - OutP == Size)
 	 return true;
-      
+
       // Write the buffer segment
       int Res;
       Res = read(Fd,Buf + (InP%Size),LeftRead());
-      
+
       if (Res == 0)
 	 return false;
       if (Res < 0)
@@ -142,13 +142,13 @@ void CircleBuf::FillOut()
       // Woops, buffer is full
       if (InP - OutP == Size)
 	 return;
-      
+
       // Write the buffer segment
       unsigned long Sz = LeftRead();
       if (OutQueue.length() - StrPos < Sz)
 	 Sz = OutQueue.length() - StrPos;
       memcpy(Buf + (InP%Size),OutQueue.c_str() + StrPos,Sz);
-      
+
       // Advance
       StrPos += Sz;
       InP += Sz;
@@ -169,14 +169,14 @@ bool CircleBuf::Write(int Fd)
    while (1)
    {
       FillOut();
-      
+
       // Woops, buffer is empty
       if (OutP == InP)
 	 return true;
-      
+
       if (OutP == MaxGet)
 	 return true;
-      
+
       // Write the buffer segment
       int Res;
       Res = write(Fd,Buf + (OutP%Size),LeftWrite());
@@ -187,13 +187,13 @@ bool CircleBuf::Write(int Fd)
       {
 	 if (errno == EAGAIN)
 	    return true;
-	 
+
 	 return false;
       }
-      
+
       if (Hash != 0)
 	 Hash->Add(Buf + (OutP%Size),Res);
-      
+
       OutP += Res;
    }
 }
@@ -205,21 +205,21 @@ bool CircleBuf::WriteTillEl(string &Data,bool Single)
 {
    // We cheat and assume it is unneeded to have more than one buffer load
    for (unsigned long I = OutP; I < InP; I++)
-   {      
+   {
       if (Buf[I%Size] != '\n')
 	 continue;
       for (I++; I < InP && Buf[I%Size] == '\r'; I++);
-      
+
       if (Single == false)
       {
 	 if (Buf[I%Size] != '\n')
 	    continue;
 	 for (I++; I < InP && Buf[I%Size] == '\r'; I++);
       }
-      
+
       if (I > InP)
 	 I = InP;
-      
+
       Data = "";
       while (OutP < I)
       {
@@ -232,7 +232,7 @@ bool CircleBuf::WriteTillEl(string &Data,bool Single)
 	 OutP += Sz;
       }
       return true;
-   }      
+   }
    return false;
 }
 									/*}}}*/
@@ -243,10 +243,10 @@ void CircleBuf::Stats()
 {
    if (InP == 0)
       return;
-   
+
    struct timeval Stop;
    gettimeofday(&Stop,0);
-/*   float Diff = Stop.tv_sec - Start.tv_sec + 
+/*   float Diff = Stop.tv_sec - Start.tv_sec +
              (float)(Stop.tv_usec - Start.tv_usec)/1000000;
    clog << "Got " << InP << " in " << Diff << " at " << InP/Diff << endl;*/
 }
@@ -270,12 +270,12 @@ bool ServerState::Open()
    // Use the already open connection if possible.
    if (ServerFd != -1)
       return true;
-   
+
    Close();
    In.Reset();
    Out.Reset();
    Persistent = true;
-   
+
    // Determine the proxy setting
    if (getenv("http_proxy") == 0)
    {
@@ -287,23 +287,23 @@ bool ServerState::Open()
 	    Proxy = "";
 	 else
 	    Proxy = SpecificProxy;
-      }   
+      }
       else
 	 Proxy = DefProxy;
    }
    else
       Proxy = getenv("http_proxy");
-   
+
    // Parse no_proxy, a , separated list of domains
    if (getenv("no_proxy") != 0)
    {
       if (CheckDomainList(ServerName.Host,getenv("no_proxy")) == true)
 	 Proxy = "";
    }
-   
+
    // Determine what host and port to use based on the proxy settings
    int Port = 0;
-   string Host;   
+   string Host;
    if (Proxy.empty() == true || Proxy.Host.empty() == true)
    {
       if (ServerName.Port != 0)
@@ -316,11 +316,11 @@ bool ServerState::Open()
 	 Port = Proxy.Port;
       Host = Proxy.Host;
    }
-   
+
    // Connect to the remote server
    if (Connect(Host,Port,"http",80,ServerFd,TimeOut,Owner) == false)
       return false;
-   
+
    return true;
 }
 									/*}}}*/
@@ -341,13 +341,13 @@ bool ServerState::Close()
 int ServerState::RunHeaders()
 {
    State = Header;
-   
+
    Owner->Status(_("Waiting for headers"));
 
-   Major = 0; 
-   Minor = 0; 
-   Result = 0; 
-   Size = 0; 
+   Major = 0;
+   Minor = 0;
+   Result = 0;
+   Size = 0;
    StartPos = 0;
    Encoding = Closes;
    HaveContent = false;
@@ -361,7 +361,7 @@ int ServerState::RunHeaders()
 
       if (Debug == true)
 	 clog << Data;
-      
+
       for (string::const_iterator I = Data.begin(); I < Data.end(); I++)
       {
 	 string::const_iterator J = I;
@@ -374,15 +374,15 @@ int ServerState::RunHeaders()
       // 100 Continue is a Nop...
       if (Result == 100)
 	 continue;
-      
+
       // Tidy up the connection persistance state.
       if (Encoding == Closes && HaveContent == true)
 	 Persistent = false;
-      
+
       return 0;
    }
    while (Owner->Go(false,this) == true);
-   
+
    return 1;
 }
 									/*}}}*/
@@ -392,7 +392,7 @@ int ServerState::RunHeaders()
 bool ServerState::RunData()
 {
    State = Data;
-   
+
    // Chunked transfer encoding is fun..
    if (Encoding == Chunked)
    {
@@ -411,13 +411,13 @@ bool ServerState::RunData()
 
 	 if (Last == false)
 	    return false;
-	 	 
+
 	 // See if we are done
 	 unsigned long Len = strtol(Data.c_str(),0,16);
 	 if (Len == 0)
 	 {
 	    In.Limit(-1);
-	    
+
 	    // We have to remove the entity trailer
 	    Last = true;
 	    do
@@ -430,17 +430,17 @@ bool ServerState::RunData()
 	       return false;
 	    return !_error->PendingError();
 	 }
-	 
+
 	 // Transfer the block
 	 In.Limit(Len);
 	 while (Owner->Go(true,this) == true)
 	    if (In.IsLimit() == true)
 	       break;
-	 
+
 	 // Error
 	 if (In.IsLimit() == false)
 	    return false;
-	 
+
 	 // The server sends an extra new line before the next block specifier..
 	 In.Limit(-1);
 	 Last = true;
@@ -462,13 +462,13 @@ bool ServerState::RunData()
 	 In.Limit(-1);
       else
 	 In.Limit(Size - StartPos);
-      
+
       // Just transfer the whole block.
       do
       {
 	 if (In.IsLimit() == false)
 	    continue;
-	 
+
 	 In.Limit(-1);
 	 return !_error->PendingError();
       }
@@ -504,10 +504,10 @@ bool ServerState::HeaderLine(string Line)
    string::size_type Pos2 = Pos;
    while (Pos2 < Line.length() && isspace(Line[Pos2]) != 0)
       Pos2++;
-      
+
    string Tag = string(Line,0,Pos);
    string Val = string(Line,Pos2);
-   
+
    if (stringcasecmp(Tag.c_str(),Tag.c_str()+4,"HTTP") == 0)
    {
       // Evil servers return no version
@@ -538,18 +538,18 @@ bool ServerState::HeaderLine(string Line)
       }
 
       return true;
-   }      
-      
+   }
+
    if (stringcasecmp(Tag,"Content-Length:") == 0)
    {
       if (Encoding == Closes)
 	 Encoding = Stream;
       HaveContent = true;
-      
+
       // The length is already set from the Content-Range header
       if (StartPos != 0)
 	 return true;
-      
+
       if (sscanf(Val.c_str(),"%lu",&Size) != 1)
 	 return _error->Error(_("The http server sent an invalid Content-Length header"));
       return true;
@@ -560,23 +560,23 @@ bool ServerState::HeaderLine(string Line)
       HaveContent = true;
       return true;
    }
-   
+
    if (stringcasecmp(Tag,"Content-Range:") == 0)
    {
       HaveContent = true;
-      
+
       if (sscanf(Val.c_str(),"bytes %lu-%*u/%lu",&StartPos,&Size) != 2)
 	 return _error->Error(_("The http server sent an invalid Content-Range header"));
       if ((unsigned)StartPos > Size)
 	 return _error->Error(_("This http server has broken range support"));
       return true;
    }
-   
+
    if (stringcasecmp(Tag,"Transfer-Encoding:") == 0)
    {
       HaveContent = true;
       if (stringcasecmp(Val,"chunked") == 0)
-	 Encoding = Chunked;      
+	 Encoding = Chunked;
       return true;
    }
 
@@ -588,7 +588,7 @@ bool ServerState::HeaderLine(string Line)
 	 Persistent = true;
       return true;
    }
-   
+
    if (stringcasecmp(Tag,"Last-Modified:") == 0)
    {
       if (StrToTime(Val,Date) == false)
@@ -607,10 +607,10 @@ bool ServerState::HeaderLine(string Line)
    {
       string::size_type SplitPoint = Val.find(' ');
       string AuthType = Val.substr(0, SplitPoint);
-      string RealmStr = Val.substr(SplitPoint + 1, 
+      string RealmStr = Val.substr(SplitPoint + 1,
 				   Val.length() - SplitPoint - 1);
       SplitPoint = RealmStr.find('=');
-      string FoundRealm = RealmStr.substr(SplitPoint, 
+      string FoundRealm = RealmStr.substr(SplitPoint,
 					  RealmStr.length() - SplitPoint);
 
       if (stringcasecmp(Tag,"WWW-Authenticate:") == 0)
@@ -639,16 +639,16 @@ void HttpMethod::SendReq(FetchItem *Itm,CircleBuf &Out)
    {
       sprintf(Buf,":%u",Uri.Port);
       ProperHost += Buf;
-   }   
-      
+   }
+
    // Just in case.
    if (Itm->Uri.length() >= sizeof(Buf))
        abort();
-       
+
    /* Build the request. We include a keep-alive header only for non-proxy
       requests. This is to tweak old http/1.0 servers that do support keep-alive
-      but not HTTP/1.1 automatic keep-alive. Doing this with a proxy server 
-      will glitch HTTP/1.0 proxies because they do not filter it out and 
+      but not HTTP/1.1 automatic keep-alive. Doing this with a proxy server
+      will glitch HTTP/1.0 proxies because they do not filter it out and
       pass it on, HTTP/1.1 says the connection should default to keep alive
       and we expect the proxy to do this */
    if (Proxy.empty() == true)
@@ -672,10 +672,10 @@ void HttpMethod::SendReq(FetchItem *Itm,CircleBuf &Out)
 	 {
 	    if (_config->FindB("Acquire::http::No-Store",false) == true)
 	       strcat(Buf,"Cache-Control: no-store\r\n");
-	 }	 
+	 }
       }
    }
-   
+
    string Req = Buf;
 
    // Check for a partial file
@@ -697,19 +697,19 @@ void HttpMethod::SendReq(FetchItem *Itm,CircleBuf &Out)
    }
 
    if (Proxy.User.empty() == false || Proxy.Password.empty() == false)
-      Req += string("Proxy-Authorization: Basic ") + 
+      Req += string("Proxy-Authorization: Basic ") +
           Base64Encode(Proxy.User + ":" + Proxy.Password) + "\r\n";
 
    if (Uri.User.empty() == false || Uri.Password.empty() == false)
-      Req += string("Authorization: Basic ") + 
+      Req += string("Authorization: Basic ") +
           Base64Encode(Uri.User + ":" + Uri.Password) + "\r\n";
 
    // CNC:2003-01-29
    string UserAgent = _config->Find("Acquire::http::User-Agent");
-   if (UserAgent.empty() == true) 
+   if (UserAgent.empty() == true)
 	  UserAgent = "RPM APT-HTTP/1.3";
    Req += string("User-Agent: ") + UserAgent + "\r\n\r\n";
-   
+
    if (Debug == true)
       cerr << Req << endl;
 
@@ -723,33 +723,33 @@ void HttpMethod::SendReq(FetchItem *Itm,CircleBuf &Out)
 bool HttpMethod::Go(bool ToFile,ServerState *Srv)
 {
    // Server has closed the connection
-   if (Srv->ServerFd == -1 && (Srv->In.WriteSpace() == false || 
+   if (Srv->ServerFd == -1 && (Srv->In.WriteSpace() == false ||
 			       ToFile == false))
       return false;
-   
+
    fd_set rfds,wfds;
    FD_ZERO(&rfds);
    FD_ZERO(&wfds);
-   
-   /* Add the server. We only send more requests if the connection will 
+
+   /* Add the server. We only send more requests if the connection will
       be persisting */
-   if (Srv->Out.WriteSpace() == true && Srv->ServerFd != -1 
+   if (Srv->Out.WriteSpace() == true && Srv->ServerFd != -1
        && Srv->Persistent == true)
       FD_SET(Srv->ServerFd,&wfds);
    if (Srv->In.ReadSpace() == true && Srv->ServerFd != -1)
       FD_SET(Srv->ServerFd,&rfds);
-   
+
    // Add the file
    int FileFD = -1;
    if (File != 0)
       FileFD = File->Fd();
-   
+
    if (Srv->In.WriteSpace() == true && ToFile == true && FileFD != -1)
       FD_SET(FileFD,&wfds);
-   
+
    // Add stdin
    FD_SET(STDIN_FILENO,&rfds);
-	  
+
    // Figure out the max fd
    int MaxFd = FileFD;
    if (MaxFd < Srv->ServerFd)
@@ -766,13 +766,13 @@ bool HttpMethod::Go(bool ToFile,ServerState *Srv)
 	 return true;
       return _error->Errno("select",_("Select failed"));
    }
-   
+
    if (Res == 0)
    {
       _error->Error(_("Connection timed out"));
       return ServerDie(Srv);
    }
-   
+
    // Handle server IO
    if (Srv->ServerFd != -1 && FD_ISSET(Srv->ServerFd,&rfds))
    {
@@ -780,7 +780,7 @@ bool HttpMethod::Go(bool ToFile,ServerState *Srv)
       if (Srv->In.Read(Srv->ServerFd) == false)
 	 return ServerDie(Srv);
    }
-	 
+
    if (Srv->ServerFd != -1 && FD_ISSET(Srv->ServerFd,&wfds))
    {
       errno = 0;
@@ -800,8 +800,8 @@ bool HttpMethod::Go(bool ToFile,ServerState *Srv)
    {
       if (Run(true) != -1)
 	 exit(100);
-   }   
-       
+   }
+
    return true;
 }
 									/*}}}*/
@@ -816,7 +816,7 @@ bool HttpMethod::Flush(ServerState *Srv)
       SetNonBlock(File->Fd(),false);
       if (Srv->In.WriteSpace() == false)
 	 return true;
-      
+
       while (Srv->In.WriteSpace() == true)
       {
 	 if (Srv->In.Write(File->Fd()) == false)
@@ -837,7 +837,7 @@ bool HttpMethod::Flush(ServerState *Srv)
 bool HttpMethod::ServerDie(ServerState *Srv)
 {
    unsigned int LErrno = errno;
-   
+
    // Dump the buffer to the file
    if (Srv->State == ServerState::Data)
    {
@@ -852,9 +852,9 @@ bool HttpMethod::ServerDie(ServerState *Srv)
 	    return true;
       }
    }
-   
+
    // See if this is because the server finished the data stream
-   if (Srv->In.IsLimit() == false && Srv->State != ServerState::Header && 
+   if (Srv->In.IsLimit() == false && Srv->State != ServerState::Header &&
        Srv->Encoding != ServerState::Closes)
    {
       Srv->Close();
@@ -870,22 +870,22 @@ bool HttpMethod::ServerDie(ServerState *Srv)
       // Nothing left in the buffer
       if (Srv->In.WriteSpace() == false)
 	 return false;
-      
+
       // We may have got multiple responses back in one packet..
       Srv->Close();
       return true;
    }
-   
+
    return false;
 }
 									/*}}}*/
 // HttpMethod::DealWithHeaders - Handle the retrieved header data	/*{{{*/
 // ---------------------------------------------------------------------
 /* We look at the header data we got back from the server and decide what
-   to do. Returns 
+   to do. Returns
      0 - File is open,
      1 - IMS hit
-     3 - Unrecoverable error 
+     3 - Unrecoverable error
      4 - Error with error content page
      5 - Unrecoverable non-server error (close the connection)
      6 - Try again with a new or changed URI  */
@@ -973,7 +973,7 @@ int HttpMethod::DealWithHeaders(FetchResult &Res,ServerState *Srv)
 		  *CurrentAuth = NewAuthInfo;
 		  break;
 	       }
-	    
+
 	    if (CurrentAuth == AuthList.end())
 	       AuthList.push_back(NewAuthInfo);
 	 }
@@ -1002,7 +1002,7 @@ int HttpMethod::DealWithHeaders(FetchResult &Res,ServerState *Srv)
    // This is some sort of 2xx 'data follows' reply
    Res.LastModified = Srv->Date;
    Res.Size = Srv->Size;
-   
+
    // Open the file
    delete File;
    File = new FileFd(Queue->DestFile,FileFd::WriteAny);
@@ -1013,20 +1013,20 @@ int HttpMethod::DealWithHeaders(FetchResult &Res,ServerState *Srv)
    FailFile.c_str();   // Make sure we dont do a malloc in the signal handler
    FailFd = File->Fd();
    FailTime = Srv->Date;
-      
+
    // Set the expected size
    if (Srv->StartPos >= 0)
    {
       Res.ResumePoint = Srv->StartPos;
       ftruncate(File->Fd(),Srv->StartPos);
    }
-      
+
    // Set the start point
    lseek(File->Fd(),0,SEEK_END);
 
    delete Srv->In.Hash;
    Srv->In.Hash = new Hashes;
-   
+
    // Fill the Hash if the file is non-empty (resume)
    if (Srv->StartPos > 0)
    {
@@ -1038,27 +1038,27 @@ int HttpMethod::DealWithHeaders(FetchResult &Res,ServerState *Srv)
       }
       lseek(File->Fd(),0,SEEK_END);
    }
-   
+
    SetNonBlock(File->Fd(),true);
    return 0;
 }
 									/*}}}*/
 // HttpMethod::SigTerm - Handle a fatal signal				/*{{{*/
 // ---------------------------------------------------------------------
-/* This closes and timestamps the open file. This is neccessary to get 
+/* This closes and timestamps the open file. This is neccessary to get
    resume behavoir on user abort */
 void HttpMethod::SigTerm(int)
 {
    if (FailFd == -1)
       _exit(100);
    close(FailFd);
-   
+
    // Timestamp
    struct utimbuf UBuf;
    UBuf.actime = FailTime;
    UBuf.modtime = FailTime;
    utime(FailFile.c_str(),&UBuf);
-   
+
    _exit(100);
 }
 									/*}}}*/
@@ -1074,7 +1074,7 @@ bool HttpMethod::Fetch(FetchItem *)
    // Queue the requests
    int Depth = -1;
    bool Tail = false;
-   for (FetchItem *I = Queue; I != 0 && Depth < (signed)PipelineDepth; 
+   for (FetchItem *I = Queue; I != 0 && Depth < (signed)PipelineDepth;
 	I = I->Next, Depth++)
    {
       // If pipelining is disabled, we only queue 1 request
@@ -1087,7 +1087,7 @@ bool HttpMethod::Fetch(FetchItem *)
 	 ChokePipe = false;
 	 break;
       }
-      
+
       // Make sure we stick with the same server
       if (Server->Comp(I->Uri) == false)
       {
@@ -1104,7 +1104,7 @@ bool HttpMethod::Fetch(FetchItem *)
 	 continue;
       }
    }
-   
+
    return true;
 };
 									/*}}}*/
@@ -1115,12 +1115,12 @@ bool HttpMethod::Configuration(string Message)
 {
    if (pkgAcqMethod::Configuration(Message) == false)
       return false;
-   
+
    TimeOut = _config->FindI("Acquire::http::Timeout",TimeOut);
    PipelineDepth = _config->FindI("Acquire::http::Pipeline-Depth",
 				  PipelineDepth);
    Debug = _config->FindB("Debug::Acquire::http",false);
-   
+
    return true;
 }
 									/*}}}*/
@@ -1135,20 +1135,20 @@ int HttpMethod::Loop()
 
    signal(SIGTERM,SigTerm);
    signal(SIGINT,SigTerm);
-   
+
    Server = 0;
-   
+
    int FailCounter = 0;
 
    while (1)
-   {      
+   {
       // We have no commands, wait for some to arrive
       if (Queue == 0)
       {
 	 if (WaitFd(STDIN_FILENO) == false)
 	    return 0;
       }
-      
+
       /* Run messages, we can accept 0 (no message) if we didn't
          do a WaitFd above.. Otherwise the FD is closed. */
       int Result = Run(true);
@@ -1157,26 +1157,26 @@ int HttpMethod::Loop()
 
       if (Queue == 0)
 	 continue;
-      
+
       // Connect to the server
       if (Server == 0 || Server->Comp(Queue->Uri) == false)
       {
 	 delete Server;
 	 Server = new ServerState(Queue->Uri,this);
       }
-      
+
       /* If the server has explicitly said this is the last connection
-         then we pre-emptively shut down the pipeline and tear down 
+         then we pre-emptively shut down the pipeline and tear down
 	 the connection. This will speed up HTTP/1.0 servers a tad
 	 since we don't have to wait for the close sequence to
          complete */
       if (Server->Persistent == false)
 	 Server->Close();
-      
+
       // Reset the pipeline
       if (Server->ServerFd == -1)
-	 QueueBack = Queue;	 
-	 
+	 QueueBack = Queue;
+
       // Connnect to the host
       if (Server->Open() == false)
       {
@@ -1188,13 +1188,13 @@ int HttpMethod::Loop()
 
       // Fill the pipeline.
       Fetch(0);
-      
+
       // Fetch the next URL header data from the server.
       switch (Server->RunHeaders())
       {
 	 case 0:
 	 break;
-	 
+
 	 // The header data is bad
 	 case 2:
 	 {
@@ -1203,7 +1203,7 @@ int HttpMethod::Loop()
 	    RotateDNS();
 	    continue;
 	 }
-	 
+
 	 // The server closed a connection during the header get..
 	 default:
 	 case 1:
@@ -1212,13 +1212,13 @@ int HttpMethod::Loop()
 	    _error->Discard();
 	    Server->Close();
 	    Server->Pipeline = false;
-	    
+
 	    if (FailCounter >= 2)
 	    {
 	       Fail(_("Connection failed"),true);
 	       FailCounter = 0;
 	    }
-	    
+
 	    RotateDNS();
 	    continue;
 	 }
@@ -1241,12 +1241,12 @@ int HttpMethod::Loop()
 	       the size now */
 	    if (Res.Size == 0)
 	       Res.Size = File->Size();
-	    
+
 	    // Close the file, destroy the FD object and timestamp it
 	    FailFd = -1;
 	    delete File;
 	    File = 0;
-	    
+
 	    // Timestamp
 	    struct utimbuf UBuf;
 	    time(&UBuf.actime);
@@ -1262,24 +1262,24 @@ int HttpMethod::Loop()
 	    }
 	    else
 	       Fail(true);
-	    
+
 	    break;
 	 }
-	 
+
 	 // IMS hit
 	 case 1:
 	 {
 	    URIDone(Res);
 	    break;
 	 }
-	 
+
 	 // Hard server error, not found or something
 	 case 3:
 	 {
 	    Fail();
 	    break;
 	 }
-	  
+
 	 // Hard internal error, kill the connection and fail
 	 case 5:
 	 {
@@ -1296,7 +1296,7 @@ int HttpMethod::Loop()
 	 case 4:
 	 {
 	    Fail();
-	    
+
 	    // Send to content to dev/null
 	    File = new FileFd("/dev/null",FileFd::WriteExists);
 	    Server->RunData();
@@ -1344,15 +1344,15 @@ int HttpMethod::Loop()
 
 	    break;
 	 }
-	 
+
 	 default:
 	 Fail(_("Internal error"));
 	 break;
       }
-      
+
       FailCounter = 0;
    }
-   
+
    return 0;
 }
 									/*}}}*/
@@ -1360,7 +1360,7 @@ int HttpMethod::Loop()
 int main()
 {
    HttpMethod Mth;
-   
+
    return Mth.Loop();
 }
 

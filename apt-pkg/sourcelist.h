@@ -4,24 +4,24 @@
 /* ######################################################################
 
    SourceList - Manage a list of sources
-   
-   The Source List class provides access to a list of sources. It 
+
+   The Source List class provides access to a list of sources. It
    can read them from a file and generate a list of all the distinct
    sources.
-   
+
    All sources have a type associated with them that defines the layout
    of the archive. The exact format of the file is documented in
    files.sgml.
 
    The types are mapped through a list of type definitions which handle
-   the actual construction of the back end type. After loading a source 
+   the actual construction of the back end type. After loading a source
    list all you have is a list of package index files that have the ability
    to be Acquired.
-   
-   The vendor machanism is similar, except the vendor types are hard 
+
+   The vendor machanism is similar, except the vendor types are hard
    wired. Before loading the source list the vendor list is loaded.
    This doesn't load key data, just the checks to preform.
-   
+
    ##################################################################### */
 									/*}}}*/
 #ifndef PKGLIB_SOURCELIST_H
@@ -34,7 +34,7 @@
 
 using std::string;
 using std::vector;
-    
+
 #ifdef __GNUG__
 #pragma interface "apt-pkg/sourcelist.h"
 #endif
@@ -43,7 +43,7 @@ class pkgAquire;
 class pkgSourceList
 {
    public:
-   
+
    // An available vendor
    struct Vendor
    {
@@ -55,12 +55,12 @@ class pkgSourceList
       bool MatchFingerPrint(string FingerPrint);
       string FingerPrintDescr();*/
    };
-   
+
    // List of supported source list types
    class Type
    {
       public:
-      
+
       // Global list of Items supported
       static Type **GlobalList;
       static unsigned long GlobalListLen;
@@ -81,14 +81,14 @@ class pkgSourceList
       Type();
       virtual ~Type() {};
    };
-   
+
    typedef vector<pkgIndexFile *>::const_iterator const_iterator;
-   
+
    protected:
 
    vector<pkgIndexFile *> SrcList;
    vector<Vendor const *> VendorList;
-   
+
    public:
 
    bool ReadMainList();
@@ -99,7 +99,7 @@ class pkgSourceList
    void Reset();
    bool ReadAppend(string File);
    bool ReadSourceDir(string Dir);
-   
+
    // List accessors
    inline const_iterator begin() const {return SrcList.begin();};
    inline const_iterator end() const {return SrcList.end();};
@@ -112,10 +112,10 @@ class pkgSourceList
 
    // CNC:2002-07-04
    bool GetReleases(pkgAcquire *Owner) const;
-   
+
    pkgSourceList();
    pkgSourceList(string File);
-   ~pkgSourceList();      
+   ~pkgSourceList();
 };
 
 #endif

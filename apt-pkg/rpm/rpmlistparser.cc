@@ -1,12 +1,12 @@
 // Description
 // $Id: rpmlistparser.cc,v 1.7 2003/01/29 18:55:03 niemeyer Exp $
-// 
+//
 /* ######################################################################
- * 
+ *
  * Package Cache Generator - Generator for the cache structure.
- * This builds the cache structure from the abstract package list parser. 
- * 
- ##################################################################### 
+ * This builds the cache structure from the abstract package list parser.
+ *
+ #####################################################################
  */
 
 
@@ -76,11 +76,11 @@ unsigned long rpmListParser::UniqFindTagWrite(int Tag)
    int type;
    int count;
    void *data;
-   
+
    if (headerGetEntry(header, Tag, &type, &data, &count) != 1)
       return 0;
-   
-   if (type == RPM_STRING_TYPE) 
+
+   if (type == RPM_STRING_TYPE)
    {
       Start = (char*)data;
       Stop = Start + strlen(Start);
@@ -88,7 +88,7 @@ unsigned long rpmListParser::UniqFindTagWrite(int Tag)
       cout << "oh shit, not handled:"<<type<<" Package:"<<Package()<<endl;
       abort();
    }
-   
+
    return WriteUniqString(Start,Stop - Start);
 }
 
@@ -110,28 +110,28 @@ string rpmListParser::Package()
 
    char *str;
    int type, count;
-   
+
    Duplicated = false;
-   
-   if (headerGetEntry(header, RPMTAG_NAME, &type, (void**)&str, &count) != 1) 
+
+   if (headerGetEntry(header, RPMTAG_NAME, &type, (void**)&str, &count) != 1)
    {
       _error->Error(_("Corrupt pkglist: no RPMTAG_NAME in header entry"));
       return "";
-   } 
+   }
 
    bool IsDup = false;
    string Name = str;
 
    if (RpmData->IsMultilibSys() && RpmData->IsCompatArch(Architecture())) {
-	 Name += ".32bit";	 
+	 Name += ".32bit";
 	 CurrentName = Name;
    }
 
-   
+
    // If this package can have multiple versions installed at
    // the same time, then we make it so that the name of the
    // package is NAME+"#"+VERSION and also add a provides
-   // with the original name and version, to satisfy the 
+   // with the original name and version, to satisfy the
    // dependencies.
    if (RpmData->IsDupPackage(Name) == true)
       IsDup = true;
@@ -162,7 +162,7 @@ string rpmListParser::Package()
    {
       Name += "#"+Version();
       Duplicated = true;
-   } 
+   }
    CurrentName = Name;
    return Name;
 }
@@ -204,9 +204,9 @@ string rpmListParser::Version()
    str.reserve(10);
 
    if (headerGetEntry(header, RPMTAG_EPOCH, &type, (void **)&ser, &count) == 1
-       && count > 0) 
+       && count > 0)
       has_epoch = true;
-   
+
    headerGetEntry(header, RPMTAG_VERSION, &type, (void **)&ver, &count);
    headerGetEntry(header, RPMTAG_RELEASE, &type, (void **)&rel, &count);
 
@@ -239,18 +239,18 @@ bool rpmListParser::NewVersion(pkgCache::VerIterator Ver)
    // Cache it for future usage.
    RpmData->SetVersion(Handler->GetID(), Offset(), Ver);
 #endif
-   
+
    // Parse the section
    Ver->Section = UniqFindTagWrite(RPMTAG_GROUP);
    Ver->Arch = UniqFindTagWrite(RPMTAG_ARCH);
-   
+
    // Archive Size
    Ver->Size = Handler->FileSize();
-   
+
    // Unpacked Size (in kbytes)
    headerGetEntry(header, RPMTAG_SIZE, &type, (void**)&num, &count);
    Ver->InstalledSize = (unsigned)num[0];
-     
+
    if (ParseDepends(Ver,pkgCache::Dep::Depends) == false)
        return false;
    if (ParseDepends(Ver,pkgCache::Dep::Conflicts) == false)
@@ -283,7 +283,7 @@ bool rpmListParser::UsePackage(pkgCache::PkgIterator Pkg,
       (*SeenPackages)[Pkg.Name()] = true;
    if (Pkg->Section == 0)
       Pkg->Section = UniqFindTagWrite(RPMTAG_GROUP);
-   if (_error->PendingError()) 
+   if (_error->PendingError())
        return false;
    string PkgName = Pkg.Name();
    string::size_type HashPos = PkgName.find('#');
@@ -304,7 +304,7 @@ bool rpmListParser::UsePackage(pkgCache::PkgIterator Pkg,
 
 /*
 static int compare(const void *a, const void *b)
-{   
+{
    return strcmp(*(char**)a, *(char**)b);
 }
 */
@@ -315,7 +315,7 @@ unsigned short rpmListParser::VersionHash()
    if (VI != NULL)
       return (*VI)->Hash;
 #endif
-      
+
    int Sections[] = {
 	  RPMTAG_VERSION,
 	  RPMTAG_RELEASE,
@@ -326,7 +326,7 @@ unsigned short rpmListParser::VersionHash()
 	  0
    };
    unsigned long Result = INIT_FCS;
-   
+
    for (const int *sec = Sections; *sec != 0; sec++)
    {
       char *Str;
@@ -334,16 +334,16 @@ unsigned short rpmListParser::VersionHash()
       int type, count;
       int res;
       char **strings = NULL;
-      
+
       res = headerGetEntry(header, *sec, &type, (void **)&strings, &count);
       if (res != 1)
 	 continue;
-      
-      switch (type) 
+
+      switch (type)
       {
       case RPM_STRING_ARRAY_TYPE:
 	 //qsort(strings, count, sizeof(char*), compare);
-	 while (count-- > 0) 
+	 while (count-- > 0)
 	 {
 	    Str = strings[count];
 	    Len = strlen(Str);
@@ -352,12 +352,12 @@ unsigned short rpmListParser::VersionHash()
 	    if (Len == 17 && *Str == 'r' && *sec == RPMTAG_REQUIRENAME &&
 	        strcmp(Str, "rpmlib(PatchRPMs)") == 0)
 	       continue;
-	    
+
 	    Result = AddCRC16(Result,Str,Len);
 	 }
 	 free(strings);
 	 break;
-	 
+
       case RPM_STRING_TYPE:
 	 Str = (char*)strings;
 	 Len = strlen(Str);
@@ -365,7 +365,7 @@ unsigned short rpmListParser::VersionHash()
 	 break;
       }
    }
-   
+
    return Result;
 }
                                                                         /*}}}*/
@@ -373,18 +373,18 @@ unsigned short rpmListParser::VersionHash()
 // ---------------------------------------------------------------------
 bool rpmListParser::ParseStatus(pkgCache::PkgIterator Pkg,
 				pkgCache::VerIterator Ver)
-{   
+{
    if (!Handler->IsDatabase())  // this means we're parsing an hdlist, so it's not installed
       return true;
-   
+
    // if we're reading from the rpmdb, then it's installed
-   // 
+   //
    Pkg->SelectedState = pkgCache::State::Install;
    Pkg->InstState = pkgCache::State::Ok;
    Pkg->CurrentState = pkgCache::State::Installed;
-   
+
    Pkg->CurrentVer = Ver.Index();
-   
+
    return true;
 }
 
@@ -398,8 +398,8 @@ bool rpmListParser::ParseDepends(pkgCache::VerIterator Ver,
    bool DepMode = false;
    if (Type == pkgCache::Dep::Depends)
       DepMode = true;
-   
-   for (; i < count; i++) 
+
+   for (; i < count; i++)
    {
       if (DepMode == true) {
 	 if (flagl[i] & RPMSENSE_PREREQ)
@@ -425,7 +425,7 @@ bool rpmListParser::ParseDepends(pkgCache::VerIterator Ver,
         if (res) continue;
       }
 #endif
-      
+
       if (namel[i][0] == 'r' && strncmp(namel[i], "rpmlib", 6) == 0)
       {
 #if RPM_VERSION >= 0x040404
@@ -448,38 +448,38 @@ bool rpmListParser::ParseDepends(pkgCache::VerIterator Ver,
 	 if (res) continue;
       }
 
-      if (verl) 
+      if (verl)
       {
-	 if (!*verl[i]) 
+	 if (!*verl[i])
 	 {
 	    Op = pkgCache::Dep::NoOp;
 	 }
-	 else 
+	 else
 	 {
-	    if (flagl[i] & RPMSENSE_LESS) 
+	    if (flagl[i] & RPMSENSE_LESS)
 	    {
 	       if (flagl[i] & RPMSENSE_EQUAL)
 		   Op = pkgCache::Dep::LessEq;
 	       else
 		   Op = pkgCache::Dep::Less;
-	    } 
-	    else if (flagl[i] & RPMSENSE_GREATER) 
+	    }
+	    else if (flagl[i] & RPMSENSE_GREATER)
 	    {
 	       if (flagl[i] & RPMSENSE_EQUAL)
 		   Op = pkgCache::Dep::GreaterEq;
 	       else
 		   Op = pkgCache::Dep::Greater;
-	    } 
-	    else if (flagl[i] & RPMSENSE_EQUAL) 
+	    }
+	    else if (flagl[i] & RPMSENSE_EQUAL)
 	    {
 	       Op = pkgCache::Dep::Equals;
 	    }
 	 }
-	 
+
 	 if (NewDepends(Ver,namel[i],verl[i],Op,Type) == false)
 	     return false;
-      } 
-      else 
+      }
+      else
       {
 	 if (NewDepends(Ver,namel[i],"",pkgCache::Dep::NoOp,Type) == false)
 	     return false;
@@ -499,20 +499,20 @@ bool rpmListParser::ParseDepends(pkgCache::VerIterator Ver,
    char **verl = NULL;
    int *flagl = NULL;
    int res, type, count;
-   
-   switch (Type) 
+
+   switch (Type)
    {
    case pkgCache::Dep::Depends:
-      res = headerGetEntry(header, RPMTAG_REQUIRENAME, &type, 
+      res = headerGetEntry(header, RPMTAG_REQUIRENAME, &type,
 			   (void **)&namel, &count);
       if (res != 1)
 	  return true;
-      res = headerGetEntry(header, RPMTAG_REQUIREVERSION, &type, 
+      res = headerGetEntry(header, RPMTAG_REQUIREVERSION, &type,
 			   (void **)&verl, &count);
       res = headerGetEntry(header, RPMTAG_REQUIREFLAGS, &type,
 			   (void **)&flagl, &count);
       break;
-      
+
    case pkgCache::Dep::Obsoletes:
       res = headerGetEntry(header, RPMTAG_OBSOLETENAME, &type,
 			   (void **)&namel, &count);
@@ -521,37 +521,37 @@ bool rpmListParser::ParseDepends(pkgCache::VerIterator Ver,
       res = headerGetEntry(header, RPMTAG_OBSOLETEVERSION, &type,
 			   (void **)&verl, &count);
       res = headerGetEntry(header, RPMTAG_OBSOLETEFLAGS, &type,
-			   (void **)&flagl, &count);      
+			   (void **)&flagl, &count);
       break;
 
    case pkgCache::Dep::Conflicts:
-      res = headerGetEntry(header, RPMTAG_CONFLICTNAME, &type, 
+      res = headerGetEntry(header, RPMTAG_CONFLICTNAME, &type,
 			   (void **)&namel, &count);
       if (res != 1)
 	  return true;
-      res = headerGetEntry(header, RPMTAG_CONFLICTVERSION, &type, 
+      res = headerGetEntry(header, RPMTAG_CONFLICTVERSION, &type,
 			   (void **)&verl, &count);
       res = headerGetEntry(header, RPMTAG_CONFLICTFLAGS, &type,
 			   (void **)&flagl, &count);
       break;
 #if RPM_VERSION >= 0x040403
    case pkgCache::Dep::Suggests:
-      res = headerGetEntry(header, RPMTAG_SUGGESTSNAME, &type, 
+      res = headerGetEntry(header, RPMTAG_SUGGESTSNAME, &type,
 			   (void **)&namel, &count);
       if (res != 1)
 	  return true;
-      res = headerGetEntry(header, RPMTAG_SUGGESTSVERSION, &type, 
+      res = headerGetEntry(header, RPMTAG_SUGGESTSVERSION, &type,
 			   (void **)&verl, &count);
       res = headerGetEntry(header, RPMTAG_SUGGESTSFLAGS, &type,
 			   (void **)&flagl, &count);
       break;
 #if 0 // Enhances is not even known to apt, sigh...
    case pkgCache::Dep::Enhances:
-      res = headerGetEntry(header, RPMTAG_ENHANCESNAME, &type, 
+      res = headerGetEntry(header, RPMTAG_ENHANCESNAME, &type,
 			   (void **)&namel, &count);
       if (res != 1)
 	  return true;
-      res = headerGetEntry(header, RPMTAG_ENHANCESVERSION, &type, 
+      res = headerGetEntry(header, RPMTAG_ENHANCESVERSION, &type,
 			   (void **)&verl, &count);
       res = headerGetEntry(header, RPMTAG_ENHANCESFLAGS, &type,
 			   (void **)&flagl, &count);
@@ -559,26 +559,26 @@ bool rpmListParser::ParseDepends(pkgCache::VerIterator Ver,
 #endif
 #endif
    }
-   
+
    ParseDepends(Ver, namel, verl, flagl, count, Type);
 
    free(namel);
    free(verl);
-   
+
    return true;
 }
                                                                         /*}}}*/
 #ifdef OLD_FILEDEPS
 bool rpmListParser::ProcessFileProvides(pkgCache::VerIterator Ver)
 {
-   const char **names = NULL;    
+   const char **names = NULL;
    int count = 0;
 
    rpmHeaderGetEntry(header, RPMTAG_OLDFILENAMES, NULL, &names, &count);
 
-   while (count--) 
+   while (count--)
    {
-      if (rpmSys.IsFileDep(string(names[count]))) 
+      if (rpmSys.IsFileDep(string(names[count])))
       {
 	 if (!NewProvides(Ver, string(names[count]), string()))
 	     return false;
@@ -597,7 +597,7 @@ bool rpmListParser::CollectFileProvides(pkgCache &Cache,
    bool ret = true;
    rpmHeaderGetEntry(header, RPMTAG_OLDFILENAMES,
 		     NULL, (void **) &names, &count);
-   while (count--) 
+   while (count--)
    {
       const char *FileName = names[count];
       pkgCache::Package *P = Cache.FindPackage(FileName);
@@ -641,22 +641,22 @@ bool rpmListParser::ParseProvides(pkgCache::VerIterator Ver)
     if (res != 1)
     return true;
     */
-   res = headerGetEntry(header, RPMTAG_PROVIDEVERSION, &type, 
+   res = headerGetEntry(header, RPMTAG_PROVIDEVERSION, &type,
 			(void **)&verl, NULL);
    if (res != 1)
 	verl = NULL;
 
    bool ret = true;
-   for (int i = 0; i < count; i++) 
-   {      
-      if (verl && *verl[i]) 
+   for (int i = 0; i < count; i++)
+   {
+      if (verl && *verl[i])
       {
 	 if (NewProvides(Ver,namel[i],verl[i]) == false) {
 	    ret = false;
 	    break;
 	 }
-      } 
-      else 
+      }
+      else
       {
 	 if (NewProvides(Ver,namel[i],"") == false) {
 	    ret = false;
@@ -667,7 +667,7 @@ bool rpmListParser::ParseProvides(pkgCache::VerIterator Ver)
 
    free(namel);
    free(verl);
-    
+
    return ret;
 }
                                                                         /*}}}*/
@@ -686,14 +686,14 @@ bool rpmListParser::Step()
       if (VI != NULL)
 	 return true;
 #endif
-      
+
       string RealName = Package();
 
       if (Duplicated == true)
 	 RealName = RealName.substr(0,RealName.find('#'));
       if (RpmData->IgnorePackage(RealName) == true)
 	 continue;
- 
+
 #if OLD_BESTARCH
       bool archOk = false;
       string tmp = rpmSys.BestArchForPackage(RealName);
@@ -724,7 +724,7 @@ bool rpmListParser::LoadReleaseInfo(pkgCache::PkgFileIterator FileI,
    pkgTagSection Section;
    if (!Tags.Step(Section))
        return false;
-   
+
    const char *Start;
    const char *Stop;
    if (Section.Find("Archive",Start,Stop))
@@ -739,16 +739,16 @@ bool rpmListParser::LoadReleaseInfo(pkgCache::PkgFileIterator FileI,
        FileI->Label = WriteUniqString(Start,Stop - Start);
    if (Section.Find("Architecture",Start,Stop))
        FileI->Architecture = WriteUniqString(Start,Stop - Start);
-   
+
    if (Section.FindFlag("NotAutomatic",FileI->Flags,
 			pkgCache::Flag::NotAutomatic) == false)
        _error->Warning(_("Bad NotAutomatic flag"));
-   
+
    return !_error->PendingError();
 }
                                                                         /*}}}*/
 
-unsigned long rpmListParser::Size() 
+unsigned long rpmListParser::Size()
 {
    uint_32 *size;
    int type, count;
@@ -790,7 +790,7 @@ void rpmListParser::VirtualizePackage(string Name)
 	 ToPkgI->Flags |= RpmData->PkgFlags(MangledName);
 	 ToPkgI->Section = FromPkgI->Section;
       }
-      
+
       // Move the version to the new package.
       FromVerI->ParentPkg = ToPkgI.Index();
 

@@ -91,7 +91,7 @@
     <manvolnum>8</manvolnum>
   </citerefentry>"
 >
-    
+
 <!-- Boiler plate docinfo section -->
 <!ENTITY apt-docinfo "
  <refentryinfo>
@@ -160,7 +160,7 @@
 <!-- Boiler plate Bug reporting section -->
 <!ENTITY manbugs "
  <refsect1><title>Bugs</title>
-   <para><ulink url='http://bugs.debian.org/src:apt'>APT bug page</ulink>. 
+   <para><ulink url='http://bugs.debian.org/src:apt'>APT bug page</ulink>.
    If you wish to report a bug in APT, please see
    <filename>/usr/share/doc/debian/bug-reporting.txt</filename> or the
    &reportbug; command.
@@ -185,7 +185,7 @@
      </para>
      </listitem>
      </varlistentry>
-     
+
      <varlistentry>
       <term><option>-v</option></term>
       <term><option>--version</option></term>
@@ -197,13 +197,13 @@
      <varlistentry>
       <term><option>-c</option></term>
       <term><option>--config-file</option></term>
-     <listitem><para>Configuration File; Specify a configuration file to use. 
-     The program will read the default configuration file and then this 
-     configuration file. See &apt-conf; for syntax information.     
+     <listitem><para>Configuration File; Specify a configuration file to use.
+     The program will read the default configuration file and then this
+     configuration file. See &apt-conf; for syntax information.
      </para>
      </listitem>
      </varlistentry>
-     
+
      <varlistentry>
       <term><option>-o</option></term>
       <term><option>--option</option></term>
@@ -219,7 +219,7 @@
 <!ENTITY apt-cmdblurb "
    <para>All command line options may be set using the configuration file, the
    descriptions indicate the configuration option to set. For boolean
-   options you can override the config file by using something like 
+   options you can override the config file by using something like
    <option>-f-</option>,<option>--no-f</option>, <option>-f=no</option>
    or several other variations.
    </para>

@@ -48,7 +48,7 @@ CachedMD5::CachedMD5(string DirName, string Domain)
       File = string(buf, p1++);
       char *p2 = strchr(p1, ' ');
       assert(p2);
-      
+
       FileData Data;
       Data.MD5 = string(p1, p2++);
       Data.TimeStamp = atol(p2);

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # apt-groupinstall v0.2
-# groupinstall helper backend for for RHL/RHEL/FC systems 
+# groupinstall helper backend for for RHL/RHEL/FC systems
 # by pmatilai@welho.com
 
 import rhpl.comps, sys
@@ -45,7 +45,7 @@ def showgroup(comps, grpname, showall = 0):
 	if not group or not group.packages:
 		print "No such group: %s" % grpname
 		return
-	if not synaptic: 
+	if not synaptic:
 		print "Group:\n    %s" % group.id
 	print "Description:\n    %s" % group.description
 	print "Required groups: "
@@ -54,7 +54,7 @@ def showgroup(comps, grpname, showall = 0):
 	print "Packages: "
 	for pkg in grouppkgs(comps, grpname, recursive=0, showall=showall):
 		print "    %s" % pkg
-		
+
 def usage():
 	print "Usage:\n %s [-t] [-p <path>] [-h] --list-tasks" % sys.argv[0]
 	print " %s [-t] [-p <path>] [-a] --task-desc <group> [--task-desc <group2>...]" % sys.argv[0]
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 	groups = []
 	cmd = None
 	compspath = "/usr/share/comps/i386/comps.xml"
-	
+
 	try:
 		optlist, args = getopt.getopt(sys.argv[1:], 'arhp:t',
 						['task-desc=', 'list-tasks', 'task-packages='])
@@ -121,5 +121,5 @@ if __name__ == "__main__":
 			showgroup(comps, grp, showall)
 	else:
 		usage()
-	
+
 # vim:ts=4:sts=4

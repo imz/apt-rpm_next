@@ -9,9 +9,9 @@
    of a method and some useful functions to make method implementation
    simpler. The methods all derive this and specialize it. The most
    complex implementation is the http method which needs to provide
-   pipelining, it runs the message engine at the same time it is 
+   pipelining, it runs the message engine at the same time it is
    downloading files..
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -47,10 +47,10 @@ pkgAcqMethod::pkgAcqMethod(const char *Ver,unsigned long Flags)
 
    if ((Flags & SingleInstance) == SingleInstance)
       strcat(End,"Single-Instance: true\n");
-   
+
    if ((Flags & Pipeline) == Pipeline)
       strcat(End,"Pipeline: true\n");
-   
+
    if ((Flags & SendConfig) == SendConfig)
       strcat(End,"Send-Config: true\n");
 
@@ -84,7 +84,7 @@ void pkgAcqMethod::Fail(bool Transient)
 {
    string Err = "Undetermined Error";
    if (_error->empty() == false)
-      _error->PopMessage(Err);   
+      _error->PopMessage(Err);
    _error->Discard();
    Fail(Err,Transient);
 }
@@ -97,12 +97,12 @@ void pkgAcqMethod::Fail(string Err,bool Transient)
    // Strip out junk from the error messages
    for (string::iterator I = Err.begin(); I != Err.end(); I++)
    {
-      if (*I == '\r') 
+      if (*I == '\r')
 	 *I = ' ';
-      if (*I == '\n') 
+      if (*I == '\n')
 	 *I = ' ';
    }
-   
+
    char S[1024];
    if (Queue != 0)
    {
@@ -121,13 +121,13 @@ void pkgAcqMethod::Fail(string Err,bool Transient)
       snprintf(S,sizeof(S)-50,"400 URI Failure\nURI: <UNKNOWN>\n"
 	       "Message: %s %s\n",Err.c_str(),
 	       FailExtra.c_str());
-      
-   // Set the transient flag 
+
+   // Set the transient flag
    if (Transient == true)
       strcat(S,"Transient-Failure: true\n\n");
    else
       strcat(S,"\n");
-   
+
    if (write(STDOUT_FILENO,S,strlen(S)) != (signed)strlen(S))
       exit(100);
 }
@@ -165,17 +165,17 @@ void pkgAcqMethod::URIDone(FetchResult &Res, FetchResult *Alt)
 {
    if (Queue == 0)
       abort();
-   
+
    ostringstream s;
 
    s << "201 URI Done\nURI: " << Queue->Uri << "\n";
-   
+
    if (Res.Filename.empty() == false)
       s << "Filename: " << Res.Filename << "\n";
-   
+
    if (Res.Size != 0)
       s << "Size: " << Res.Size << "\n";
-   
+
    if (Res.LastModified != 0)
       s << "Last-Modified: " << TimeRFC1123(Res.LastModified) << "\n";
 
@@ -193,27 +193,27 @@ void pkgAcqMethod::URIDone(FetchResult &Res, FetchResult *Alt)
 
    if (Res.IMSHit == true)
       s << "IMS-Hit: true\n";
-      
+
    if (Alt != 0)
    {
       if (Alt->Filename.empty() == false)
 	 s << "Alt-Filename: " << Alt->Filename << "\n";
-      
+
       if (Alt->Size != 0)
 	 s << "Alt-Size: " << Alt->Size << "\n";
-      
+
       if (Alt->LastModified != 0)
 	 s << "Alt-Last-Modified: " << TimeRFC1123(Alt->LastModified) << "\n";
-      
+
       if (Alt->MD5Sum.empty() == false)
 	 s << "Alt-MD5-Hash: " << Alt->MD5Sum << "\n";
       if (Alt->SHA1Sum.empty() == false)
 	 s << "Alt-SHA1-Hash: " << Alt->SHA1Sum << "\n";
-      
+
       if (Alt->IMSHit == true)
 	 s << "Alt-IMS-Hit: true\n";
    }
-   
+
    s << "\n";
    string S = s.str();
    if (write(STDOUT_FILENO,S.c_str(),S.size()) != (ssize_t)S.size())
@@ -239,27 +239,27 @@ bool pkgAcqMethod::MediaFail(string Required,string Drive)
 
    if (write(STDOUT_FILENO,S,strlen(S)) != (signed)strlen(S))
       exit(100);
-   
+
    vector<string> MyMessages;
-   
+
    /* Here we read messages until we find a 603, each non 603 message is
       appended to the main message list for later processing */
    while (1)
    {
       if (WaitFd(STDIN_FILENO) == false)
 	 return false;
-      
+
       if (ReadMessages(STDIN_FILENO,MyMessages) == false)
 	 return false;
 
       string Message = MyMessages.front();
       MyMessages.erase(MyMessages.begin());
-      
+
       // Fetch the message number
       char *End;
       int Number = strtol(Message.c_str(),&End,10);
       if (End == Message.c_str())
-      {	 
+      {
 	 cerr << "Malformed message!" << endl;
 	 exit(100);
       }
@@ -275,9 +275,9 @@ bool pkgAcqMethod::MediaFail(string Required,string Drive)
 
 	 return !StringToBool(LookupTag(Message,"Fail"),false);
       }
-      
+
       Messages.push_back(Message);
-   }   
+   }
 }
 									/*}}}*/
 // AcqMethod::NeedAuth - Request authentication				/*{{{*/
@@ -292,27 +292,27 @@ bool pkgAcqMethod::NeedAuth(string Description,string &User,string &Pass)
 
    if (write(STDOUT_FILENO,S,strlen(S)) != (signed)strlen(S))
       exit(100);
-   
+
    vector<string> MyMessages;
-   
+
    /* Here we read messages until we find a 604, each non 604 message is
       appended to the main message list for later processing */
    while (1)
    {
       if (WaitFd(STDIN_FILENO) == false)
 	 return false;
-      
+
       if (ReadMessages(STDIN_FILENO,MyMessages) == false)
 	 return false;
 
       string Message = MyMessages.front();
       MyMessages.erase(MyMessages.begin());
-      
+
       // Fetch the message number
       char *End;
       int Number = strtol(Message.c_str(),&End,10);
       if (End == Message.c_str())
-      {	 
+      {
 	 cerr << "Malformed message!" << endl;
 	 exit(100);
       }
@@ -335,31 +335,31 @@ bool pkgAcqMethod::NeedAuth(string Description,string &User,string &Pass)
 	 else
 	    return false;
       }
-      
+
       Messages.push_back(Message);
-   }   
+   }
 }
 									/*}}}*/
 // AcqMethod::Configuration - Handle the configuration message		/*{{{*/
 // ---------------------------------------------------------------------
-/* This parses each configuration entry and puts it into the _config 
+/* This parses each configuration entry and puts it into the _config
    Configuration class. */
 bool pkgAcqMethod::Configuration(string Message)
 {
    ::Configuration &Cnf = *_config;
-   
+
    const char *I = Message.c_str();
    const char *MsgEnd = I + Message.length();
-   
+
    unsigned int Length = strlen("Config-Item");
    for (; I + Length < MsgEnd; I++)
    {
       // Not a config item
       if (I[Length] != ':' || stringcasecmp(I,I+Length,"Config-Item") != 0)
 	 continue;
-      
+
       I += Length + 1;
-      
+
       for (; I < MsgEnd && *I == ' '; I++);
       const char *Equals = I;
       for (; Equals < MsgEnd && *Equals != '='; Equals++);
@@ -367,19 +367,19 @@ bool pkgAcqMethod::Configuration(string Message)
       for (; End < MsgEnd && *End != '\n'; End++);
       if (End == Equals)
 	 return false;
-      
+
       Cnf.Set(DeQuoteString(string(I,Equals-I)),
 	      DeQuoteString(string(Equals+1,End-Equals-1)));
       I = End;
    }
-   
+
    return true;
 }
 									/*}}}*/
 // AcqMethod::Run - Run the message engine				/*{{{*/
 // ---------------------------------------------------------------------
 /* Fetch any messages and execute them. In single mode it returns 1 if
-   there are no more available messages - any other result is a 
+   there are no more available messages - any other result is a
    fatal failure code! */
 int pkgAcqMethod::Run(bool Single)
 {
@@ -394,34 +394,34 @@ int pkgAcqMethod::Run(bool Single)
 	 if (ReadMessages(STDIN_FILENO,Messages) == false)
 	    break;
       }
-            
+
       // Single mode exits if the message queue is empty
       if (Single == true && Messages.empty() == true)
 	 return -1;
-      
+
       string Message = Messages.front();
       Messages.erase(Messages.begin());
-      
+
       // Fetch the message number
       char *End;
       int Number = strtol(Message.c_str(),&End,10);
       if (End == Message.c_str())
-      {	 
+      {
 	 cerr << "Malformed message!" << endl;
 	 return 100;
       }
 
       switch (Number)
-      {	 
+      {
 	 case 601:
 	 if (Configuration(Message) == false)
 	    return 100;
 	 break;
-	 
+
 	 case 600:
 	 {
 	    FetchItem *Tmp = new FetchItem;
-	    
+
 	    Tmp->Uri = LookupTag(Message,"URI");
 	    Tmp->DestFile = LookupTag(Message,"FileName");
 	    if (StrToTime(LookupTag(Message,"Last-Modified"),Tmp->LastModified) == false)
@@ -433,20 +433,20 @@ int pkgAcqMethod::Run(bool Single)
 	    if (StringToBool(LookupTag(Message,"Local-Only-IMS"),false) == true
 	        && (Flags & LocalOnly) == 0)
 	       Tmp->LastModified = 0;
-	    
+
 	    // Append it to the list
 	    FetchItem **I = &Queue;
 	    for (; *I != 0; I = &(*I)->Next);
 	    *I = Tmp;
 	    if (QueueBack == 0)
 	       QueueBack = Tmp;
-	    
+
 	    // Notify that this item is to be fetched.
 	    if (Fetch(Tmp) == false)
 	       Fail();
-	    
-	    break;					     
-	 }   
+
+	    break;
+	 }
 
 	 // CNC:2004-04-27
 	 case 679:
@@ -459,7 +459,7 @@ int pkgAcqMethod::Run(bool Single)
 	    break;
 
 	 }
-      }      
+      }
    }
 
    Exit();
@@ -474,7 +474,7 @@ void pkgAcqMethod::Log(const char *Format,...)
    string CurrentURI = "<UNKNOWN>";
    if (Queue != 0)
       CurrentURI = Queue->Uri;
-   
+
    va_list args;
    va_start(args,Format);
 
@@ -485,7 +485,7 @@ void pkgAcqMethod::Log(const char *Format,...)
 
    vsnprintf(S+Len,sizeof(S)-4-Len,Format,args);
    strcat(S,"\n\n");
-   
+
    if (write(STDOUT_FILENO,S,strlen(S)) != (signed)strlen(S))
       exit(100);
 }
@@ -498,7 +498,7 @@ void pkgAcqMethod::Status(const char *Format,...)
    string CurrentURI = "<UNKNOWN>";
    if (Queue != 0)
       CurrentURI = Queue->Uri;
-   
+
    va_list args;
    va_start(args,Format);
 
@@ -526,7 +526,7 @@ void pkgAcqMethod::Redirect(const string &NewURI)
       CurrentURI = Queue->Uri;
 
    ostringstream s;
-   s << "103 Redirect\nURI: " << CurrentURI << "\nNew-URI: " << NewURI 
+   s << "103 Redirect\nURI: " << CurrentURI << "\nNew-URI: " << NewURI
      << "\n\n";
 
    string S = s.str();
@@ -558,7 +558,7 @@ pkgAcqMethod::FetchResult::FetchResult() : LastModified(0),
 									/*}}}*/
 // AcqMethod::FetchResult::TakeHashes - Load hashes			/*{{{*/
 // ---------------------------------------------------------------------
-/* This hides the number of hashes we are supporting from the caller. 
+/* This hides the number of hashes we are supporting from the caller.
    It just deals with the hash class. */
 void pkgAcqMethod::FetchResult::TakeHashes(Hashes &Hash)
 {

@@ -6,7 +6,7 @@
 
 ]>
 
-<!-- 
+<!--
 (c) 2003 Software in the Public Interest
 Esta traducción ha sido realizada por Rubén Porras Campo <nahoo@inicia.es>
 Está basada en la página de manual original:
@@ -16,12 +16,12 @@ versión 1.5 del CVS de
 
 <refentry lang=es>
  &apt-docinfo;
- 
+
  <refmeta>
    <refentrytitle>apt-cache</>
    <manvolnum>8</>
  </refmeta>
- 
+
  <!-- Man page title -->
  <refnamediv>
     <refname>apt-cache</>
@@ -51,20 +51,20 @@ versión 1.5 del CVS de
          <arg>pkgnames <arg choice="plain"><replaceable>prefijo</replaceable></arg></arg>
          <arg>dotty <arg choice="plain" rep="repeat"><replaceable>paquete</replaceable></arg></arg>
          <arg>policy <arg choice="plain" rep="repeat"><replaceable>paquetes</replaceable></arg></arg>
-      </group>   
+      </group>
    </cmdsynopsis>
  </refsynopsisdiv>
- 
+
  <RefSect1><Title>Descripción</>
    <para>
    <command/apt-cache/ realiza una serie de operaciones sobre la caché de
    paquetes de APT. <command/apt-cache/ no modifica el estado del sistema
-   pero proporciona operaciones de búsqueda en la información de los 
-   paquetes, de las cuales se puede obtener información muy útil. 
+   pero proporciona operaciones de búsqueda en la información de los
+   paquetes, de las cuales se puede obtener información muy útil.
 
    <para>
    A menos que se proporcionen las opciones <option/-h/, o <option/--help/, se
-   debe de proporcionar una de las siguientes órdenes: 
+   debe de proporcionar una de las siguientes órdenes:
 
    <VariableList>
      <VarListEntry><Term>add <replaceable/fichero(s)/</Term>
@@ -72,10 +72,10 @@ versión 1.5 del CVS de
      <literal/add/ añade el nombre del paquete a los ficheros de
      índices de la caché de paquetes. Sólo para depuración.
      </VarListEntry>
-     
+
      <VarListEntry><Term>gencaches</Term>
      <ListItem><Para>
-     <literal/gencaches/ realiza la misma operación que 
+     <literal/gencaches/ realiza la misma operación que
      <command/apt-get check/. Construye las cachés de paquetes fuente y de
      paquetes binarios, usando la lista de recursos en &sources-list;
      junto con la información en <filename>/var/lib/dpkg/status</>.
@@ -88,23 +88,23 @@ versión 1.5 del CVS de
      consideran nombres de paquetes. Por cada paquete se mostrarán las
      versiones disponibles y los paquetes que dependen de él (reverse
      dependencies), así como los paquetes de que depende (forward dependencies),
-     (los cuales deben de ser instalados para instalar el paquete).  
+     (los cuales deben de ser instalados para instalar el paquete).
      Por ejemplo, <command>apt-cache showpkg libreadline2</> mostrará algo
      similar a lo siguiente:
-     
+
 <informalexample><programlisting>
 Package: libreadline2
 Versions: 2.1-12(/var/state/apt/lists/foo_Packages),
-Reverse Depends: 
+Reverse Depends:
   libreadlineg2,libreadline2
   libreadline2-altdev,libreadline2
 Dependencies:
 2.1-12 - libc5 (2 5.4.0-0) ncurses3.0 (0 (null))
 Provides:
-2.1-12 - 
-Reverse Provides: 
+2.1-12 -
+Reverse Provides:
 </programlisting></informalexample>
-			    
+
      <para>
      Esta información nos indica que la versión 2.1-12 de libreadline2,
      depende de libc5 y ncurses3.0, ambos programas deben instalarse para
@@ -120,13 +120,13 @@ Reverse Provides:
      <ListItem><Para>
      <literal/stats/ muestra algunas estadísticas acerca de la caché.
      No necesita ningún argumento adicional. Las estadísticas que
-     muestra son: 
+     muestra son:
      <itemizedlist>
        <listitem><para>
        <literal/Total package names/ es el número de paquetes encontrados
-       en la caché. 
+       en la caché.
        </listitem>
-       
+
        <listitem><para>
        <literal/Normal packages/ es el número de paquetes normales. Estos
        paquetes tienen una correspondencia unívoca entre sus nombres y
@@ -144,12 +144,12 @@ Reverse Provides:
        "mail-transport-agent", pero no hay ningún paquete que se llame
        "mail-transport-agent".
        </listitem>
-   
+
        <listitem><para>
        <literal/Single virtual packages/ es el número de paquetes que
        sólo tiene un paquete real que los proporcione. Por ejemplo, en
        un sistema Debian GNU/Linux, "X11-text-viewer" es un paquete
-       virtual, pero sólo un paquete, xless, proporciona "X11-text-viewer". 
+       virtual, pero sólo un paquete, xless, proporciona "X11-text-viewer".
        </listitem>
 
        <listitem><para>
@@ -157,16 +157,16 @@ Reverse Provides:
        bien proporcionan un determinado paquete virtual o tienen el
        mismo nombre como paquete virtual y como paquete real, en un
        sistema Debian GNU/Linux, "debconf" es a la vez un paquete real,
-       y es proporcionado por el paquete debconf-tiny. 
+       y es proporcionado por el paquete debconf-tiny.
        </listitem>
-   
+
        <listitem><para>
        <literal/Missing/ es el número de nombres de paquetes a los que se hace
        referencia como dependencia pero que no son proporcionado por ningún
        paquete. Estos paquetes probablemente signifiquen que no se tiene
        acceso al total de la distribución, o bien que algún paquete (real o
        virtual) ha sido eliminado de la distribución. Normalmente se hace
-       referencia a ellos desde los campos de conflictos de la descripción 
+       referencia a ellos desde los campos de conflictos de la descripción
        de los paquetes.
        </listitem>
 
@@ -176,7 +176,7 @@ Reverse Provides:
        número total de paquetes. Si más de una distribución ("estable"
        e "inestable", por ejemplo), se encuentra en la caché al mismo
        tiempo, este valor puede ser considerablemente mayor que el
-       número total de paquetes. 
+       número total de paquetes.
        </listitem>
 
        <listitem><para>
@@ -185,14 +185,14 @@ Reverse Provides:
        </listitem>
      </itemizedlist>
      </VarListEntry>
-     
+
      <VarListEntry><Term>showsrc <replaceable/paquete(s)/</Term>
      <ListItem><Para>
      <literal/showsrc/ muestra todos los campos de los paquetes fuente que
       coinciden con los nombres de los paquetes suministrados. Se muestran
-      todas las versiones, así como  los paquetes que son binarios. 
+      todas las versiones, así como  los paquetes que son binarios.
      </VarListEntry>
-     
+
      <VarListEntry><Term>dump</Term>
      <ListItem><Para>
      <literal/dump/ muestra una pequeña lista de todos los paquetes en la
@@ -203,7 +203,7 @@ Reverse Provides:
      <ListItem><Para>
      <literal/dumpavail/ envía a la salida estándar una lista de los paquetes
        disponibles. Esta lista es apropiada para su uso con &dpkg; y es
-       usada por el método &dselect;. 
+       usada por el método &dselect;.
      </VarListEntry>
 
      <VarListEntry><Term>unmet</Term>
@@ -229,7 +229,7 @@ Reverse Provides:
        concreto, pero si se proporciona el argumento <option/--names-only/
        entonces sólo se busca en el nombre de los paquetes.
      <para>
-     
+
        Se pueden especificar argumentos separados para buscar una cadena de
        caracteres que los contenga todos al mismo tiempo.
      </VarListEntry>
@@ -254,11 +254,11 @@ Reverse Provides:
        intérprete de órdenes y se genera de forma extremadamente
        rápida. Su mejor uso es con la opción <option/--generate/.
      </VarListEntry>
-     
+
      <VarListEntry><Term>dotty <replaceable/paquete(s)/</Term>
      <ListItem><Para>
      <literal/dotty/ toma una lista de paquetes de la línea de ordenes
-       y genera una salida apropiada para dotty, del paquete 
+       y genera una salida apropiada para dotty, del paquete
      <ulink url="http://www.research.att.com/sw/tools/graphviz/">GraphViz</>.
        El resultado será una serie de nodos y uniones representando las
        relaciones entre paquetes. Por omisión los paquetes dados
@@ -271,11 +271,11 @@ Reverse Provides:
        cajas, pure provides son triángulos, mixed provides son
        diamantes, los paquetes no encontrados son hexágonos. Las cajas naranjas
        significan recursion was stopped [leaf packages], líneas azules
-       son predependencias, líneas verdes son conflictos. 
+       son predependencias, líneas verdes son conflictos.
 
      <para>
      Tenga cuidado, dotty no puede dibujar una gran cantidad de paquetes.
-     
+
      <VarListEntry><Term>policy <replaceable/[ paquete(s) ]/</Term>
      <ListItem><Para>
      <literal/policy/ está pensada para ayudar a depurar
@@ -286,10 +286,10 @@ Reverse Provides:
      </VarListEntry>
    </VariableList>
  </RefSect1>
- 
+
  <RefSect1><Title>Opciones</>
    &apt-cmdblurb;
-   
+
    <VariableList>
      <VarListEntry><term><option/-p/</><term><option/--pkg-cache/</>
      <ListItem><Para>
@@ -327,7 +327,7 @@ Reverse Provides:
      <VarListEntry><term><option/-f/</><term><option/--full/</>
      <ListItem><Para>
      Muestra todos los campos de información cuando se busque. Opción de
-      configuración: <literal/APT::Cache::ShowFull/. 
+      configuración: <literal/APT::Cache::ShowFull/.
      </VarListEntry>
 
      <VarListEntry><term><option/-a/</><term><option/--all-versions/</>
@@ -350,7 +350,7 @@ Reverse Provides:
 
      <VarListEntry><term><option/--names-only/</><term><option/-n/</>
      <ListItem><Para>
-     Sólo busca en los nombres de paquetes, no en las descripciones largas. 
+     Sólo busca en los nombres de paquetes, no en las descripciones largas.
       Opción de configuración: <literal/APT::Cache::NamesOnly/.
      </VarListEntry>
 
@@ -369,7 +369,7 @@ Reverse Provides:
      </VarListEntry>
 
      &apt-commonoptions;
-     
+
    </VariableList>
  </RefSect1>
 
@@ -380,20 +380,20 @@ Reverse Provides:
      Fichero que contiene los sitios de donde se obtienen los paquetes.
       Opción de configuración: <literal/Dir::Etc::SourceList/.
      </VarListEntry>
-     
+
      <VarListEntry><term><filename>&statedir;/lists/</></term>
      <ListItem><Para>
      Directorio donde se almacena la información del estado de cada paquete
      fuente por cada sitio especificado &sources-list;
      Opción de configuración: <literal/Dir::State::Lists/.
      </VarListEntry>
-  
+
      <VarListEntry><term><filename>&statedir;/lists/partial/</></term>
      <ListItem><Para>
      Directorio de almacenamiento para la información de estado en
       tránsito. Opción de Configuración: <literal/Dir::State::Lists/
-      (lo que implica que no estarán completos). 
-     </VarListEntry>     
+      (lo que implica que no estarán completos).
+     </VarListEntry>
    </variablelist>
  </RefSect1>
 

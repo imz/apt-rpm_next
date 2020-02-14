@@ -4,7 +4,7 @@
 /* ######################################################################
 
    CRC16 - Compute a 16bit crc very quickly
-   
+
    ##################################################################### */
 									/*}}}*/
 #ifndef APTPKG_CRC16_H
@@ -12,7 +12,7 @@
 
 #ifdef __GNUG__
 #pragma interface "apt-pkg/crc-16.h"
-#endif 
+#endif
 
 #define INIT_FCS  0xffff
 unsigned short AddCRC16(unsigned short fcs, void const *buf,

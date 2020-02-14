@@ -139,5 +139,5 @@ void * rpmShowProgress(const Header h,
     }
 
     return rc;
-}	
+}
 

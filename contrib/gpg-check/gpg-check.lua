@@ -25,7 +25,7 @@ function printhash(amount, total)
 	io.stdout.write(io.stdout, string.format("%%%% %f\n", percent))
     end
 end
-	
+
 function showerrors(i, msg)
     apterror(msg)
 end
@@ -57,7 +57,7 @@ for i, file in ipairs(files_install) do
     end
     if skipthis == false then
 	inp = io.popen("LANG=C /bin/rpm --checksig  "..file.." 2>&1")
- 
+
 	for line in inp.lines(inp) do
 	    if string.find(line, "gpg") then
 		break

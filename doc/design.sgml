@@ -41,7 +41,7 @@
     </titlepag>
     <chapt id="introduction">
       <heading>Introduction</heading>
-      <p>APT is supposed to be a replacement for dselect, and not a 
+      <p>APT is supposed to be a replacement for dselect, and not a
 	replacement for dpkg. However, since addition functionality
 	has been required for APT, and given the fact that this is
 	very closely related to dpkg, it is not unreasonable to expect
@@ -195,7 +195,7 @@
 	      in the midst of installation, which may cause havoc on
 	      the machine)</p>
 	  </item>
-	</enumlist> 
+	</enumlist>
       </p>
     </chapt>
     <chapt>
@@ -285,7 +285,7 @@
       <p><taglist>
 	  <tag>The user interface module</tag>
 	  <item>
-	    <p> Look at Behan Webster's documentation.</p> 
+	    <p> Look at Behan Webster's documentation.</p>
 	  </item>
 	  <tag>Widget set</tag>
 	  <item>
@@ -295,7 +295,7 @@
 	  </item>
 	  <tag>pdate Module</tag>
 	  <item>
-	    <p>	    
+	    <p>
 	      Distinct versions of the same package are recorded
 	      separately, but if multiple Packages files contain the
 	      same version of a package, then only the first one is
@@ -323,7 +323,7 @@
 	  </item>
 	  <tag>Status file parser/generator</tag>
 	  <item>
-	    <p> 
+	    <p>
 	      The status file records the current state of the system,
 	      listing the packages installed, etc. The status file is
 	      also one method of communicating with dpkg, since it is
@@ -364,7 +364,7 @@
     </chapt>
     <chapt>
       <heading>Data flow and conversions analysis.</heading>
-      <p> 
+      <p>
 	<example>
                                                           ____________
                                                        __\|ftp modules|
@@ -405,7 +405,7 @@
 	store, and finally writing it out as the status file and
 	possibly issuing directives to dpkg.</p>
 
-      <p>The other focal point for APT is the user interface.</p> 
+      <p>The other focal point for APT is the user interface.</p>
     </chapt>
   </book>
 </debiandoc>

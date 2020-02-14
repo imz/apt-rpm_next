@@ -1,4 +1,4 @@
-/* This is an ISO C 9X header file. We omit this copy to the include 
+/* This is an ISO C 9X header file. We omit this copy to the include
    directory if the local platform does not have inttypes.h, it contains
    [u]int[8,16,32]_t fixed width types */
 

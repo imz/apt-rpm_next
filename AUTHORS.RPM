@@ -3,7 +3,7 @@
 Gustavo Niemeyer <niemeyer@conectiva.com>
 Alfredo K. Kojima <kojima@conectiva.com.br>
 
-0.3 RPM port brought to you by 
+0.3 RPM port brought to you by
 Alfredo K. Kojima <kojima@conectiva.com.br>
 
 with consulting help from:
@@ -12,7 +12,7 @@ Security: Andreas Hasenack <andreas@conectiva.com.br>
 Misc.: Claudio Matsuoka <claudio@conectiva.com.br>
 
 added user specified public keyring option for gpg, fixed a bug
-in the file method with authentication 
+in the file method with authentication
 	Alexander Bokovoy <ab@avilink.net>
 
 solaris portability fixes

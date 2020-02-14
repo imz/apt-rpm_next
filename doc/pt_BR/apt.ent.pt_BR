@@ -77,7 +77,7 @@
     <RefEntryTitle><command/dselect/</RefEntryTitle>
     <ManVolNum/8/
   </CiteRefEntry>">
-    
+
 <!-- Boiler plate docinfo section -->
 <!ENTITY apt-docinfo "
  <docinfo>
@@ -86,7 +86,7 @@
    <copyright><year>1998-2001</> <holder>Jason Gunthorpe</></>
    <date>12 Março 2001</>
  </docinfo>
-"> 
+">
 
 <!-- Boiler plate Bug reporting section -->
 <!ENTITY manbugs "
@@ -123,7 +123,7 @@
      <ListItem><Para>
      Exibe um pequeno resumo de uso.
      </VarListEntry>
-     
+
      <VarListEntry><term><option/-v/</><term><option/--version/</>
      <ListItem><Para>
      Exibe a versão do programa.
@@ -134,9 +134,9 @@
      Arquivo de Configuração; Especifica um arquivo de configuração
      a ser usado. O programa irá ler o arquivo de configuração padrão
      e então este arquivo de configuração. Consulte &apt-conf; para
-     informação de sintaxe.     
+     informação de sintaxe.
      </VarListEntry>
-     
+
      <VarListEntry><term><option/-o/</><term><option/--option/</>
      <ListItem><Para>
      Defie uma Opção de Configuração; Esta opção irá definir uma opção

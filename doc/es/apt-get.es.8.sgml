@@ -6,7 +6,7 @@
 
 ]>
 
-<!-- 
+<!--
 (c) 2003 Software in the Public Interest
 Esta traducción ha sido realizada por Rubén Porras Campo <nahoo@inicia.es>
 Está basada en la página de manual original:
@@ -16,12 +16,12 @@ versión 1.6 del CVS de
 
 <refentry lang=es>
  &apt-docinfo;
- 
+
  <refmeta>
    <refentrytitle>apt-get</>
    <manvolnum>8</>
  </refmeta>
- 
+
  <!-- Man page title -->
  <refnamediv>
     <refname>apt-get</>
@@ -47,10 +47,10 @@ versión 1.6 del CVS de
          <arg>check</>
          <arg>clean</>
          <arg>autoclean</>
-      </group>   
+      </group>
    </cmdsynopsis>
  </refsynopsisdiv>
- 
+
  <RefSect1><Title>Descripción</>
    <para>
    <command/apt-get/ es la herramienta en línea de órdenes usada para
@@ -60,7 +60,7 @@ versión 1.6 del CVS de
    <para>
    Se debe de proporcionar una de las siguientes órdenes a menos que se
    den las opciones <option/-h/, o <option/--help/.
-   
+
    <VariableList>
      <VarListEntry><Term>update</Term>
      <ListItem><Para>
@@ -76,11 +76,11 @@ versión 1.6 del CVS de
        debe tener en cuenta que el indicador de progreso será
        incorrecto, ya que el tamaño de los próximos ficheros con
        información sobre paquetes es desconocido hasta el momento de
-       su descarga. 
+       su descarga.
      </VarListEntry>
-     
+
      <VarListEntry><Term>upgrade</Term>
-     <ListItem><Para>   
+     <ListItem><Para>
      <literal/upgrade/ upgrade se usa para instalar la versión más
        nueva de todos los paquetes instalados en el sistema
        provenientes de alguna de las fuentes listadas en
@@ -96,17 +96,17 @@ versión 1.6 del CVS de
      </VarListEntry>
 
      <VarListEntry><Term>dselect-upgrade</Term>
-     <ListItem><Para>   
+     <ListItem><Para>
      se usa junto con el tradicional administrador de paquetes de Debian
      GNU/Linux, &dselect; . <literal/dselect-upgrade/ recoge los
      cambios hechos al campo de <literal/estado/ de los paquetes
      disponibles por &dselect; , y realiza las acciones necesarias
      para que los cambios se lleven a cabo (por ejemplo, borrar
-     paquetes antiguos e instalar las nuevas versiones). 
+     paquetes antiguos e instalar las nuevas versiones).
      </VarListEntry>
 
      <VarListEntry><Term>dist-upgrade</Term>
-     <ListItem><Para>   
+     <ListItem><Para>
      <literal/dist-upgrade/,  además de realizar las acciones de
      <literal/upgrade/, maneja inteligentemente los cambios de
        dependencias debidos a nuevas versiones de paquetes,
@@ -116,18 +116,18 @@ versión 1.6 del CVS de
        <filename>/etc/apt/sources.list</> contiene la lista de sitios
        de los cuales se descargan los ficheros.
        También puede consultar &apt-preferences; si quiere modificar este
-       comportamiento para paquetes individuales. 
+       comportamiento para paquetes individuales.
      </VarListEntry>
 
      <VarListEntry><Term>install</Term>
-     <ListItem><Para>   
+     <ListItem><Para>
      <literal/install/ instala los paquetes que siguen a la palabra
        install. Cada nombre de paquete no es el nombre completo del
        paquete junto con la versión de Debian, sino sólo el nombre del
        paquete (por ejemplo, en un sistema Debian GNU/Linux, el
        argumento sería libc6, no <literal/libc6_1.9.6-2.deb/). Se obtendrán e
        instalarán todos los paquetes especificados para la
-       instalación, así como los requeridos por estos. El fichero 
+       instalación, así como los requeridos por estos. El fichero
        <filename>/etc/apt/sources.list</> se usa para localizar los
        paquetes. Si al nombre del paquete se le antepone un guión(sin
        ningún espacio), el paquete será desinstalado en vez de
@@ -142,7 +142,7 @@ versión 1.6 del CVS de
      distribución especifica poniendo a continuación del nombre del
      paquete una barra ('/') seguido de la versión de la
      distribución o su nombre en el archivo de Debian (stable,
-     testing, unstable). 
+     testing, unstable).
      <para>
      Cualquiera de estos dos métodos de selección puede instalar una
      versión anterior de los paquetes y debe de ser usada con cuidado.
@@ -155,14 +155,14 @@ versión 1.6 del CVS de
      expresión regular de acuerdo con el estándar POSIX, y es aplicado a
      todos los nombres de paquetes de la base de datos. Cualquier
      coincidencia se instala (o desinstala). Tenga en cuenta que la
-     comparación se hace en subcadenas, de manera que 'lo.*' es válido 
+     comparación se hace en subcadenas, de manera que 'lo.*' es válido
      para 'how-lo' y para 'lowest'. Si este no es el comportamiento deseado
      se debe anclar la expresión regular con un '^' o un '$', o bien crear una
-     expresión regular más específica. 
+     expresión regular más específica.
      </VarListEntry>
 
      <VarListEntry><Term>remove</Term>
-     <ListItem><Para>   
+     <ListItem><Para>
      <literal/remove/ se comporta del mismo modo que <literal/install/
        con la diferencia de que desinstala paquetes en vez de
        instalarlos. Si un signo más precede el nombre del paquete (sin
@@ -192,7 +192,7 @@ versión 1.6 del CVS de
      se usa con los paquetes binarios. Esto posibilita seleccionar
      exactamente el nombre y versión del paquete fuente, activando
      implícitamente la opción <literal/APT::Get::Only-Source/.
-     
+
      <para>
      Dese cuenta que los paquetes fuentes no se tratan como los paquetes
      binarios, se descargan en el directorio actual, es parecido a
@@ -200,7 +200,7 @@ versión 1.6 del CVS de
      </VarListEntry>
 
      <VarListEntry><Term>build-dep</Term>
-     <ListItem><Para>   
+     <ListItem><Para>
      <literal/build-dep/ hace que apt-get instale/desinstale paquetes
        en un intento de satisfacer las dependencias de compilación de
        un paquete fuente. Por el momento si hay varios paquetes que
@@ -208,7 +208,7 @@ versión 1.6 del CVS de
      </VarListEntry>
 
      <VarListEntry><Term>check</Term>
-     <ListItem><Para>   
+     <ListItem><Para>
      <literal/check/ es una herramienta de diagnóstico. Actualiza la
        caché de paquetes (/var/cache/apt/pkgcache.bin), vuelve a crear
        un nuevo árbol de dependencias y busca dependencias imposibles
@@ -216,20 +216,20 @@ versión 1.6 del CVS de
      </VarListEntry>
 
      <VarListEntry><Term>clean</Term>
-     <ListItem><Para>   
+     <ListItem><Para>
      <literal/clean/ clean borra totalmente el repositorio local que
        contiene los ficheros .deb descargados. Borra todo excepto el
        fichero de bloqueo de los directorios
-     <filename>&cachedir;/archives/</> y 
+     <filename>&cachedir;/archives/</> y
      <filename>&cachedir;/archives/partial/</>. Cuando APT se usa como
        un método de &dselect;, <literal/clean/ se ejecuta
-       automáticamente. Si usted no usa dselect es probable que desee 
+       automáticamente. Si usted no usa dselect es probable que desee
        ejecutar <literal/apt-get clean/ de vez en cuando para liberar
        algo de espacio en disco.
      </VarListEntry>
 
      <VarListEntry><Term>autoclean</Term>
-     <ListItem><Para>   
+     <ListItem><Para>
      Al igual que <literal/clean/, <literal/autoclean/ borra el
        repositorio local de paquetes descargados. La diferencia reside
        en que sólo borrará aquellos paquetes que ya no pueden ser
@@ -241,7 +241,7 @@ versión 1.6 del CVS de
      </VarListEntry>
    </VariableList>
  </RefSect1>
- 
+
  <RefSect1><Title>Opciones</>
    &apt-cmdblurb;
 
@@ -355,7 +355,7 @@ versión 1.6 del CVS de
 
      <VarListEntry><term><option/--ignore-hold/</>
      <ListItem><Para>
-     No respetar los paquetes en hold. Esto puede ser interesante junto con 
+     No respetar los paquetes en hold. Esto puede ser interesante junto con
      <literal/dist-upgrade/ para no tener en cuenta un gran número de
       paquetes en hold. Opción de Configuración: <literal/APT::Ignore-Hold/.
      </VarListEntry>
@@ -389,7 +389,7 @@ versión 1.6 del CVS de
       <literal/update/. Cuando se usa con la orden <literal/update/,
       no se incluyen ni la suma de control MD5 ni el tamaño, y es
       tarea del usuario descomprimir todos los fichero
-      comprimidos. Opción de Configuración: <literal/APT::Get::Print-URIs/. 
+      comprimidos. Opción de Configuración: <literal/APT::Get::Print-URIs/.
      </VarListEntry>
 
      <VarListEntry><term><option/--purge/</>
@@ -436,13 +436,13 @@ versión 1.6 del CVS de
      Solo realizar acciones consideradas triviales. Esta opción está
      relacionada con <option/--assume-yes/, donde <option/--assume-yes/
      responderá afirmativamente a cualquier pregunta,
-     <option/--trivial-only/ responderá negativamente. 
+     <option/--trivial-only/ responderá negativamente.
      Opción de configuración: <literal/APT::Get::Trivial-Only/.
      </VarListEntry>
 
      <VarListEntry><term><option/--no-remove/</>
      <ListItem><Para>
-     Si algún paquete va a ser desinstalado apt-get termina inmediatamente. 
+     Si algún paquete va a ser desinstalado apt-get termina inmediatamente.
      Opción de Configuración: <literal/APT::Get::Remove/
      </VarListEntry>
 
@@ -459,19 +459,19 @@ versión 1.6 del CVS de
 
      <VarListEntry><term><option/--diff-only/</><term><option/--tar-only/</>
      <ListItem><Para>
-     Descargar solo el fichero diff o tar del archivo fuente. 
-     Opción de Configuración: <literal/APT::Get::Diff-Only/ and 
+     Descargar solo el fichero diff o tar del archivo fuente.
+     Opción de Configuración: <literal/APT::Get::Diff-Only/ and
      <literal/APT::Get::Tar-Only/
      </VarListEntry>
-     
+
      <VarListEntry><term><option/--arch-only/</>
      <ListItem><Para>
      Procesar sólo las dependencias de construcción dependentes de la
-      arquitectura. Opción de configuración: <literal/APT::Get::Arch-Only/ 
+      arquitectura. Opción de configuración: <literal/APT::Get::Arch-Only/
      </VarListEntry>
-     
+
      &apt-commonoptions;
-     
+
    </VariableList>
  </RefSect1>
 
@@ -482,19 +482,19 @@ versión 1.6 del CVS de
      Fichero que contiene los sitios de donde se obtienen los paquetes.
      Opción de Configuración: <literal/Dir::Etc::SourceList/.
      </VarListEntry>
-     
+
      <VarListEntry><term><filename>/etc/apt/apt.conf</></term>
      <ListItem><Para>
      Fichero de configuración de APT.
      Opción de Configuración: <literal/Dir::Etc::Main/.
      </VarListEntry>
-     
+
      <VarListEntry><term><filename>/etc/apt/apt.conf.d/</></term>
      <ListItem><Para>
-     Directorio con ficheros de configuración de programas relacionados con 
+     Directorio con ficheros de configuración de programas relacionados con
      APT configuration. Opción de Configuración: <literal/Dir::Etc::Parts/.
      </VarListEntry>
-     
+
      <VarListEntry><term><filename>/etc/apt/preferences</></term>
      <ListItem><Para>
      Fichero de configuración que contiene preferencias sobre versiones de
@@ -502,33 +502,33 @@ versión 1.6 del CVS de
      de un sitio diferente, o de una versión de la distribución diferente.
      Opción de Configuración: <literal/Dir::Etc::Preferences/.
      </VarListEntry>
-     
+
      <VarListEntry><term><filename>&cachedir;/archives/</></term>
      <ListItem><Para>
      Directorio donde se guardan los paquetes obtenidos.
      Opción de Configuración: <literal/Dir::Cache::Archives/.
      </VarListEntry>
-     
+
      <VarListEntry><term><filename>&cachedir;/archives/partial/</></term>
      <ListItem><Para>
      Directorio donde se guardan los ficheros en tránsito.
      Opción de Configuración: <literal/Dir::Cache::Archives/ (lo que
      implica que no estarán completos).
      </VarListEntry>
-     
+
      <VarListEntry><term><filename>&statedir;/lists/</></term>
      <ListItem><Para>
      Directorio donde se almacena la información del estado de cada paquete
      fuente por cada sitio especificado en &sources-list;
      Opción de Configuración: <literal/Dir::State::Lists/.
      </VarListEntry>
-  
+
      <VarListEntry><term><filename>&statedir;/lists/partial/</></term>
      <ListItem><Para>
      Directorio de almacenamiento para la información de estado en tránsito.
      Opción de Configuración: <literal/Dir::State::Lists/ (lo que
      implica que no estarán completos).
-     </VarListEntry>     
+     </VarListEntry>
    </variablelist>
  </RefSect1>
 
@@ -555,5 +555,5 @@ versión 1.6 del CVS de
       &lt;debian-l10n-spanish@lists.debian.org&gt;
     </para>
   </refsect1>
- 
+
 </refentry>

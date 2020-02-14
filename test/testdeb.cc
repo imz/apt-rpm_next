@@ -13,21 +13,21 @@ bool Test(const char *File)
 {
    FileFd Fd(File,FileFd::ReadOnly);
    debDebFile Deb(Fd);
-   
+
    if (_error->PendingError() == true)
       return false;
-   
-   // Get the archive member and positition the file 
+
+   // Get the archive member and positition the file
    const ARArchive::Member *Member = Deb.GotoMember("data.tar.gz");
    if (Member == 0)
       return false;
-      
+
    // Extract it.
    ExtractTar Tar(Deb.GetFile(),Member->Size);
    NullStream Dir;
    if (Tar.Go(Dir) == false)
-      return false;   
-   
+      return false;
+
    return true;
 }
 

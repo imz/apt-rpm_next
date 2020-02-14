@@ -2,18 +2,18 @@
 // Description								/*{{{*/
 // $Id: pkgcachegen.h,v 1.3 2002/07/25 18:07:18 niemeyer Exp $
 /* ######################################################################
-   
+
    Package Cache Generator - Generator for the cache structure.
-   
-   This builds the cache structure from the abstract package list parser. 
+
+   This builds the cache structure from the abstract package list parser.
    Each archive source has it's own list parser that is instantiated by
-   the caller to provide data for the generator. 
-   
+   the caller to provide data for the generator.
+
    Parts of the cache are created by this generator class while other
    parts are created by the list parser. The list parser is responsible
    for creating version, depends and provides structures, and some of
    their contents
-   
+
    ##################################################################### */
 									/*}}}*/
 #ifndef PKGLIB_PKGCACHEGEN_H
@@ -21,7 +21,7 @@
 
 #ifdef __GNUG__
 #pragma interface "apt-pkg/pkgcachegen.h"
-#endif 
+#endif
 
 #include <apt-pkg/pkgcache.h>
 
@@ -33,26 +33,26 @@ class pkgIndexFile;
 class pkgCacheGenerator
 {
    private:
-   
+
    pkgCache::StringItem *UniqHash[26];
-   
+
    public:
-   
+
    class ListParser;
    friend class ListParser;
-   
+
    protected:
-   
+
    DynamicMMap &Map;
    pkgCache Cache;
    OpProgress *Progress;
-   
+
    string PkgFileName;
    pkgCache::PackageFile *CurrentFile;
 
    // Flag file dependencies
    bool FoundFileDeps;
-   
+
    bool NewFileVer(pkgCache::VerIterator &Ver,ListParser &List);
    unsigned long NewVersion(pkgCache::VerIterator &Ver,string VerStr,unsigned long Next);
 
@@ -69,7 +69,7 @@ class pkgCacheGenerator
 		   unsigned long Flags = 0);
    bool MergeList(ListParser &List,pkgCache::VerIterator *Ver = 0);
    inline pkgCache &GetCache() {return Cache;};
-   inline pkgCache::PkgFileIterator GetCurFile() 
+   inline pkgCache::PkgFileIterator GetCurFile()
          {return pkgCache::PkgFileIterator(Cache,CurrentFile);};
 
    bool HasFileDeps() {return FoundFileDeps;};
@@ -77,7 +77,7 @@ class pkgCacheGenerator
 
    // CNC:2003-03-18
    inline void ResetFileDeps() {FoundFileDeps = false;};
-      
+
    pkgCacheGenerator(DynamicMMap *Map,OpProgress *Progress);
    ~pkgCacheGenerator();
 };
@@ -91,7 +91,7 @@ class pkgCacheGenerator::ListParser
 
    // Flag file dependencies
    bool FoundFileDeps;
-      
+
    protected:
 
    // CNC:2003-02-27 - We need Owner in rpmListParser.
@@ -106,9 +106,9 @@ class pkgCacheGenerator::ListParser
 		   string Version,unsigned int Op,
 		   unsigned int Type);
    bool NewProvides(pkgCache::VerIterator Ver,string Package,string Version);
-   
+
    public:
-   
+
    // These all operate against the current section
    virtual string Package() = 0;
    virtual string Version() = 0;
@@ -132,9 +132,9 @@ class pkgCacheGenerator::ListParser
    // 		       even if with a "better" architecture or different
    // 		       dependencies.
    virtual bool IsDatabase() {return false;};
-   
+
    virtual bool Step() = 0;
-   
+
    inline bool HasFileDeps() {return FoundFileDeps;};
    virtual bool CollectFileProvides(pkgCache &Cache,
 				    pkgCache::VerIterator Ver) {return true;};

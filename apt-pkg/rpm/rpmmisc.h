@@ -10,7 +10,7 @@ using namespace __gnu_cxx;
 struct hash_string
 {
    size_t operator()(string str) const {
-      unsigned long h = 0; 
+      unsigned long h = 0;
       const char *s = str.c_str();
       for (; *s; ++s)
 	 h = 5*h + *s;

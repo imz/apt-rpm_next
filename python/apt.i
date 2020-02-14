@@ -77,7 +77,7 @@ typedef pkgRecords::Parser Parser;
 
 /* One-shot initialization function. */
 %inline %{
-inline bool pkgInit() 
+inline bool pkgInit()
 {
    return pkgInitConfig(*_config) && pkgInitSystem(*_config,_system);
 }
@@ -290,7 +290,7 @@ class ROpPyProgress : public OpProgress {
 			Py_XDECREF(Ret);
 		}
 	};
-	
+
 	ROpPyProgress(PyObject *PyObj) : PyObj(PyObj) {Py_INCREF(PyObj);};
 	~ROpPyProgress() {Py_DECREF(PyObj);};
 };
@@ -313,7 +313,7 @@ class ROpPyProgress : public OpProgress {
 	public:
 	float Percent;
 	bool MajorChange;
-	bool CheckChange(float Interval=0.7);		    
+	bool CheckChange(float Interval=0.7);
 	ROpPyProgress(PyObject *PyObj);
 };
 
@@ -366,7 +366,7 @@ class pkgRPyAcquireStatus : public pkgAcquireStatus
 	pkgAcquireStatus::ElapsedTime;
 	pkgAcquireStatus::TotalItems;
 	pkgAcquireStatus::CurrentItems;
-   
+
    	/* Call only Python method, if existent, or parent method. */
 	void Fetched(unsigned long Size,unsigned long ResumePoint)
 	{
@@ -400,7 +400,7 @@ class pkgRPyAcquireStatus : public pkgAcquireStatus
 			PyErr_Clear();
 		}
 	};
-   
+
 	void IMSHit(pkgAcquire::ItemDesc &Itm)
 		{ ItemDescMethod("IMSHit", Itm); };
 	void Fetch(pkgAcquire::ItemDesc &Itm)
@@ -458,7 +458,7 @@ class pkgRPyAcquireStatus : public pkgAcquireStatus
 			PyErr_Clear();
 		}
 	};
-   
+
 	pkgRPyAcquireStatus(PyObject *PyObj) : PyObj(PyObj)
 		{ Py_INCREF(PyObj); };
 	~pkgRPyAcquireStatus()

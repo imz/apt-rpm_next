@@ -1,4 +1,4 @@
-/* 
+/*
 	Mode Muncher -- modemuncher.c
 	961110 Claudio Terra
 
@@ -7,7 +7,7 @@
 	:to chew with a crunching sound: eat with relish
 	:to chew food with a crunching sound: eat food with relish
 	--munch-er n
-		
+
 	The NeXT Digital Edition of Webster's Ninth New Collegiate Dictionary
 	and Webster's Collegiate Thesaurus
 */
@@ -27,11 +27,11 @@ static modeLookup modesel[] =
 	{'r',					S_IRUSR},
 	{'w',					S_IWUSR},
 	{'x',					S_IXUSR},
-	
+
 	{'r',					S_IRGRP},
 	{'w',					S_IWGRP},
 	{'x',					S_IXGRP},
-	
+
 	{'r',					S_IROTH},
 	{'w',					S_IWOTH},
 	{'x',					S_IXOTH},
@@ -44,7 +44,7 @@ static int rwxrwxrwx(mode_t *mode, const char *p)
 {
 	int count;
 	mode_t tmp_mode = *mode;
-	
+
 	tmp_mode &= ~(S_ISUID | S_ISGID); /* turn off suid and sgid flags */
 	for (count=0; count<9; count ++)
 	{
@@ -55,7 +55,7 @@ static int rwxrwxrwx(mode_t *mode, const char *p)
 			case 2: /* turn on suid flag */
 			tmp_mode |= S_ISUID | S_IXUSR;
 			break;
-			
+
 			case 5: /* turn on sgid flag */
 			tmp_mode |= S_ISGID | S_IXGRP;
 			break;
@@ -75,18 +75,18 @@ static void modechopper(mode_t mode, char *p)
 	/* requires char p[10] */
 	int count;
 	char *pp;
-	
+
 	pp=p;
-	
+
 	for (count=0; count<9; count ++)
 	{
 		if (mode & modesel[count].bits) *p = modesel[count].rwx;
 		else *p='-';
-		
+
 		p++;
 	}
 	*p=0; /* to finish the string */
-	
+
 	/* dealing with suid and sgid flags */
 	if (mode & S_ISUID) pp[2] = (mode & S_IXUSR) ? 's' : 'S';
 	if (mode & S_ISGID) pp[5] = (mode & S_IXGRP) ? 's' : 'S';
@@ -113,13 +113,13 @@ printf("modemuncher: got base mode = %s\n", tmp);
 		/* step 0 -- clear temporary variables */
 		affected_bits=0;
 		ch_mode=0;
-		
+
 		/* step 1 -- who's affected? */
 
 #ifdef DEBUG
 printf("modemuncher step 1\n");
 #endif
-		
+
 		/* mode string given in rwxrwxrwx format */
 		if (*p== 'r' || *p == '-') return rwxrwxrwx(mode, p);
 
@@ -129,10 +129,10 @@ printf("modemuncher step 1\n");
 			mode_t tmp_mode = strtol(p, &e, 8);
 			if (*p == 0 || *e != 0)
 				return -5;
-			*mode = tmp_mode; 
+			*mode = tmp_mode;
 			return 0;
 		}
-		
+
 		/* mode string given in ugoa+-=rwx format */
 		for ( ; ; p++)
 			switch (*p)
@@ -140,24 +140,24 @@ printf("modemuncher step 1\n");
 				case 'u':
 				affected_bits |= 04700;
 				break;
-				
+
 				case 'g':
 				affected_bits |= 02070;
 				break;
-				
+
 				case 'o':
 				affected_bits |= 01007;
 				break;
-				
+
 				case 'a':
 				affected_bits |= 07777;
 				break;
-				
+
 				/* ignore spaces */
 				case ' ':
 				break;
-				
-				
+
+
 				default:
 				goto no_more_affected;
 			}
@@ -167,7 +167,7 @@ printf("modemuncher step 1\n");
 		if (affected_bits == 0) affected_bits = 07777;
 
 		/* step 2 -- how is it changed? */
-		
+
 #ifdef DEBUG
 printf("modemuncher step 2 (*p='%c')\n", *p);
 #endif
@@ -179,18 +179,18 @@ printf("modemuncher step 2 (*p='%c')\n", *p);
 			case '=':
 			op = *p;
 			break;
-			
+
 			/* ignore spaces */
 			case ' ':
 			break;
-			
+
 			default:
 			return -1; /* failed! -- bad operator */
 		}
-		
-		
+
+
 		/* step 3 -- what are the changes? */
-		
+
 #ifdef DEBUG
 printf("modemuncher step 3\n");
 #endif
@@ -201,24 +201,24 @@ printf("modemuncher step 3\n");
 				case 'r':
 				ch_mode |= 00444;
 				break;
-				
+
 				case 'w':
 				ch_mode |= 00222;
 				break;
-				
+
 				case 'x':
 				ch_mode |= 00111;
 				break;
-				
+
 				case 's':
 				/* Set the setuid/gid bits if `u' or `g' is selected. */
 				ch_mode |= 06000;
 				break;
-			
+
 				/* ignore spaces */
 				case ' ':
 				break;
-				
+
 				default:
 				goto specs_done;
 			}
@@ -232,13 +232,13 @@ printf("modemuncher step 3\n");
 		if (*p != ',') doneFlag = 1;
 		if (*p != 0 && *p != ' ' && *p != ',')
 		{
-		
+
 #ifdef DEBUG
 printf("modemuncher: comma error!\n");
 printf("modemuncher: doneflag = %u\n", doneFlag);
 #endif
 			return -2; /* failed! -- bad mode change */
-		
+
 		}
 		p++;
 		/*if (!ch_mode) return -2;*/ /* failed! -- bad mode change */
@@ -255,7 +255,7 @@ printf("modemuncher: doneflag = %u\n", doneFlag);
 			case '=':
 			*mode = ch_mode & affected_bits;
 			break;
-		
+
 			default:
 			return -3; /* failed! -- unknown error */
 		}

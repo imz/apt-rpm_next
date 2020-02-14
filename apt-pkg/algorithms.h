@@ -4,26 +4,26 @@
 /* ######################################################################
 
    Algorithms - A set of misc algorithms
-   
+
    This simulate class displays what the ordering code has done and
    analyses it with a fresh new dependency cache. In this way we can
    see all of the effects of an upgrade run.
 
    pkgDistUpgrade computes an upgrade that causes as many packages as
    possible to move to the newest verison.
-   
+
    pkgApplyStatus sets the target state based on the content of the status
    field in the status file. It is important to get proper crash recovery.
 
    pkgFixBroken corrects a broken system so that it is in a sane state.
- 
-   pkgAllUpgrade attempts to upgade as many packages as possible but 
+
+   pkgAllUpgrade attempts to upgade as many packages as possible but
    without installing new packages.
-   
+
    The problem resolver class contains a number of complex algorithms
-   to try to best-guess an upgrade state. It solves the problem of 
+   to try to best-guess an upgrade state. It solves the problem of
    maximizing the number of install state packages while having no broken
-   packages. 
+   packages.
 
    ##################################################################### */
 									/*}}}*/
@@ -32,7 +32,7 @@
 
 #ifdef __GNUG__
 #pragma interface "apt-pkg/algorithms.h"
-#endif 
+#endif
 
 #include <apt-pkg/packagemanager.h>
 #include <apt-pkg/depcache.h>
@@ -50,27 +50,27 @@ class pkgSimulate : public pkgPackageManager
    {
       pkgDepCache *Cache;
       public:
-      
+
       virtual VerIterator GetCandidateVer(PkgIterator Pkg)
       {
 	 return (*Cache)[Pkg].CandidateVerIter(*Cache);
       }
-      
+
       Policy(pkgDepCache *Cache) : Cache(Cache) {};
    };
-   
+
    unsigned char *Flags;
-   
+
    Policy iPolicy;
    pkgDepCache Sim;
-   
+
    // The Actuall installation implementation
    virtual bool Install(PkgIterator Pkg,string File);
    virtual bool Configure(PkgIterator Pkg);
    virtual bool Remove(PkgIterator Pkg,bool Purge);
    void ShortBreaks();
    void Describe(PkgIterator iPkg,ostream &out,bool Now);
-   
+
    public:
 
    pkgSimulate(pkgDepCache *Cache);
@@ -86,14 +86,14 @@ class pkgProblemResolver
    typedef pkgCache::PrvIterator PrvIterator;
    typedef pkgCache::Version Version;
    typedef pkgCache::Package Package;
-   
+
    enum Flags {Protected = (1 << 0), PreInstalled = (1 << 1),
                Upgradable = (1 << 2), ReInstateTried = (1 << 3),
                ToRemove = (1 << 4)};
    signed short *Scores;
    unsigned char *Flags;
    bool Debug;
-   
+
    // Sort stuff
    static pkgProblemResolver *This;
    static int ScoreSort(const void *a,const void *b);
@@ -106,23 +106,23 @@ class pkgProblemResolver
 
    void MakeScores();
    bool DoUpgrade(pkgCache::PkgIterator Pkg);
-   
+
    public:
-   
+
    inline void Protect(pkgCache::PkgIterator Pkg) {Flags[Pkg->ID] |= Protected;};
    inline void Remove(pkgCache::PkgIterator Pkg) {Flags[Pkg->ID] |= ToRemove;};
    inline void Clear(pkgCache::PkgIterator Pkg) {Flags[Pkg->ID] &= ~(Protected | ToRemove);};
-   
-   // Try to intelligently resolve problems by installing and removing packages   
+
+   // Try to intelligently resolve problems by installing and removing packages
    bool Resolve(bool BrokenFix = false);
-   
+
    // Try to resolve problems only by using keep
    bool ResolveByKeep();
-   
-   void InstallProtect();   
+
+   void InstallProtect();
 
    bool RemoveDepends(); // CNC:2002-08-01
-   
+
    pkgProblemResolver(pkgDepCache *Cache);
    ~pkgProblemResolver();
 };
@@ -134,5 +134,5 @@ bool pkgAllUpgrade(pkgDepCache &Cache);
 bool pkgMinimizeUpgrade(pkgDepCache &Cache);
 
 void pkgPrioSortList(pkgCache &Cache,pkgCache::Version **List);
-		     
+
 #endif

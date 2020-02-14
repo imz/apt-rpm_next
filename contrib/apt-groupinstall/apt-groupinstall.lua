@@ -53,7 +53,7 @@ elseif script_slot == "Scripts::AptGet::Command" then
 	else
 		return
 	end
-	
+
 	numgroups = table.getn(command_args) - 1
 	if numgroups < 1 then
 		apterror(_("No groupname given."))

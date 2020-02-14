@@ -3,12 +3,12 @@
 // $Id: acquire-worker.cc,v 1.1 2002/07/23 17:54:50 niemeyer Exp $
 /* ######################################################################
 
-   Acquire Worker 
+   Acquire Worker
 
    The worker process can startup either as a Configuration prober
    or as a queue runner. As a configuration prober it only reads the
-   configuration message and 
-   
+   configuration message and
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -26,7 +26,7 @@
 
 #include <iostream>
 #include <fstream>
-    
+
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -49,8 +49,8 @@ pkgAcquire::Worker::Worker(Queue *Q,MethodConfig *Cnf,
    CurrentItem = 0;
    TotalSize = 0;
    CurrentSize = 0;
-   
-   Construct();   
+
+   Construct();
 }
 									/*}}}*/
 // Worker::Worker - Constructor for method config startup		/*{{{*/
@@ -64,8 +64,8 @@ pkgAcquire::Worker::Worker(MethodConfig *Cnf)
    CurrentItem = 0;
    TotalSize = 0;
    CurrentSize = 0;
-   
-   Construct();   
+
+   Construct();
 }
 									/*}}}*/
 // Worker::Construct - Constructor helper				/*{{{*/
@@ -90,7 +90,7 @@ pkgAcquire::Worker::~Worker()
 {
    close(InFd);
    close(OutFd);
-   
+
    if (Process > 0)
    {
       /* Closing of stdin is the signal to exit and die when the process
@@ -98,7 +98,7 @@ pkgAcquire::Worker::~Worker()
       if (Config->NeedsCleanup == false)
 	 kill(Process,SIGINT);
       ExecWait(Process,Access.c_str(),true);
-   }   
+   }
 }
 									/*}}}*/
 // Worker::Start - Start the worker process				/*{{{*/
@@ -125,7 +125,7 @@ bool pkgAcquire::Worker::Start()
    }
    for (int I = 0; I != 4; I++)
       SetCloseExec(Pipes[I],true);
-   
+
    // Fork off the process
    Process = ExecFork();
    if (Process == 0)
@@ -134,9 +134,9 @@ bool pkgAcquire::Worker::Start()
       dup2(Pipes[1],STDOUT_FILENO);
       dup2(Pipes[2],STDIN_FILENO);
       SetCloseExec(STDOUT_FILENO,false);
-      SetCloseExec(STDIN_FILENO,false);      
+      SetCloseExec(STDIN_FILENO,false);
       SetCloseExec(STDERR_FILENO,false);
-      
+
       const char *Args[2];
       Args[0] = Method.c_str();
       Args[1] = 0;
@@ -154,7 +154,7 @@ bool pkgAcquire::Worker::Start()
    close(Pipes[2]);
    OutReady = false;
    InReady = true;
-   
+
    // Read the configuration data
    if (WaitFd(InFd) == false ||
        ReadMessages() == false)
@@ -163,7 +163,7 @@ bool pkgAcquire::Worker::Start()
    RunMessages();
    if (OwnerQ != 0)
       SendConfiguration();
-   
+
    // CNC:2004-04-27
    if (Config->HasPreferredURI == true &&
        Config->DonePreferredURI == false &&
@@ -204,7 +204,7 @@ bool pkgAcquire::Worker::RunMessages()
 
       if (Debug == true)
 	 clog << " <- " << Access << ':' << QuoteString(Message,"\n") << endl;
-      
+
       // Fetch the message number
       char *End;
       int Number = strtol(Message.c_str(),&End,10);
@@ -215,7 +215,7 @@ bool pkgAcquire::Worker::RunMessages()
       pkgAcquire::Queue::QItem *Itm = 0;
       if (URI.empty() == false)
 	 Itm = OwnerQ->FindItem(URI,this);
-      
+
       // Determine the message number and dispatch
       switch (Number)
       {
@@ -224,13 +224,13 @@ bool pkgAcquire::Worker::RunMessages()
 	 if (Capabilities(Message) == false)
 	    return _error->Error("Unable to process Capabilities message from %s",Access.c_str());
 	 break;
-	 
+
 	 // 101 Log
 	 case 101:
 	 if (Debug == true)
 	    clog << " <- (log) " << LookupTag(Message,"Message") << endl;
 	 break;
-	 
+
 	 // 102 Status
 	 case 102:
 	 Status = LookupTag(Message,"Message");
@@ -255,7 +255,7 @@ bool pkgAcquire::Worker::RunMessages()
 	    Itm->URI = NewURI;
 	    break;
 	 }
-	    
+
 	 // 200 URI Start
 	 case 200:
 	 {
@@ -264,7 +264,7 @@ bool pkgAcquire::Worker::RunMessages()
 	       _error->Error("Method gave invalid 200 URI Start message");
 	       break;
 	    }
-	    
+
 	    CurrentItem = Itm;
 	    CurrentSize = 0;
 	    TotalSize = atoi(LookupTag(Message,"Size","0").c_str());
@@ -274,13 +274,13 @@ bool pkgAcquire::Worker::RunMessages()
 	    // Display update before completion
 	    if (Log != 0 && Log->MorePulses == true)
 	       Log->Pulse(Itm->Owner->GetOwner());
-	    
+
 	    if (Log != 0)
 	       Log->Fetch(*Itm);
 
 	    break;
 	 }
-	 
+
 	 // 201 URI Done
 	 case 201:
 	 {
@@ -289,14 +289,14 @@ bool pkgAcquire::Worker::RunMessages()
 	       _error->Error("Method gave invalid 201 URI Done message");
 	       break;
 	    }
-	    
+
 	    pkgAcquire::Item *Owner = Itm->Owner;
 	    pkgAcquire::ItemDesc Desc = *Itm;
-	    
+
 	    // Display update before completion
 	    if (Log != 0 && Log->MorePulses == true)
 	       Log->Pulse(Owner->GetOwner());
-	    
+
 	    OwnerQ->ItemDone(Itm);
 	    if (TotalSize != 0 &&
 		(unsigned)atoi(LookupTag(Message,"Size","0").c_str()) != TotalSize)
@@ -306,7 +306,7 @@ bool pkgAcquire::Worker::RunMessages()
 	    Owner->Done(Message,atoi(LookupTag(Message,"Size","0").c_str()),
 			LookupTag(Message,"MD5-Hash"),Config);
 	    ItemDone();
-	    
+
 	    // Log that we are done
 	    if (Log != 0)
 	    {
@@ -317,13 +317,13 @@ bool pkgAcquire::Worker::RunMessages()
 		     hide gets */
 		  if (Config->LocalOnly == false)
 		     Log->IMSHit(Desc);
-	       }	       
+	       }
 	       else
 		  Log->Done(Desc);
 	    }
 	    break;
-	 }	 
-	 
+	 }
+
 	 // 400 URI Failure
 	 case 400:
 	 {
@@ -336,7 +336,7 @@ bool pkgAcquire::Worker::RunMessages()
 	    // Display update before completion
 	    if (Log != 0 && Log->MorePulses == true)
 	       Log->Pulse(Itm->Owner->GetOwner());
-	    
+
 	    pkgAcquire::Item *Owner = Itm->Owner;
 	    pkgAcquire::ItemDesc Desc = *Itm;
 	    OwnerQ->ItemDone(Itm);
@@ -347,23 +347,23 @@ bool pkgAcquire::Worker::RunMessages()
 	       Log->Fail(Desc);
 
 	    break;
-	 }	 
-	 
+	 }
+
 	 // 401 General Failure
 	 case 401:
 	 _error->Error("Method %s General failure: %s",Access.c_str(),LookupTag(Message,"Message").c_str());
 	 break;
-	 
+
 	 // 403 Media Change
 	 case 403:
-	 MediaChange(Message); 
+	 MediaChange(Message);
 	 break;
 
 	 // 404 Authenticate
 	 case 404:
 	 Authenticate(Message);
 	 break;
-      }      
+      }
    }
    return true;
 }
@@ -376,7 +376,7 @@ bool pkgAcquire::Worker::Capabilities(string Message)
 {
    if (Config == 0)
       return true;
-   
+
    Config->Version = LookupTag(Message,"Version");
    Config->SingleInstance = StringToBool(LookupTag(Message,"Single-Instance"),false);
    Config->Pipeline = StringToBool(LookupTag(Message,"Pipeline"),false);
@@ -393,15 +393,15 @@ bool pkgAcquire::Worker::Capabilities(string Message)
       clog << "Configured access method " << Config->Access << endl;
       clog << "Version:" << Config->Version <<
 	      " SingleInstance:" << Config->SingleInstance <<
-	      " Pipeline:" << Config->Pipeline << 
-	      " SendConfig:" << Config->SendConfig << 
-	      " LocalOnly: " << Config->LocalOnly << 
-	      " NeedsCleanup: " << Config->NeedsCleanup << 
+	      " Pipeline:" << Config->Pipeline <<
+	      " SendConfig:" << Config->SendConfig <<
+	      " LocalOnly: " << Config->LocalOnly <<
+	      " NeedsCleanup: " << Config->NeedsCleanup <<
 	      // CNC:2004-04-27
 	      " Removable: " << Config->Removable <<
 	      " HasPreferredURI: " << Config->HasPreferredURI << endl;
    }
-   
+
    return true;
 }
 									/*}}}*/
@@ -469,11 +469,11 @@ bool pkgAcquire::Worker::SendConfiguration()
 
    if (OutFd == -1)
       return false;
-   
+
    string Message = "601 Configuration\n";
    Message.reserve(2000);
 
-   /* Write out all of the configuration directives by walking the 
+   /* Write out all of the configuration directives by walking the
       configuration tree */
    const Configuration::Item *Top = _config->Tree(0);
    for (; Top != 0;)
@@ -484,25 +484,25 @@ bool pkgAcquire::Worker::SendConfiguration()
 	 Line += QuoteString(Top->Value,"\n") + '\n';
 	 Message += Line;
       }
-      
+
       if (Top->Child != 0)
       {
 	 Top = Top->Child;
 	 continue;
       }
-      
+
       while (Top != 0 && Top->Next == 0)
 	 Top = Top->Parent;
       if (Top != 0)
 	 Top = Top->Next;
-   }   
+   }
    Message += '\n';
 
    if (Debug == true)
       clog << " -> " << Access << ':' << QuoteString(Message,"\n") << endl;
    OutQueue += Message;
-   OutReady = true; 
-   
+   OutReady = true;
+
    return true;
 }
 									/*}}}*/
@@ -513,19 +513,19 @@ bool pkgAcquire::Worker::QueueItem(pkgAcquire::Queue::QItem *Item)
 {
    if (OutFd == -1)
       return false;
-   
+
    string Message = "600 URI Acquire\n";
    Message.reserve(300);
    Message += "URI: " + Item->URI;
    Message += "\nFilename: " + Item->Owner->DestFile;
    Message += Item->Owner->Custom600Headers();
    Message += "\n\n";
-   
+
    if (Debug == true)
       clog << " -> " << Access << ':' << QuoteString(Message,"\n") << endl;
    OutQueue += Message;
    OutReady = true;
-   
+
    return true;
 }
 									/*}}}*/
@@ -540,18 +540,18 @@ bool pkgAcquire::Worker::OutFdReady()
       Res = write(OutFd,OutQueue.c_str(),OutQueue.length());
    }
    while (Res < 0 && errno == EINTR);
-   
+
    if (Res <= 0)
       return MethodFailure();
 
    // Hmm.. this should never happen.
    if (Res < 0)
       return true;
-   
+
    OutQueue.erase(0,Res);
    if (OutQueue.empty() == true)
       OutReady = false;
-   
+
    return true;
 }
 									/*}}}*/
@@ -573,7 +573,7 @@ bool pkgAcquire::Worker::InFdReady()
 bool pkgAcquire::Worker::MethodFailure()
 {
    _error->Error("Method %s has died unexpectedly!",Access.c_str());
-   
+
    ExecWait(Process,Access.c_str(),true);
    Process = -1;
    close(InFd);
@@ -584,7 +584,7 @@ bool pkgAcquire::Worker::MethodFailure()
    InReady = false;
    OutQueue = string();
    MessageQueue.erase(MessageQueue.begin(),MessageQueue.end());
-   
+
    return false;
 }
 									/*}}}*/
@@ -595,12 +595,12 @@ void pkgAcquire::Worker::Pulse()
 {
    if (CurrentItem == 0)
       return;
- 
+
    struct stat Buf;
    if (stat(CurrentItem->Owner->DestFile.c_str(),&Buf) != 0)
       return;
    CurrentSize = Buf.st_size;
-   
+
    // Hmm? Should not happen...
    if (CurrentSize > TotalSize && TotalSize != 0)
       TotalSize = CurrentSize;

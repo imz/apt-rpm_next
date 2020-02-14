@@ -2,12 +2,12 @@
 // Description								/*{{{*/
 // $Id: apt-cdrom.cc,v 1.44 2003/09/12 01:48:33 mdz Exp $
 /* ######################################################################
-   
+
    APT CDROM - Tool for handling APT's CDROM database.
-   
+
    Currently the only option is 'add' which will take the current CD
    in the drive and add it into the database.
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -20,7 +20,7 @@
 #include <apt-pkg/strutl.h>
 #include <config.h>
 #include <apti18n.h>
-    
+
 // CNC:2002-07-11
 #ifdef HAVE_RPM
 #include "rpmindexcopy.h"
@@ -58,7 +58,7 @@ bool FindPackages(string CD,vector<string> &List,vector<string> &SList,
       return true;
 
    if (CD[CD.length()-1] != '/')
-      CD += '/';   
+      CD += '/';
 
    if (chdir(CD.c_str()) != 0)
       return _error->Errno("chdir","Unable to change to %s",CD.c_str());
@@ -74,20 +74,20 @@ bool FindPackages(string CD,vector<string> &List,vector<string> &SList,
    // Don't look into directories that have been marked to ingore.
    if (stat(".aptignr",&Buf) == 0)
       return true;
-   
+
 // CNC:2002-07-11
 #ifdef HAVE_RPM
    bool Found = false;
    if (stat("release",&Buf) == 0)
       Found = true;
 #else
-   /* Aha! We found some package files. We assume that everything under 
+   /* Aha! We found some package files. We assume that everything under
       this dir is controlled by those package files so we don't look down
       anymore */
    if (stat("Packages",&Buf) == 0 || stat("Packages.gz",&Buf) == 0)
    {
       List.push_back(CD);
-      
+
       // Continue down if thorough is given
       if (_config->FindB("APT::CDROM::Thorough",false) == false)
 	 return true;
@@ -95,17 +95,17 @@ bool FindPackages(string CD,vector<string> &List,vector<string> &SList,
    if (stat("Sources.gz",&Buf) == 0 || stat("Sources",&Buf) == 0)
    {
       SList.push_back(CD);
-      
+
       // Continue down if thorough is given
       if (_config->FindB("APT::CDROM::Thorough",false) == false)
 	 return true;
    }
 #endif
-   
+
    DIR *D = opendir(".");
    if (D == 0)
       return _error->Errno("opendir","Unable to read %s",CD.c_str());
-   
+
    // Run over the directory
    for (struct dirent *Dir = readdir(D); Dir != 0; Dir = readdir(D))
    {
@@ -149,18 +149,18 @@ bool FindPackages(string CD,vector<string> &List,vector<string> &SList,
       // See if the name is a sub directory
       struct stat Buf;
       if (stat(Dir->d_name,&Buf) != 0)
-	 continue;      
-      
+	 continue;
+
       if (S_ISDIR(Buf.st_mode) == 0)
 	 continue;
-      
+
       unsigned int I;
       for (I = 0; I != Depth; I++)
 	 if (Inodes[I] == Buf.st_ino)
 	    break;
       if (I != Depth)
 	 continue;
-      
+
       // Store the inodes weve seen
       Inodes[Depth] = Buf.st_ino;
 
@@ -173,7 +173,7 @@ bool FindPackages(string CD,vector<string> &List,vector<string> &SList,
    };
 
    closedir(D);
-   
+
    return !_error->PendingError();
 }
 									/*}}}*/
@@ -185,11 +185,11 @@ bool DropBinaryArch(vector<string> &List)
    char S[300];
    snprintf(S,sizeof(S),"/binary-%s/",
 	    _config->Find("Apt::Architecture").c_str());
-   
+
    for (unsigned int I = 0; I < List.size(); I++)
    {
       const char *Str = List[I].c_str();
-      
+
       const char *Res;
       if ((Res = strstr(Str,"/binary-")) == 0)
 	 continue;
@@ -201,16 +201,16 @@ bool DropBinaryArch(vector<string> &List)
 	 I--;
 	 continue;
       }
-	  
+
       // See if it is our arch
       if (stringcmp(Res,Res + strlen(S),S) == 0)
 	 continue;
-      
+
       // Erase it
       List.erase(List.begin() + I);
       I--;
    }
-   
+
    return true;
 }
 									/*}}}*/
@@ -270,10 +270,10 @@ bool DropRepeats(vector<string> &List,const char *Name)
 		       Name);
       Inodes[I] = Buf.st_ino;
    }
-   
+
    if (_error->PendingError() == true)
       return false;
-   
+
    // Look for dups
    for (unsigned int I = 0; I != List.size(); I++)
    {
@@ -282,7 +282,7 @@ bool DropRepeats(vector<string> &List,const char *Name)
 	 // No match
 	 if (Inodes[J] != Inodes[I])
 	    continue;
-	 
+
 	 // We score the two paths.. and erase one
 	 int ScoreA = Score(List[I]);
 	 int ScoreB = Score(List[J]);
@@ -291,11 +291,11 @@ bool DropRepeats(vector<string> &List,const char *Name)
 	    List[I] = string();
 	    break;
 	 }
-	 
+
 	 List[J] = string();
       }
-   }  
- 
+   }
+
    // Wipe erased entries
    for (unsigned int I = 0; I < List.size();)
    {
@@ -304,7 +304,7 @@ bool DropRepeats(vector<string> &List,const char *Name)
       else
 	 List.erase(List.begin()+I);
    }
-   
+
    return true;
 }
 									/*}}}*/
@@ -316,7 +316,7 @@ bool DropRepeats(vector<string> &List,const char *Name)
 void ReduceSourcelist(string CD,vector<string> &List)
 {
    sort(List.begin(),List.end());
-   
+
    // Collect similar entries
    for (vector<string>::iterator I = List.begin(); I != List.end(); I++)
    {
@@ -339,16 +339,16 @@ void ReduceSourcelist(string CD,vector<string> &List)
 	 string::size_type SSpace2 = (*J).find(' ',Space2 + 1);
 	 if (SSpace2 == string::npos)
 	    continue;
-	 
+
 	 if (string(*J,0,Space2) != Prefix)
 	    continue;
 	 if (string(*J,Space2,SSpace2-Space2) != Word1)
 	    continue;
-	 
+
 	 *J += string(*I,SSpace);
 	 *I = string();
       }
-   }   
+   }
 
    // Wipe erased entries
    for (unsigned int I = 0; I < List.size();)
@@ -367,13 +367,13 @@ bool WriteDatabase(Configuration &Cnf)
 {
    string DFile = _config->FindFile("Dir::State::cdroms");
    string NewFile = DFile + ".new";
-   
+
    unlink(NewFile.c_str());
    ofstream Out(NewFile.c_str());
    if (!Out)
       return _error->Errno("ofstream::ofstream",
 			   "Failed to open %s.new",DFile.c_str());
-   
+
    /* Write out all of the configuration directives by walking the
       configuration tree */
    const Configuration::Item *Top = Cnf.Tree(0);
@@ -382,21 +382,21 @@ bool WriteDatabase(Configuration &Cnf)
       // Print the config entry
       if (Top->Value.empty() == false)
 	 Out <<  Top->FullTag() + " \"" << Top->Value << "\";" << endl;
-      
+
       if (Top->Child != 0)
       {
 	 Top = Top->Child;
 	 continue;
       }
-      
+
       while (Top != 0 && Top->Next == 0)
 	 Top = Top->Parent;
       if (Top != 0)
 	 Top = Top->Next;
-   }   
+   }
 
    Out.close();
-   
+
    rename(DFile.c_str(),string(DFile + '~').c_str());
    if (rename(NewFile.c_str(),DFile.c_str()) != 0)
       return _error->Errno("rename",_("Failed to rename %s.new to %s"),
@@ -407,7 +407,7 @@ bool WriteDatabase(Configuration &Cnf)
 									/*}}}*/
 // WriteSourceList - Write an updated sourcelist			/*{{{*/
 // ---------------------------------------------------------------------
-/* This reads the old source list and copies it into the new one. It 
+/* This reads the old source list and copies it into the new one. It
    appends the new CDROM entires just after the first block of comments.
    This places them first in the file. It also removes any old entries
    that were the same. */
@@ -432,7 +432,7 @@ bool WriteSourceList(string Name,vector<string> &List,bool Source)
 			   _("Failed to open %s.new"),File.c_str());
 
    // Create a short uri without the path
-   string ShortURI = "cdrom:[" + Name + "]/";   
+   string ShortURI = "cdrom:[" + Name + "]/";
    string ShortURI2 = "cdrom:" + Name + "/";     // For Compatibility
 
    const char *Type;
@@ -448,17 +448,17 @@ bool WriteSourceList(string Name,vector<string> &List,bool Source)
    else
       Type = "deb";
 #endif
-   
+
    char Buffer[300];
    int CurLine = 0;
    bool First = true;
    while (F.eof() == false)
-   {      
+   {
       F.getline(Buffer,sizeof(Buffer));
       CurLine++;
       _strtabexpand(Buffer,sizeof(Buffer));
       _strstrip(Buffer);
-            
+
       // Comment or blank
       if (Buffer[0] == '#' || Buffer[0] == 0)
       {
@@ -478,7 +478,7 @@ bool WriteSourceList(string Name,vector<string> &List,bool Source)
 	 }
       }
       First = false;
-      
+
       // Grok it
       string cType;
       string URI;
@@ -496,9 +496,9 @@ bool WriteSourceList(string Name,vector<string> &List,bool Source)
       {
 	 Out << Buffer << endl;
 	 continue;
-      }      
+      }
    }
-   
+
    // Just in case the file was empty
    if (First == true)
    {
@@ -507,25 +507,25 @@ bool WriteSourceList(string Name,vector<string> &List,bool Source)
 	 string::size_type Space = (*I).find(' ');
 	 if (Space == string::npos)
 	    return _error->Error("Internal error");
-	 
+
 // CNC:2002-07-11
 #ifdef HAVE_RPM
-	 Out << "rpm cdrom:[" << Name << "]/" << string(*I,0,Space) << 
+	 Out << "rpm cdrom:[" << Name << "]/" << string(*I,0,Space) <<
 	    " " << string(*I,Space+1) << endl;
 #else
-	 Out << "deb cdrom:[" << Name << "]/" << string(*I,0,Space) << 
+	 Out << "deb cdrom:[" << Name << "]/" << string(*I,0,Space) <<
 	    " " << string(*I,Space+1) << endl;
 #endif
       }
    }
-   
+
    Out.close();
 
    rename(File.c_str(),string(File + '~').c_str());
    if (rename(NewFile.c_str(),File.c_str()) != 0)
       return _error->Errno("rename",_("Failed to rename %s.new to %s"),
 			   File.c_str(),File.c_str());
-   
+
    return true;
 }
 									/*}}}*/
@@ -548,7 +548,7 @@ void Prompt(const char *Text)
 string PromptLine(const char *Text)
 {
    cout << Text << ':' << endl;
-   
+
    string Res;
    getline(cin,Res);
    return Res;
@@ -558,7 +558,7 @@ string PromptLine(const char *Text)
 // DoAdd - Add a new CDROM						/*{{{*/
 // ---------------------------------------------------------------------
 /* This does the main add bit.. We show some status and things. The
-   sequence is to mount/umount the CD, Ident it then scan it for package 
+   sequence is to mount/umount the CD, Ident it then scan it for package
    files and reduce that list. Then we copy over the package files and
    verify them. Then rewrite the database files */
 bool DoAdd(CommandLine &)
@@ -567,9 +567,9 @@ bool DoAdd(CommandLine &)
    string CDROM = _config->FindDir("Acquire::cdrom::mount","/cdrom/");
    if (CDROM[0] == '.')
       CDROM= SafeGetCWD() + '/' + CDROM;
-   
+
    cout << _("Using CD-ROM mount point ") << CDROM << endl;
-      
+
    // Read the database
    Configuration Database;
    string DFile = _config->FindFile("Dir::State::cdroms");
@@ -586,7 +586,7 @@ bool DoAdd(CommandLine &)
    string ID = _config->Find("APT::CDROM::ID");
    if (ID.empty() == false && FileExists(PreFetchDir+"/"+ID))
       PreFetch = true;
-   
+
    // Unmount the CD and get the user to put in the one they want
    // CNC:2002-10-29
    bool Mounted = false;
@@ -602,7 +602,7 @@ bool DoAdd(CommandLine &)
       if (MountCdrom(CDROM) == false)
 	 return _error->Error(_("Failed to mount the cdrom."));
    }
-   
+
    // Hash the CD to get an ID
    cout << _("Identifying.. ") << flush;
    // CNC:2002-10-29
@@ -636,7 +636,7 @@ bool DoAdd(CommandLine &)
       cout << endl;
       return false;
    }
-   
+
    chdir(StartDir.c_str());
 
    if (_config->FindB("Debug::aptcdrom",false) == true)
@@ -647,8 +647,8 @@ bool DoAdd(CommandLine &)
       cout << _("I found (source):") << endl;
       for (vector<string>::iterator I = sList.begin(); I != sList.end(); I++)
 	 cout << *I << endl;
-   }   
-   
+   }
+
    // Fix up the list
 // CNC:2002-07-11
 #ifdef HAVE_RPM
@@ -659,7 +659,7 @@ bool DoAdd(CommandLine &)
    DropRepeats(List,"Packages");
    DropRepeats(sList,"Sources");
 #endif
-   cout << _("Found ") << List.size() << _(" package indexes and ") << sList.size() << 
+   cout << _("Found ") << List.size() << _(" package indexes and ") << sList.size() <<
       _(" source indexes.") << endl;
 
    // CNC:2002-07-11
@@ -668,7 +668,7 @@ bool DoAdd(CommandLine &)
 	if (Mounted && _config->FindB("APT::CDROM::NoMount",false) == false)
 	     UnmountCdrom(CDROM);
 	return _error->Error(_("Unable to locate any package files, perhaps this is not an APT enabled disc"));
-   
+
    }
    // Check if the CD is in the database
    string Name;
@@ -690,12 +690,12 @@ bool DoAdd(CommandLine &)
 	    for (; J != Name.end(); J++)
 	       if (*J == '"' || *J == ']' || *J == '[')
 		  *J = '_';
-	    
+
 	    cout << _("Found label '") << Name << "'" << endl;
 	    Database.Set("CD::" + ID + "::Label",Name);
-	 }	 
+	 }
       }
-      
+
       if (_config->FindB("APT::CDROM::Rename",false) == true ||
 	  Name.empty() == true)
       {
@@ -710,8 +710,8 @@ bool DoAdd(CommandLine &)
 		Name.find(']') == string::npos)
 	       break;
 	    cout << _("That is not a valid name, try again ") << endl;
-	 }	 
-      }      
+	 }
+      }
    }
    else
       Name = Database.Find("CD::" + ID);
@@ -721,10 +721,10 @@ bool DoAdd(CommandLine &)
    for (; J != Name.end(); J++)
       if (*J == '"' || *J == ']' || *J == '[')
 	 *J = '_';
-   
+
    Database.Set("CD::" + ID,Name);
    cout << _("This Disc is called:") << endl << " '" << Name << "'" << endl;
-   
+
    // Copy the package files to the state directory
 // CNC:2002-07-11
 #ifdef HAVE_RPM
@@ -738,7 +738,7 @@ bool DoAdd(CommandLine &)
    if (Copy.CopyPackages(ScanDir,Name,List) == false ||
        SrcCopy.CopyPackages(ScanDir,Name,sList) == false)
       return false;
-   
+
    // CNC:2002-10-29
    ReduceSourcelist(ScanDir,List);
    ReduceSourcelist(ScanDir,sList);
@@ -748,7 +748,7 @@ bool DoAdd(CommandLine &)
    {
       if (WriteDatabase(Database) == false)
 	 return false;
-      
+
       cout << "Writing new source list" << endl;
       if (WriteSourceList(Name,List,false) == false ||
 	  WriteSourceList(Name,sList,true) == false)
@@ -765,10 +765,10 @@ bool DoAdd(CommandLine &)
 
 // CNC:2002-07-11
 #ifdef HAVE_RPM
-      cout << "rpm cdrom:[" << Name << "]/" << string(*I,0,Space) << 
+      cout << "rpm cdrom:[" << Name << "]/" << string(*I,0,Space) <<
 	 " " << string(*I,Space+1) << endl;
 #else
-      cout << "deb cdrom:[" << Name << "]/" << string(*I,0,Space) << 
+      cout << "deb cdrom:[" << Name << "]/" << string(*I,0,Space) <<
 	 " " << string(*I,Space+1) << endl;
 #endif
    }
@@ -781,10 +781,10 @@ bool DoAdd(CommandLine &)
 
 // CNC:2002-07-11
 #ifdef HAVE_RPM
-      cout << "rpm-src cdrom:[" << Name << "]/" << string(*I,0,Space) << 
+      cout << "rpm-src cdrom:[" << Name << "]/" << string(*I,0,Space) <<
 	 " " << string(*I,Space+1) << endl;
 #else
-      cout << "deb-src cdrom:[" << Name << "]/" << string(*I,0,Space) << 
+      cout << "deb-src cdrom:[" << Name << "]/" << string(*I,0,Space) <<
 	 " " << string(*I,Space+1) << endl;
 #endif
    }
@@ -795,7 +795,7 @@ bool DoAdd(CommandLine &)
    // CNC:2002-10-29
    if (Mounted == true)
       UnmountCdrom(CDROM);
-   
+
    return true;
 }
 									/*}}}*/
@@ -808,12 +808,12 @@ bool DoIdent(CommandLine &)
    string CDROM = _config->FindDir("Acquire::cdrom::mount","/cdrom/");
    if (CDROM[0] == '.')
       CDROM= SafeGetCWD() + '/' + CDROM;
-   
+
    cout << _("Using CD-ROM mount point ") << CDROM << endl;
    cout << _("Mounting CD-ROM") << endl;
    if (MountCdrom(CDROM) == false)
       return _error->Error(_("Failed to mount the cdrom."));
-   
+
    // Hash the CD to get an ID
    cout << _("Identifying.. ") << flush;
    string ID;
@@ -822,7 +822,7 @@ bool DoIdent(CommandLine &)
       cout << endl;
       return false;
    }
-   
+
    cout << '[' << ID << ']' << endl;
 
    // Read the database
@@ -848,8 +848,8 @@ int ShowHelp()
 	    COMMON_OS,COMMON_CPU,__DATE__,__TIME__);
    if (_config->FindB("version") == true)
       return 0;
-   
-   cout << 
+
+   cout <<
     _("Usage: apt-cdrom [options] command\n"
       "\n"
       "apt-cdrom is a tool to add CDROM's to APT's source list. The\n"
@@ -884,7 +884,7 @@ int main(int argc,const char *argv[])
       {'m',"no-mount","APT::CDROM::NoMount",0},
       {'f',"fast","APT::CDROM::Fast",0},
       {'n',"just-print","APT::CDROM::NoAct",0},
-      {'n',"recon","APT::CDROM::NoAct",0},      
+      {'n',"recon","APT::CDROM::NoAct",0},
       {'n',"no-act","APT::CDROM::NoAct",0},
       {'a',"thorough","APT::CDROM::Thorough",0},
       {'c',"config-file",0,CommandLine::ConfigFile},
@@ -917,7 +917,7 @@ int main(int argc,const char *argv[])
    // Deal with stdout not being a tty
    if (ttyname(STDOUT_FILENO) == 0 && _config->FindI("quiet",0) < 1)
       _config->Set("quiet","1");
-   
+
    // Match the operation
    CmdL.DispatchArg(Cmds);
 
@@ -928,7 +928,7 @@ int main(int argc,const char *argv[])
       _error->DumpErrors();
       return Errors == true?100:0;
    }
-   
+
    return 0;
 }
 

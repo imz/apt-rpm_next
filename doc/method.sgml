@@ -71,7 +71,7 @@ item, that is each source maps to exactly one index file. Archive sources
 map to Package files and Source Code sources map to Source files.
 
 <tag>archive file<item>
-Refers to a binary package archive (.deb, .rpm, etc). 
+Refers to a binary package archive (.deb, .rpm, etc).
 
 <tag>source file<item>
 Refers to one of the files making up the source code of a package. In
@@ -81,8 +81,8 @@ debian it is one of .diff.gz, .dsc. or .tar.gz.
 Universal Resource Identifier (URI) is a super-set of the familiar URL
 syntax used by web browsers. It consists of an access specification
 followed by a specific location in that access space. The form is
-&lt;access&gt;:&lt;location&gt;. Network addresses are given with the form 
-&lt;access&gt;://[&lt;user&gt;[:&lt;pas&gt;]@]hostname[:port]/&lt;location&gt;. 
+&lt;access&gt;:&lt;location&gt;. Network addresses are given with the form
+&lt;access&gt;://[&lt;user&gt;[:&lt;pas&gt;]@]hostname[:port]/&lt;location&gt;.
 Some examples:
 <example>
 file:/var/mirrors/debian/
@@ -125,17 +125,17 @@ a remote site.
 <p>
 All methods operate as a sub process of a main controlling parent. 3 FD's
 are opened for use by the method allowing two way communication and
-emergency error reporting. The FD's correspond to the well known unix FD's, 
+emergency error reporting. The FD's correspond to the well known unix FD's,
 stdin, stdout and stderr.
 
 <p>
-Through operation of the method communication is done via http 
+Through operation of the method communication is done via http
 style plain text. Specifically RFC-822 (like the Package file) fields
 are used to describe items and a numeric-like header is used to indicate
 what is happening. Each of these distinct communication messages should be
 sent quickly and without pause.
 
-<p> 
+<p>
 In some instances APT may pre-invoke a method to allow things like file
 URI's to determine how many files are available locally.
 </sect>
@@ -146,9 +146,9 @@ URI's to determine how many files are available locally.
 
 <p>
 The first line of each message is called the message header. The first
-3 digits (called the Status Code) have the usual meaning found in the 
-http protocol. 1xx is informational, 2xx is successful and 4xx is failure. 
-The 6xx series is used to specify things sent to the method. After the 
+3 digits (called the Status Code) have the usual meaning found in the
+http protocol. 1xx is informational, 2xx is successful and 4xx is failure.
+The 6xx series is used to specify things sent to the method. After the
 status code is an informational string provided for visual debugging.
 
 <list>
@@ -161,7 +161,7 @@ status code is an informational string provided for visual debugging.
 <item>401 General Failure - Method did not like something sent to it
 <item>402 Authorization Required - Method requires authorization
         to access the URI. Authorization is User/Pass
-<item>403 Media Failure - Method requires a media change	
+<item>403 Media Failure - Method requires a media change
 <item>600 URI Acquire - Request a URI be acquired
 <item>601 Configuration - Sends the configuration space
 <item>602 Authorization Credentials - Response to the 402 message
@@ -175,10 +175,10 @@ until the proper 602/603 code is received. This means the method must be
 capable of handling an unlimited number of 600 messages.
 
 <p>
-The flow of messages starts with the method sending out a 
+The flow of messages starts with the method sending out a
 <em>100 Capabilities</> and APT sending out a <em>601 Configuration</>.
 After that APT begins sending <em>600 URI Acquire</> and the method
-sends out <em>200 URI Start</>, <em>201 URI Done</> or 
+sends out <em>200 URI Start</>, <em>201 URI Done</> or
 <em>400 URI Failure</>. No synchronization is performed, it is expected
 that APT will send <em>600 URI Acquire</> messages at -any- time and
 that the method should queue the messages. This allows methods like http
@@ -191,7 +191,7 @@ to be constantly ready to receive them.
 <!-- ===================================================================== -->
 <sect>Header Fields
 
-<p> 
+<p>
 The following is a short index of the header fields that are supported
 
 <taglist>
@@ -210,7 +210,7 @@ The following is a short index of the header fields that are supported
 <tag>Fail<item>Operation failed
 <tag>Drive<item>Drive the media should be placed in
 <tag>Config-Item<item>
-A string of the form <var>item</>=<var>value</> derived from the APT 
+A string of the form <var>item</>=<var>value</> derived from the APT
 configuration space. These may include method specific values and general
 values not related to the method. It is up to the method to filter out
 the ones it wants.
@@ -232,7 +232,7 @@ This is a list of which headers each status code can use
 Displays the capabilities of the method. Methods should set the
 pipeline bit if their underlying protocol supports pipelining. The
 only known method that does support pipelining is http.
-Fields: Version, Single-Instance, Pre-Scan, Pipeline, Send-Config, 
+Fields: Version, Single-Instance, Pre-Scan, Pipeline, Send-Config,
 Needs-Cleanup
 
 <tag>101 Log<item>
@@ -254,8 +254,8 @@ Fields: URI, Size, Last-Modified, Resume-Point
 Indicates that a URI has completed being transfered. It is possible
 to specify a <em>201 URI Done</> without a <em>URI Start</> which would
 mean no data was transfered but the file is now available. A Filename
-field is specified when the URI is directly available in the local 
-pathname space. APT will either directly use that file or copy it into 
+field is specified when the URI is directly available in the local
+pathname space. APT will either directly use that file or copy it into
 another location. It is possible to return Alt-* fields to indicate that
 another possibility for the URI has been found in the local pathname space.
 This is done if a decompressed version of a .gz file is found.
@@ -269,14 +269,14 @@ Fields: URI, Message
 
 <tag>401 General Failure<item>
 Indicates that some unspecific failure has occurred and the method is unable
-to continue. The method should terminate after sending this message. It 
+to continue. The method should terminate after sending this message. It
 is intended to check for invalid configuration options or other severe
 conditions.
 Fields: Message
 
 <tag>402 Authorization Required<item>
 The method requires a Username and Password pair to continue. After sending
-this message the method will expect APT to send a <em>602 Authorization 
+this message the method will expect APT to send a <em>602 Authorization
 Credentials</> message with the required information. It is possible for
 a method to send this multiple times.
 Fields: Site
@@ -299,7 +299,7 @@ from the configuration space.
 Fields: Config-Item.
 
 <tag>602 Authorization Credentials<item>
-This is sent in response to a <em>402 Authorization Required</> message. 
+This is sent in response to a <em>402 Authorization Required</> message.
 It contains the entered username and password.
 Fields: Site, User, Password
 
@@ -327,11 +327,11 @@ The methods supplied by the stock apt are:
 
 <p>
 The two internal methods, copy and gzip, are used by the acquire code to
-parallize and simplify the automatic decompression of package files as well 
-as copying package files around the file system. Both methods can be seen to 
+parallize and simplify the automatic decompression of package files as well
+as copying package files around the file system. Both methods can be seen to
 act the same except that one decompresses on the fly. APT uses them by
 generating a copy URI that is formed identically to a file URI. The destination
-file is send as normal. The method then takes the file specified by the 
+file is send as normal. The method then takes the file specified by the
 URI and writes it to the destination file. A typical set of operations may
 be:
 <example>
@@ -345,7 +345,7 @@ The http method implements a fully featured HTTP/1.1 client that supports
 deep pipelining and reget. It works best when coupled with an apache 1.3
 server. The file method simply generates failures or success responses with
 the filename field set to the proper location. The cdrom method acts the same
-except that it checks that the mount point has a valid cdrom in it. It does 
+except that it checks that the mount point has a valid cdrom in it. It does
 this by (effectively) computing a md5 hash of 'ls -l' on the mountpoint.
 
 </sect>

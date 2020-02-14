@@ -17,7 +17,7 @@ struct LessPred
      { return strcmp(s1, s2) < 0; }
 };
 
-class RPMPackageData 
+class RPMPackageData
 {
    protected:
 
@@ -44,14 +44,14 @@ class RPMPackageData
    typedef map<const char*,int,cstr_lt_pred> ArchScoresType;
 #endif
 
-   vector<regex_t*> HoldPackages;   
+   vector<regex_t*> HoldPackages;
    vector<regex_t*> DuplicatedPatterns;
 
    struct Translate {
 	   regex_t Pattern;
 	   string Template;
    };
-   
+
    vector<Translate*> BinaryTranslations;
    vector<Translate*> SourceTranslations;
    vector<Translate*> IndexTranslations;
@@ -71,13 +71,13 @@ class RPMPackageData
 
    public:
 
-   inline pkgCache::State::VerPriority VerPriority(const string &Package) 
+   inline pkgCache::State::VerPriority VerPriority(const string &Package)
    {
       if (Priorities.find(Package) != Priorities.end())
 	 return Priorities[Package];
       return pkgCache::State::Standard;
    };
-   inline pkgCache::Flag::PkgFlags PkgFlags(const string &Package) 
+   inline pkgCache::Flag::PkgFlags PkgFlags(const string &Package)
    	{return Flags[Package];};
 
    bool HoldPackage(const char *name);

@@ -8,7 +8,7 @@
 
    This is really C code, it just has a .cc extensions to play nicer with
    the rest of APT.
-   
+
    Originally written by Jason Gunthorpe <jgg@debian.org> and placed into
    the Public Domain, do with it what you will.
 
@@ -35,27 +35,27 @@ int getaddrinfo(const char *nodename, const char *servname,
    int Proto;
    const char *End;
    char **CurAddr;
-   
+
    // Try to convert the service as a number
    Port = htons(strtol(servname,(char **)&End,0));
    Proto = SOCK_STREAM;
-   
+
    if (hints != 0 && hints->ai_socktype != 0)
       Proto = hints->ai_socktype;
-   
+
    // Not a number, must be a name.
    if (End != servname + strlen(servname))
    {
       struct servent *Srv = 0;
-      
+
       // Do a lookup in the service database
       if (hints == 0 || hints->ai_socktype == SOCK_STREAM)
 	 Srv = getservbyname(servname,"tcp");
       if (hints != 0 && hints->ai_socktype == SOCK_DGRAM)
 	 Srv = getservbyname(servname,"udp");
       if (Srv == 0)
-	 return EAI_NONAME;  
-      
+	 return EAI_NONAME;
+
       // Get the right protocol
       Port = Srv->s_port;
       if (strcmp(Srv->s_proto,"tcp") == 0)
@@ -66,13 +66,13 @@ int getaddrinfo(const char *nodename, const char *servname,
 	    Proto = SOCK_DGRAM;
          else
 	    return EAI_NONAME;
-      }      
-      
-      if (hints != 0 && hints->ai_socktype != Proto && 
+      }
+
+      if (hints != 0 && hints->ai_socktype != Proto &&
 	  hints->ai_socktype != 0)
 	 return EAI_SERVICE;
    }
-      
+
    // Hostname lookup, only if this is not a listening socket
    if (hints != 0 && (hints->ai_flags & AI_PASSIVE) != AI_PASSIVE)
    {
@@ -85,16 +85,16 @@ int getaddrinfo(const char *nodename, const char *servname,
 	    return EAI_FAIL;
 	 return EAI_NONAME;
       }
-   
-      // No A records 
+
+      // No A records
       if (Addr->h_addr_list[0] == 0)
 	 return EAI_NONAME;
-      
+
       CurAddr = Addr->h_addr_list;
    }
    else
       CurAddr = (char **)&End;    // Fake!
-   
+
    // Start constructing the linked list
    *res = 0;
    for (; *CurAddr != 0; CurAddr++)
@@ -108,7 +108,7 @@ int getaddrinfo(const char *nodename, const char *servname,
       }
       if (*res == 0)
 	 *res = *Result;
-      
+
       (*Result)->ai_family = AF_INET;
       (*Result)->ai_socktype = Proto;
 
@@ -128,11 +128,11 @@ int getaddrinfo(const char *nodename, const char *servname,
 	 freeaddrinfo(*res);
 	 return EAI_MEMORY;
       }
-      
+
       // Set the address
       ((struct sockaddr_in *)(*Result)->ai_addr)->sin_family = AF_INET;
       ((struct sockaddr_in *)(*Result)->ai_addr)->sin_port = Port;
-      
+
       if (hints != 0 && (hints->ai_flags & AI_PASSIVE) != AI_PASSIVE)
 	 ((struct sockaddr_in *)(*Result)->ai_addr)->sin_addr = *(in_addr *)(*CurAddr);
       else
@@ -140,10 +140,10 @@ int getaddrinfo(const char *nodename, const char *servname,
          // Already zerod by calloc.
 	 break;
       }
-      
+
       Result = &(*Result)->ai_next;
    }
-   
+
    return 0;
 }
 									/*}}}*/
@@ -174,11 +174,11 @@ int getnameinfo(const struct sockaddr *sa, socklen_t salen,
 		int flags)
 {
    struct sockaddr_in *sin = (struct sockaddr_in *)sa;
-   
+
    // This routine only supports internet addresses
    if (sa->sa_family != AF_INET)
       return EAI_ADDRFAMILY;
-   
+
    if (host != 0)
    {
       // Try to resolve the hostname
@@ -202,14 +202,14 @@ int getnameinfo(const struct sockaddr *sa, socklen_t salen,
 	    flags |= NI_NUMERICHOST;
 	 }
       }
-      
+
       // Resolve as a plain numberic
       if ((flags & NI_NUMERICHOST) == NI_NUMERICHOST)
       {
 	 strncpy(host,inet_ntoa(sin->sin_addr),hostlen);
       }
    }
-   
+
    if (serv != 0)
    {
       // Try to resolve the hostname
@@ -220,7 +220,7 @@ int getnameinfo(const struct sockaddr *sa, socklen_t salen,
 	    Ent = getservbyport(ntohs(sin->sin_port),"udp");
 	 else
 	    Ent = getservbyport(ntohs(sin->sin_port),"tcp");
-	 
+
 	 if (Ent != 0)
 	    strncpy(serv,Ent->s_name,servlen);
 	 else
@@ -231,14 +231,14 @@ int getnameinfo(const struct sockaddr *sa, socklen_t salen,
 	    flags |= NI_NUMERICSERV;
 	 }
       }
-      
+
       // Resolve as a plain numberic
       if ((flags & NI_NUMERICSERV) == NI_NUMERICSERV)
       {
 	 snprintf(serv,servlen,"%u",ntohs(sin->sin_port));
       }
    }
-   
+
    return 0;
 }
 									/*}}}*/

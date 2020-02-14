@@ -2,16 +2,16 @@
 // Description								/*{{{*/
 // $Id: crc-16.cc,v 1.1 2002/07/23 17:54:51 niemeyer Exp $
 /* ######################################################################
-   
+
    CRC16 - Compute a 16bit crc very quickly
-   
+
    This was ripped out of the linux 2.2 kernel source (irda/crc.c) and
    is credited to ppp.c by Michael Callahan <callahan@maths.ox.ac.uk> and
    Al Longyear <longyear@netcom.com>
-   
+
    Modified by Jason Gunthorpe <jgg@debian.org> to fit the local coding
    style, this code is belived to be in the Public Domain.
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -67,7 +67,7 @@ static unsigned short const crc16_table[256] =
 /* Recompute the FCS with one more character appended. */
 #define CalcFCS(fcs, c) (((fcs) >> 8) ^ crc16_table[((fcs) ^ (c)) & 0xff])
 unsigned short AddCRC16(unsigned short fcs, void const *Buf,
-			unsigned long len) 
+			unsigned long len)
 {
    unsigned char const *buf = (unsigned char const *)Buf;
    while (len--)

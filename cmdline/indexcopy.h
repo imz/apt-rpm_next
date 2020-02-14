@@ -4,7 +4,7 @@
 /* ######################################################################
 
    Index Copying - Aid for copying and verifying the index files
-   
+
    ##################################################################### */
 									/*}}}*/
 #ifndef INDEXCOPY_H
@@ -23,9 +23,9 @@ class FileFd;
 class IndexCopy
 {
    protected:
-   
+
    pkgTagSection *Section;
-   
+
    string ChopDirs(string Path,unsigned int Depth);
    bool ReconstructPrefix(string &Prefix,string OrigPath,string CD,
 			  string File);
@@ -36,7 +36,7 @@ class IndexCopy
    virtual bool RewriteEntry(FILE *Target,string File) = 0;
    virtual const char *GetFileName() = 0;
    virtual const char *Type() = 0;
-   
+
    public:
 
    bool CopyPackages(string CDROM,string Name,vector<string> &List);
@@ -45,24 +45,24 @@ class IndexCopy
 class PackageCopy : public IndexCopy
 {
    protected:
-   
+
    virtual bool GetFile(string &Filename,unsigned long &Size);
    virtual bool RewriteEntry(FILE *Target,string File);
    virtual const char *GetFileName() {return "Packages";};
    virtual const char *Type() {return "Package";};
-   
+
    public:
 };
 
 class SourceCopy : public IndexCopy
 {
    protected:
-   
+
    virtual bool GetFile(string &Filename,unsigned long &Size);
    virtual bool RewriteEntry(FILE *Target,string File);
    virtual const char *GetFileName() {return "Sources";};
    virtual const char *Type() {return "Source";};
-   
+
    public:
 };
 

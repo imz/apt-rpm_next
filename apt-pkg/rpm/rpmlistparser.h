@@ -2,11 +2,11 @@
 // Description								/*{{{*/
 // $Id: rpmlistparser.h,v 1.2 2002/07/26 17:39:28 niemeyer Exp $
 /* ######################################################################
-   
-   RPM Package List Parser - This implements the abstract parser 
+
+   RPM Package List Parser - This implements the abstract parser
    interface for RPM package files
-   
-   ##################################################################### 
+
+   #####################################################################
  */
 									/*}}}*/
 // Header section: pkglib
@@ -34,7 +34,7 @@ class rpmListParser : public pkgCacheGenerator::ListParser
 
    string CurrentName;
    const pkgCache::VerIterator *VI;
-   
+
 #ifdef WITH_HASH_MAP
    typedef hash_map<const char*,bool,
    		    hash<const char*>,cstr_eq_pred> SeenPackagesType;
@@ -44,7 +44,7 @@ class rpmListParser : public pkgCacheGenerator::ListParser
    SeenPackagesType *SeenPackages;
 
    bool Duplicated;
-   
+
    unsigned long UniqFindTagWrite(int Tag);
    bool ParseStatus(pkgCache::PkgIterator Pkg,pkgCache::VerIterator Ver);
    bool ParseDepends(pkgCache::VerIterator Ver,
@@ -52,13 +52,13 @@ class rpmListParser : public pkgCacheGenerator::ListParser
 		     int count, unsigned int Type);
    bool ParseDepends(pkgCache::VerIterator Ver, unsigned int Type);
    bool ParseProvides(pkgCache::VerIterator Ver);
-   
+
 #ifdef OLD_FILEDEPS
    bool ProcessFileProvides(pkgCache::VerIterator Ver);
 #endif
-   
+
  public:
-   
+
    // These all operate against the current header
    virtual string Package();
    virtual string Version();
@@ -78,14 +78,14 @@ class rpmListParser : public pkgCacheGenerator::ListParser
    	{return Handler->IsDatabase();};
 
    virtual bool CollectFileProvides(pkgCache &Cache,
-				    pkgCache::VerIterator Ver); 
+				    pkgCache::VerIterator Ver);
    virtual bool Step();
-   
+
    bool LoadReleaseInfo(pkgCache::PkgFileIterator FileI,FileFd &File);
 
    void VirtualizePackage(string Name);
    void CompatArchPackage(string Name);
-   
+
    rpmListParser(RPMHandler *Handler);
    ~rpmListParser();
 };

@@ -7,8 +7,8 @@
 <version>$Id: files.sgml,v 1.12 2003/04/26 23:26:13 doogie Exp $</version>
 
 <abstract>
-This document describes the complete implementation and format of the 
-installed APT directory structure. It also serves as guide to how APT 
+This document describes the complete implementation and format of the
+installed APT directory structure. It also serves as guide to how APT
 views the Debian archive.
 </abstract>
 
@@ -35,7 +35,7 @@ For more details, on Debian GNU/Linux systems, see the file
 <p>
 This document serves two purposes. The first is to document the installed
 directory structure and the format and purpose of each file. The second
-purpose is to document how APT views the Debian archive and deals with 
+purpose is to document how APT views the Debian archive and deals with
 multiple package files.
 
 <p>
@@ -66,7 +66,7 @@ The var directory structure is as follows:
 </example>
 
 <p>
-As is specified in the FHS 2.1 /var/lib/apt is used for application 
+As is specified in the FHS 2.1 /var/lib/apt is used for application
 data that is not expected to be user modified. /var/cache/apt is used
 for regeneratable data and is where the package cache and downloaded .debs
 go.
@@ -81,14 +81,14 @@ go.
 <p>
 The distribution source list is used to locate archives of the debian
 distribution. It is designed to support any number of active sources and to
-support a mix of source media. The file lists one source per line, with the 
+support a mix of source media. The file lists one source per line, with the
 fastest source listed first. The format of each line is:
 
 <p>
 <var>type uri args</var>
 
 <p>
-The first item, <var>type</var>, indicates the format for the remainder 
+The first item, <var>type</var>, indicates the format for the remainder
 of the line. It is designed to indicate the structure of the distribution
 the line is talking about. Currently the only defined value is <em>deb</em>
 which indicates a standard debian archive with a dists dir.
@@ -97,43 +97,43 @@ which indicates a standard debian archive with a dists dir.
    <p>
    The <em>deb</em> type is to be a typical two level debian distributions,
    dist/<var>distribution</var>/<var>component</var>. Typically distribution
-   is one of stable, unstable or testing while component is one of main, 
+   is one of stable, unstable or testing while component is one of main,
    contrib, non-free or non-us. The format for the deb line is as follows:
 
    <p>
-   deb <var>uri</var> <var>distribution</var> <var>component</var> 
+   deb <var>uri</var> <var>distribution</var> <var>component</var>
    [<var>component</var> ...]
 
    <p>
-   <var>uri</var> for the <em>deb</em> type must specify the base of the 
-   debian distribution. APT will automatically generate the proper longer 
+   <var>uri</var> for the <em>deb</em> type must specify the base of the
+   debian distribution. APT will automatically generate the proper longer
    URIs to get the information it needs. <var>distribution</var> can specify
    an exact path, in this case the components must be omitted and
    <var>distribution</var> must end in a slash.
-   
+
    <p>
    Since only one distribution can be specified per deb line it may be
    necessary to list a number of deb lines for the same URI. APT will
-   sort the URI list after it has generated a complete set to allow 
+   sort the URI list after it has generated a complete set to allow
    connection reuse. It is important to order things in the sourcelist
    from most preferred to least preferred (fastest to slowest).
 </sect1>
 
 <sect1>URI specification
-<p> 
+<p>
 URIs in the source list support a large number of access schemes.
 
 <taglist>
 <tag>cdrom<item>
    The cdrom scheme is special in that If Modified Since queries are never
    performed and that APT knows how to match a cdrom to the name it
-   was given when first inserted. APT also knows all of the possible 
+   was given when first inserted. APT also knows all of the possible
    mount points the cdrom drives and that the user should be prompted
-   to insert a CD if it cannot be found. The path is relative to an 
-   arbitrary mount point (of APT's choosing) and must not start with a 
+   to insert a CD if it cannot be found. The path is relative to an
+   arbitrary mount point (of APT's choosing) and must not start with a
    slash. The first pathname component is the given name and is purely
-   descriptive and of the users choice. However, if a file in the root of 
-   the cdrom is called '.disk/info' its contents will be used instead of 
+   descriptive and of the users choice. However, if a file in the root of
+   the cdrom is called '.disk/info' its contents will be used instead of
    prompting. The name serves as a tag for the cdrom and should be unique.
    <example>
    cdrom:Debian 1.3/debian
@@ -155,15 +155,15 @@ URIs in the source list support a large number of access schemes.
    </example>
 
 <tag>file<item>
-   The file scheme allows an arbitrary directory in the file system to be 
-   considered as a debian archive. This is useful for NFS mounts and 
+   The file scheme allows an arbitrary directory in the file system to be
+   considered as a debian archive. This is useful for NFS mounts and
    local mirrors/archives.
    <example>
    file:/var/debian
    </example>
-   
+
 <tag>smb<item>
-   A possible future expansion may be to have direct support for smb (Samba 
+   A possible future expansion may be to have direct support for smb (Samba
    servers).
    <example>
    smb://ftp.kernel.org/pub/mirrors/debian
@@ -177,25 +177,25 @@ All permanent information acquired from any of the sources is stored in the
 lists directory. Thus, there must be a way to relate the filename in the
 lists directory to a line in the sourcelist. To simplify things this is
 done by quoting the URI and treating _'s as quoteable characters and
-converting / to _. The URI spec says this is done by converting a 
-sensitive character into %xx where xx is the hexadecimal representation 
+converting / to _. The URI spec says this is done by converting a
+sensitive character into %xx where xx is the hexadecimal representation
 from the ASCII character set. Examples:
 
 <example>
-http://www.debian.org/archive/dists/stable/binary-i386/Packages 
+http://www.debian.org/archive/dists/stable/binary-i386/Packages
 /var/lib/apt/lists/www.debian.org_archive_dists_stable_binary-i386_Packages
 
 cdrom:Debian 1.3/debian/Packages
 /var/lib/apt/info/Debian%201.3_debian_Packages
 </example>
 
-<p> 
-The other alternative that was considered was to use a deep directory 
+<p>
+The other alternative that was considered was to use a deep directory
 structure but this poses two problems, it makes it very difficult to prune
 directories back when sources are no longer used and complicates the handling
 of the partial directory. This gives a very simple way to deal with all
-of the situations that can arise. Also note that the same rules described in 
-the <em>Archive Directory</> section regarding the partial sub dir apply 
+of the situations that can arise. Also note that the same rules described in
+the <em>Archive Directory</> section regarding the partial sub dir apply
 here as well.
 </sect1>
 
@@ -218,12 +218,12 @@ apply to. The new fields are as follows:
 <taglist>
 <tag>X-Auto<item>
    The Auto flag can be Yes or No and controls whether the package is in
-   auto mode. 
+   auto mode.
 
 <tag>X-TargetDist<item>
    The TargetDist item indicates which distribution versions are offered for
    installation from. It should be stable, unstable or testing.
-   
+
 <tag>X-TargetVersion<item>
    The target version item is set if the user selects a specific version, it
    overrides the TargetDist selection if both are present.
@@ -235,12 +235,12 @@ apply to. The new fields are as follows:
 <sect>Binary Package Cache (pkgcache.bin)
 
 <p>
-Please see cache.sgml for a complete description of what this file is. The 
+Please see cache.sgml for a complete description of what this file is. The
 cache file is updated whenever the contents of the lists directory changes.
 If the cache is erased, corrupted or of a non-matching version it will
-be automatically rebuilt by all of the tools that need it. 
-<em>srcpkgcache.bin</> contains a cache of all of the package files in the 
-source list. This allows regeneration of the cache when the status files 
+be automatically rebuilt by all of the tools that need it.
+<em>srcpkgcache.bin</> contains a cache of all of the package files in the
+source list. This allows regeneration of the cache when the status files
 change to use a prebuilt version for greater speed.
 </sect>
                                                                   <!-- }}} -->
@@ -252,7 +252,7 @@ change to use a prebuilt version for greater speed.
 The archives directory is where all downloaded .deb archives go. When the
 file transfer is initiated the deb is placed in partial. Once the file
 is fully downloaded and its MD5 hash and size are verified it is moved
-from partial into archives/. Any files found in archives/ can be assumed 
+from partial into archives/. Any files found in archives/ can be assumed
 to be verified.
 
 <p>
@@ -260,7 +260,7 @@ No directory structure is transfered from the receiving site and all .deb
 file names conform to debian conventions. No short (msdos) filename should
 be placed in archives. If the need arises .debs should be unpacked, scanned
 and renamed to their correct internal names. This is mostly to prevent
-file name conflicts but other programs may depend on this if convenient. 
+file name conflicts but other programs may depend on this if convenient.
 A conforming .deb is one of the form, name_version_arch.deb. Our archive
 scripts do not handle epochs, but they are necessary and should be re-inserted.
 If necessary _'s and :'s in the fields should be quoted using the % convention.
@@ -284,7 +284,7 @@ document.
 
 <p>
 The mirror list is stored on the primary debian web server (www.debian.org)
-and contains a machine readable list of all known debian mirrors. It's 
+and contains a machine readable list of all known debian mirrors. It's
 format and style mirror the Package file.
 
 <taglist>
@@ -297,12 +297,12 @@ These list any commonly used aliases for the site. This field is used to make
 sure that a site is not added twice.
 
 <tag>Type<item>
-This field can either be <em>Push-Primary</> or <em>leaf</>. 
-<em>Push-Primary</> are authorized top level mirrors of the archive, all 
-other mirrors are leaf. 
+This field can either be <em>Push-Primary</> or <em>leaf</>.
+<em>Push-Primary</> are authorized top level mirrors of the archive, all
+other mirrors are leaf.
 
 <tag>Archive-[access]<item>
-The Archive field gives the path(s) to the debian archive. [access] 
+The Archive field gives the path(s) to the debian archive. [access]
 specifies the access method and may be one of ftp, http, rsync, nfs, or
 smb. For many of the types it is possible to prefix the path with :###
 indicating that an alternate port should be used. Generally paths
@@ -348,16 +348,16 @@ will use the first found URI.
 <sect> The Release File
 
 <p>
-This file plays and important role in how APT presents the archive to the 
+This file plays and important role in how APT presents the archive to the
 user. Its main purpose is to present a descriptive name for the source
 of each version of each package. It also is used to detect when new versions
-of debian are released. It augments the package file it is associated with 
+of debian are released. It augments the package file it is associated with
 by providing meta information about the entire archive which the Packages
 file describes.
 
 <p>
 The full name of the distribution for presentation to the user is formed
-as 'label version archive', with a possible extended name being 
+as 'label version archive', with a possible extended name being
 'label version archive component'.
 
 <p>
@@ -383,7 +383,7 @@ string will read 'Debian'. Other providers may use their own string
 
 <tag>Label<item>
 This carries the encompassing name of the distribution. For Debian proper
-this field reads 'Debian'. For derived distributions it should contain their 
+this field reads 'Debian'. For derived distributions it should contain their
 proper name.
 
 <tag>Architecture<item>
@@ -393,7 +393,7 @@ contain the keyword <em>mixed</em>.
 
 <tag>NotAutomatic<item>
 A Yes/No flag indicating that the archive is extremely unstable and its
-version's should never be automatically selected. This is to be used by 
+version's should never be automatically selected. This is to be used by
 experimental.
 
 <tag>Description<item>
@@ -402,10 +402,10 @@ contain a warning that the packages have problems.
 </taglist>
 
 <p>
-The location of the Release file in the archive is very important, it must 
-be located in the same location as the packages file so that it can be 
+The location of the Release file in the archive is very important, it must
+be located in the same location as the packages file so that it can be
 located in all situations. The following is an example for the current stable
-release, 1.3.1r6 
+release, 1.3.1r6
 
 <example>
 Archive: stable

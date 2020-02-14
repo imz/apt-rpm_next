@@ -6,7 +6,7 @@
 # the pkglists and the hash file. Update the components directory to contain
 # the components of your repository.
 #
- 
+
 usage="\
 Usage: genbasedir [<options>] <topdir> [<comp1> [<comp2> ...]]\n\
 
@@ -40,7 +40,7 @@ Examples:\n\
 getsize()
 {
     tmp=`wc -c $1`
-    echo $tmp|cut -f1 -d\  
+    echo $tmp|cut -f1 -d\
 }
 
 phashstuff()
@@ -217,7 +217,7 @@ fi
 echo -n "Processing pkglists..."
 
 # Save older pkglist outside loop, if creating a meta repository
-if [ -n "$meta" ]; then 
+if [ -n "$meta" ]; then
 	if [ -f $basedir/pkglist.$meta ]; then
 		mv -f $basedir/pkglist.$meta $basedir/pkglist.$meta.old
 	fi
@@ -305,7 +305,7 @@ echo " [done]"
 
 echo -n "Processing srclists..."
 
-if [ -n "$meta" ]; then 
+if [ -n "$meta" ]; then
 	if [ -f $basedir/srclist.$meta ]; then
 		mv -f $basedir/srclist.$meta $basedir/srclist.$meta.old
 	fi

@@ -7,7 +7,7 @@ include ../buildlib/defaults.mak
 
 # Program for testing methods
 PROGRAM=mthdcat
-SLIBS = 
+SLIBS =
 SOURCE = mthdcat.cc
 include $(PROGRAM_H)
 
@@ -26,7 +26,7 @@ include $(PROGRAM_H)
 
 # Version compare tester
 PROGRAM=versiontest
-SLIBS = -lapt-pkg 
+SLIBS = -lapt-pkg
 LIB_MAKES = apt-pkg/makefile
 SOURCE = versiontest.cc
 include $(PROGRAM_H)
@@ -58,7 +58,7 @@ include $(PROGRAM_H)
 
 # Program for testing hashes
 PROGRAM=hash
-SLIBS = -lapt-pkg 
+SLIBS = -lapt-pkg
 SOURCE = hash.cc
 include $(PROGRAM_H)
 

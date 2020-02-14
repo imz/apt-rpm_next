@@ -490,7 +490,7 @@ rpm/rpmsrcrecords.lo: rpm/$(am__dirstamp) \
 	rpm/$(DEPDIR)/$(am__dirstamp)
 rpm/rpmsystem.lo: rpm/$(am__dirstamp) rpm/$(DEPDIR)/$(am__dirstamp)
 rpm/rpmversion.lo: rpm/$(am__dirstamp) rpm/$(DEPDIR)/$(am__dirstamp)
-libapt-pkg.la: $(libapt_pkg_la_OBJECTS) $(libapt_pkg_la_DEPENDENCIES) 
+libapt-pkg.la: $(libapt_pkg_la_OBJECTS) $(libapt_pkg_la_DEPENDENCIES)
 	$(CXXLINK) -rpath $(libdir) $(libapt_pkg_la_LDFLAGS) $(libapt_pkg_la_OBJECTS) $(libapt_pkg_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:

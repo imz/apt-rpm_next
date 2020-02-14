@@ -4,7 +4,7 @@
 /* ######################################################################
 
    DPKG Package Manager - Provide an interface to dpkg
-   
+
    ##################################################################### */
 									/*}}}*/
 #ifndef PKGLIB_DPKGPM_H
@@ -23,7 +23,7 @@ using std::vector;
 class pkgDPkgPM : public pkgPackageManager
 {
    protected:
-   
+
    struct Item
    {
       enum Ops {Install, Configure, Remove, Purge} Op;
@@ -32,7 +32,7 @@ class pkgDPkgPM : public pkgPackageManager
       Item(Ops Op,PkgIterator Pkg,string File = "") : Op(Op),
             File(File), Pkg(Pkg) {};
       Item() {};
-      
+
    };
    vector<Item> List;
 
@@ -40,14 +40,14 @@ class pkgDPkgPM : public pkgPackageManager
    bool RunScripts(const char *Cnf);
    bool RunScriptsWithPkgs(const char *Cnf);
    bool SendV2Pkgs(FILE *F);
-   
+
    // The Actuall installation implementation
    virtual bool Install(PkgIterator Pkg,string File);
    virtual bool Configure(PkgIterator Pkg);
    virtual bool Remove(PkgIterator Pkg,bool Purge = false);
    virtual bool Go();
    virtual void Reset();
-   
+
    public:
 
    pkgDPkgPM(pkgDepCache *Cache);

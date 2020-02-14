@@ -2,13 +2,13 @@
 // Description								/*{{{*/
 // $Id: cachefile.cc,v 1.2 2002/07/25 18:07:18 niemeyer Exp $
 /* ######################################################################
-   
+
    CacheFile - Simple wrapper class for opening, generating and whatnot
-   
+
    This class implements a simple 2 line mechanism to open various sorts
    of caches. It can operate as root, as not root, show progress and so on,
    it transparently handles everything necessary.
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -23,7 +23,7 @@
 #include <apt-pkg/configuration.h>
 #include <apt-pkg/policy.h>
 #include <apt-pkg/pkgsystem.h>
-    
+
 #include <apti18n.h>
 									/*}}}*/
 
@@ -44,7 +44,7 @@ pkgCacheFile::~pkgCacheFile()
    delete Cache;
    delete Map;
    _system->UnLock(true);
-}   
+}
 									/*}}}*/
 // CacheFile::BuildCaches - Open and build the cache files		/*{{{*/
 // ---------------------------------------------------------------------
@@ -58,13 +58,13 @@ bool pkgCacheFile::BuildCaches(OpProgress &Progress,bool WithLock)
    // CNC:2002-07-06
    if (WithLock == false)
       _system->LockRead();
-   
+
    if (_config->FindB("Debug::NoLocking",false) == true)
       WithLock = false;
-      
+
    if (_error->PendingError() == true)
       return false;
-   
+
    // Read the source list
    pkgSourceList List;
    if (List.ReadMainList() == false)
@@ -93,24 +93,24 @@ bool pkgCacheFile::Open(OpProgress &Progress,bool WithLock)
 {
    if (BuildCaches(Progress,WithLock) == false)
       return false;
-   
+
    // The policy engine
    Policy = new pkgPolicy(Cache);
    if (_error->PendingError() == true)
       return false;
    if (ReadPinFile(*Policy) == false)
       return false;
-   
+
    // Create the dependency cache
    DCache = new pkgDepCache(Cache,Policy);
    if (_error->PendingError() == true)
       return false;
-   
+
    DCache->Init(&Progress);
    Progress.Done();
    if (_error->PendingError() == true)
       return false;
-   
+
    return true;
 }
 									/*}}}*/

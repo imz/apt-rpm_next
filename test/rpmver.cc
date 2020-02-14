@@ -29,7 +29,7 @@ int rpmvercmp(const char * a, const char * b)
 
     one = str1;
     two = str2;
-   
+
     /* loop through each version segment of str1 and str2 and compare them */
     while (*one && *two) {
 	while (*one && !xisalnum(*one)) one++;
@@ -103,12 +103,12 @@ int rpmvercmp(const char * a, const char * b)
 int main(int argc,const char *argv[])
 {
    printf("%i\n",strcmp(argv[1],argv[2]));
-   
+
    printf("'%s' <> '%s':  ",argv[1],argv[2]);
    printf("rpm: %i   deb:  %i\n",rpmvercmp(argv[1],argv[2]),
 	  debVS.CmpFragment(argv[1],argv[1]+strlen(argv[1]),
 			    argv[2],argv[2]+strlen(argv[2])));
-   
+
    printf("'%s' <> '%s':  ",argv[2],argv[1]);
    printf("rpm: %i   deb:  %i\n",rpmvercmp(argv[2],argv[1]),
 	  debVS.CmpFragment(argv[2],argv[2]+strlen(argv[2]),

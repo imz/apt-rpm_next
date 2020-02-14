@@ -3,8 +3,8 @@
 // $Id: acqprogress.cc,v 1.24 2003/04/27 01:56:48 doogie Exp $
 /* ######################################################################
 
-   Acquire Progress - Command line progress meter 
-   
+   Acquire Progress - Command line progress meter
+
    ##################################################################### */
 									/*}}}*/
 // Include files							/*{{{*/
@@ -15,7 +15,7 @@
 #include <apt-pkg/error.h>
 
 #include <apti18n.h>
-    
+
 #include <stdio.h>
 #include <signal.h>
 #include <termios.h>
@@ -36,9 +36,9 @@ AcqTextStatus::AcqTextStatus(unsigned int &ScreenWidth,unsigned int Quiet) :
 // AcqTextStatus::Start - Downloading has started			/*{{{*/
 // ---------------------------------------------------------------------
 /* */
-void AcqTextStatus::Start() 
+void AcqTextStatus::Start()
 {
-   pkgAcquireStatus::Start(); 
+   pkgAcquireStatus::Start();
    BlankLine[0] = 0;
    ID = 1;
 };
@@ -52,8 +52,8 @@ void AcqTextStatus::IMSHit(pkgAcquire::ItemDesc &Itm)
       return;
 
    if (Quiet <= 0)
-      cout << '\r' << BlankLine << '\r';   
-   
+      cout << '\r' << BlankLine << '\r';
+
    cout << _("Hit ") << Itm.Description;
    if (Itm.Owner->FileSize != 0)
       cout << " [" << SizeToStr(Itm.Owner->FileSize) << "B]";
@@ -69,15 +69,15 @@ void AcqTextStatus::Fetch(pkgAcquire::ItemDesc &Itm)
    Update = true;
    if (Itm.Owner->Complete == true)
       return;
-   
+
    Itm.Owner->ID = ID++;
-   
+
    if (Quiet > 1)
       return;
 
    if (Quiet <= 0)
       cout << '\r' << BlankLine << '\r';
-   
+
    cout << _("Get:") << Itm.Owner->ID << ' ' << Itm.Description;
    if (Itm.Owner->FileSize != 0)
       cout << " [" << SizeToStr(Itm.Owner->FileSize) << "B]";
@@ -103,10 +103,10 @@ void AcqTextStatus::Fail(pkgAcquire::ItemDesc &Itm)
    // Ignore certain kinds of transient failures (bad code)
    if (Itm.Owner->Status == pkgAcquire::Item::StatIdle)
       return;
-      
+
    if (Quiet <= 0)
       cout << '\r' << BlankLine << '\r';
-   
+
    if (Itm.Owner->Status == pkgAcquire::Item::StatDone)
    {
       cout << _("Ign ") << Itm.Description << endl;
@@ -116,7 +116,7 @@ void AcqTextStatus::Fail(pkgAcquire::ItemDesc &Itm)
       cout << _("Err ") << Itm.Description << endl;
       cout << "  " << Itm.Owner->ErrorText << endl;
    }
-   
+
    Update = true;
 };
 									/*}}}*/
@@ -143,17 +143,17 @@ void AcqTextStatus::Stop()
 // AcqTextStatus::Pulse - Regular event pulse				/*{{{*/
 // ---------------------------------------------------------------------
 /* This draws the current progress. Each line has an overall percent
-   meter and a per active item status meter along with an overall 
+   meter and a per active item status meter along with an overall
    bandwidth and ETA indicator. */
 bool AcqTextStatus::Pulse(pkgAcquire *Owner)
 {
    if (Quiet > 0)
       return true;
-   
+
    pkgAcquireStatus::Pulse(Owner);
-   
+
    enum {Long = 0,Medium,Short} Mode = Long;
-   
+
    char Buffer[sizeof(BlankLine)];
    char *End = Buffer + sizeof(Buffer);
    char *S = Buffer;
@@ -168,8 +168,8 @@ bool AcqTextStatus::Pulse(pkgAcquire *Owner)
 	I = Owner->WorkerStep(I))
    {
       S += strlen(S);
-      
-      // There is no item running 
+
+      // There is no item running
       if (I->CurrentItem == 0)
       {
 	 if (I->Status.empty() == false)
@@ -177,12 +177,12 @@ bool AcqTextStatus::Pulse(pkgAcquire *Owner)
 	    snprintf(S,End-S," [%s]",I->Status.c_str());
 	    Shown = true;
 	 }
-	 
+
 	 continue;
       }
 
       Shown = true;
-      
+
       // Add in the short description
       if (I->CurrentItem->Owner->ID != 0)
 	 snprintf(S,End-S," [%lu %s",I->CurrentItem->Owner->ID,
@@ -197,7 +197,7 @@ bool AcqTextStatus::Pulse(pkgAcquire *Owner)
 	 snprintf(S,End-S," %s",I->CurrentItem->Owner->Mode);
 	 S += strlen(S);
       }
-            
+
       // Add the current progress
       if (Mode == Long)
 	 snprintf(S,End-S," %lu",I->CurrentSize);
@@ -207,7 +207,7 @@ bool AcqTextStatus::Pulse(pkgAcquire *Owner)
 	    snprintf(S,End-S," %sB",SizeToStr(I->CurrentSize).c_str());
       }
       S += strlen(S);
-      
+
       // Add the total size and percent
       if (I->TotalSize > 0 && I->CurrentItem->Owner->Complete == false)
       {
@@ -217,7 +217,7 @@ bool AcqTextStatus::Pulse(pkgAcquire *Owner)
 	 else
 	    snprintf(S,End-S,"/%sB %lu%%",SizeToStr(I->TotalSize).c_str(),
 		     long(double(I->CurrentSize*100.0)/double(I->TotalSize)));
-      }      
+      }
       S += strlen(S);
       snprintf(S,End-S,"]");
    }
@@ -225,26 +225,26 @@ bool AcqTextStatus::Pulse(pkgAcquire *Owner)
    // Show something..
    if (Shown == false)
       snprintf(S,End-S,_(" [Working]"));
-      
+
    /* Put in the ETA and cps meter, block off signals to prevent strangeness
       during resizing */
    sigset_t Sigs,OldSigs;
    sigemptyset(&Sigs);
    sigaddset(&Sigs,SIGWINCH);
    sigprocmask(SIG_BLOCK,&Sigs,&OldSigs);
-   
+
    if (CurrentCPS != 0)
-   {      
+   {
       char Tmp[300];
       unsigned long ETA = (unsigned long)((TotalBytes - CurrentBytes)/CurrentCPS);
       sprintf(Tmp," %sB/s %s",SizeToStr(CurrentCPS).c_str(),TimeToStr(ETA).c_str());
       unsigned int Len = strlen(Buffer);
       unsigned int LenT = strlen(Tmp);
       if (Len + LenT < ScreenWidth)
-      {	 
+      {
 	 memset(Buffer + Len,' ',ScreenWidth - Len);
 	 strcpy(Buffer + ScreenWidth - LenT,Tmp);
-      }      
+      }
    }
    Buffer[ScreenWidth] = 0;
    BlankLine[ScreenWidth] = 0;
@@ -257,7 +257,7 @@ bool AcqTextStatus::Pulse(pkgAcquire *Owner)
       cout << '\r' << BlankLine << '\r' << Buffer << flush;
    memset(BlankLine,' ',strlen(Buffer));
    BlankLine[strlen(Buffer)] = 0;
-   
+
    Update = false;
 
    return true;
@@ -278,7 +278,7 @@ bool AcqTextStatus::MediaChange(string Media,string Drive)
    char C = 0;
    while (C != '\n' && C != '\r')
       read(STDIN_FILENO,&C,1);
-   
+
    Update = true;
    return true;
 }
@@ -334,7 +334,7 @@ bool AcqTextStatus::Authenticate(string Desc,string &User,string &Pass)
 
    ioprintf(cout,_("\n"));
    cout << flush;
-   
+
    Update = true;
    return true;
 }

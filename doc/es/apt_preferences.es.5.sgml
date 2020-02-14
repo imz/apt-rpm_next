@@ -6,10 +6,10 @@
 
 ]>
 
-<!-- 
+<!--
 (c) 2003 Software in the Public Interest
 Esta traducción ha sido realizada por Rubén Porras Campo <nahoo@inicia.es>
-y revisada por Javier Fernández-Sanguino <jfs@computer.org> 
+y revisada por Javier Fernández-Sanguino <jfs@computer.org>
 Está basada en la página de manual original:
 versión 1.4 del CVS de
 /cvs/debian-doc/manpages/english/apt/apt_preferences.5.sgml
@@ -38,7 +38,7 @@ se puede usar para controlar las versiones de los paquetes seleccionados.
 
 <para>Cuando el fichero &sources-list; contiene referencias a más de una
 distribución (por ejemplo, <literal>estable</literal> y <literal>pruebas
-</literal>). APT asigna una prioridad a cada versión disponible. 
+</literal>). APT asigna una prioridad a cada versión disponible.
 Limitado por las dependencias, <command>apt-get</command> selecciona la versión
 con mayor prioridad.
 </para>
@@ -57,9 +57,9 @@ modifica la elección del ejemplar, sólo la elección de la versión.
 <RefSect2><Title>¿Cómo asigna APT las prioridades?</>
 
 <para>Si no existe el fichero de preferencias o no hay ninguna entrada en éste
-que se pueda aplicar a una determinada versión, se asigna a la versión la 
-prioridad de la distribución a la que pertenece. Es posible seleccionar una 
-distribución, &gt;&gt;distribución objetivo&lt;&lt; 
+que se pueda aplicar a una determinada versión, se asigna a la versión la
+prioridad de la distribución a la que pertenece. Es posible seleccionar una
+distribución, &gt;&gt;distribución objetivo&lt;&lt;
 (n. t. del inglés <emphasis>target release</emphasis>), que recibe
 una prioridad mayor que el resto. La distribución objetivo se puede definir
 en la línea de órdenes al ejecutar <command>apt-get</command> o en el fichero
@@ -75,7 +75,7 @@ APT::Default-Release "stable";
 
 <para>
 Si se ha especificado una distribución objetivo, APT usa el siguiente
-algoritmo para establecer las prioridades de cada versión de un paquete. 
+algoritmo para establecer las prioridades de cada versión de un paquete.
 Asigna:
 
 <variablelist>
@@ -85,7 +85,7 @@ Asigna:
 </varlistentry>
 <varlistentry>
 <term>prioridad 500</term>
-<listitem><simpara>a la versión que ni está instalada ni pertenece a la 
+<listitem><simpara>a la versión que ni está instalada ni pertenece a la
 distribución objetivo.</simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -102,20 +102,20 @@ todas las versiones de los paquetes instalados y 500 al resto.
 </para>
 
 <para>
-APT aplica las siguientes normas, expuestas por orden de precedencia, 
+APT aplica las siguientes normas, expuestas por orden de precedencia,
 para determinar qué versión del paquete debe instalar.
 
 <itemizedlist>
-<listitem><simpara>Nunca instalar una versión anterior de un paquete en lugar 
-de la instalada a menos que la prioridad de la versión disponible supere 1000 
+<listitem><simpara>Nunca instalar una versión anterior de un paquete en lugar
+de la instalada a menos que la prioridad de la versión disponible supere 1000
 (Dese cuenta que ninguna de las prioridades que asigna APT por omisión superan
-1000, éstas prioridades sólo se pueden establecer mediante el fichero de 
+1000, éstas prioridades sólo se pueden establecer mediante el fichero de
 preferencias. Tenga en consideración que instalar una versión anterior del
 paquete puede ser peligroso).
 </simpara></listitem>
 <listitem><simpara>Instalar la versión de mayor prioridad.
 </simpara></listitem>
-<listitem><simpara>Si dos o más versiones tienen la misma prioridad, 
+<listitem><simpara>Si dos o más versiones tienen la misma prioridad,
 instala la más reciente (esto es, la que tiene un número de versión mayor).
 </simpara></listitem>
 <listitem><simpara>Si dos o más versiones tienen la misma prioridad y número de
@@ -127,7 +127,7 @@ opción <literal/--reinstall/ se instala la que no está instalada.
 
 <para>
 Típicamente, la versión instalada del paquete (prioridad 100)
-no es tan reciente como la disponible a través de &sources-list; 
+no es tan reciente como la disponible a través de &sources-list;
 (prioridad 500 o 990). Entonces el paquete se actualizará cuando se ejecute
 <command>apt-get install <replaceable>algún-paquete</replaceable></command> o
 <command>apt-get upgrade</command>.
@@ -141,11 +141,11 @@ upgrade</command>.
 </para>
 
 <para>
-A veces la versión instalada de un paquete es más reciente que la 
-versión perteneciente a la distribución objetivo, pero no tan reciente como la 
+A veces la versión instalada de un paquete es más reciente que la
+versión perteneciente a la distribución objetivo, pero no tan reciente como la
 versión de otra distribución. Este tipo de paquetes se actualizarán cuando se
 ejecute <command>apt-get install
-<replaceable>algún-paquete</replaceable></command> o <command>apt-get 
+<replaceable>algún-paquete</replaceable></command> o <command>apt-get
 upgrade</command>.porque al menos <emphasis/uno/ de los ejemplares disponibles
 tiene una prioridad mayor que la versión instalada.
 </para>
@@ -248,11 +248,11 @@ anterior a la instalada en el sistema.</simpara></listitem>
 <varlistentry><term>990 &lt; P &lt;=1000</term>
 <listitem><simpara>la versión se instala aunque no venga de la distribución
 objetivo, a menos que la versión instalada sea más reciente.
-</simpara></listitem> 
+</simpara></listitem>
 </varlistentry>
 <varlistentry><term>500 &lt; P &lt;=990</term>
 <listitem><simpara>la versión se instala a menos que exista otro ejemplar
-disponible perteneciente a la distribución objetivo o bien la versión 
+disponible perteneciente a la distribución objetivo o bien la versión
 instalada sea más reciente.</simpara></listitem>
 </varlistentry>
 <varlistentry><term>100 &lt; P &lt;=500</term>
@@ -260,7 +260,7 @@ instalada sea más reciente.</simpara></listitem>
 perteneciente a otra distribución o la versión instalada sea más reciente.
 </simpara></listitem>
 <varlistentry><term>0 &lt; P &lt;=100</term>
-<listitem><simpara>la versión sólo se instala si no hay ninguna versión 
+<listitem><simpara>la versión sólo se instala si no hay ninguna versión
 del paquete instalado.</simpara></listitem>
 </varlistentry>
 <varlistentry><term>P &lt; 0</term>
@@ -279,7 +279,7 @@ versión del paquete.
 </para>
 
 <para>
-Por ejemplo, suponga que el fichero de preferencias de APT 
+Por ejemplo, suponga que el fichero de preferencias de APT
 contiene los tres registros antes mencionados:
 
 <programlisting>
@@ -300,14 +300,14 @@ Entonces:
 
 <itemizedlist>
 <listitem><simpara>La versión más reciente disponible del paquete
-<literal/perl/ se instala mientras que el número de versión empieze 
-con "<literal/5.8/". Si se encuentra disponible <emphasis/cualquier/ 
-versión 5.8* de <literal/perl/ y la versión instalada es 5.9*, entonces 
+<literal/perl/ se instala mientras que el número de versión empieze
+con "<literal/5.8/". Si se encuentra disponible <emphasis/cualquier/
+versión 5.8* de <literal/perl/ y la versión instalada es 5.9*, entonces
 se instala la versión5.8*.
 </simpara></listitem><listitem><simpara>Cualquier otra versión de un paquete
-distinto de 
+distinto de
 <literal/perl/ disponible desde el sistema local tiene prioridad sobre el
-resto de las versiones, incluso sobre los pertenecientes a la distribución 
+resto de las versiones, incluso sobre los pertenecientes a la distribución
 objetivo.
 </simpara></listitem>
 <listitem><simpara>Otras versiones que tengan un origen distinto al sistema
@@ -350,23 +350,23 @@ son significativas dos de las líneas de cada registro:
 </para>
 
 <para>El fichero <filename>Release</filename> normalmente se encuentra en el
-directorio 
+directorio
 <filename>.../dists/<replaceable>nombre-dist</replaceable></filename>,
 por ejemplo, <filename>.../dists/stable/Release</filename>,
 o <filename>.../dists/woody/Release</filename>.
-El fichero consiste en registros de una sola línea que se aplican a 
-<emphasis/todos/ los paquetes por debajo del directorio 
-padre. Al contrario que el fichero <filename/Packages/, casi todas las 
-líneas del fichero <filename/Release/ son relevantes para las prioridades de 
-APT: 
+El fichero consiste en registros de una sola línea que se aplican a
+<emphasis/todos/ los paquetes por debajo del directorio
+padre. Al contrario que el fichero <filename/Packages/, casi todas las
+líneas del fichero <filename/Release/ son relevantes para las prioridades de
+APT:
 
 <variablelist>
 <varlistentry>
 <term>La línea <literal/Archive:/ </term>
 <listitem><simpara>Indica el nombre del archivo al que pertenecen todos los
-paquetes del árbol de directorios. Por ejemplo, la línea 
-"Archive: stable" especifica que todos los paquetes en el árbol de 
-directorios por debajo del directorio raíz marcado en el fichero 
+paquetes del árbol de directorios. Por ejemplo, la línea
+"Archive: stable" especifica que todos los paquetes en el árbol de
+directorios por debajo del directorio raíz marcado en el fichero
 <filename/Release/ están en un archivo de <literal/estable/. Para
 especificar una preferencia de acuerdo con este parámetro
 tendrá que poner la siguiente línea en el fichero de preferencias de APT:
@@ -379,7 +379,7 @@ Pin: release a=stable
 
 <varlistentry>
 <term>La línea <literal/Version:/ </term>
-<listitem><simpara>Indica la versión de la distribución. Por ejemplo, los 
+<listitem><simpara>Indica la versión de la distribución. Por ejemplo, los
 paquetes en árbol pueden pertenecer a la versión 3.0 de Debian GNU/Linux. Dese
 cuenta de que <literal/pruebas/ e <literal/inestable/ no tienen una versión
 asignada porque no han sido liberadas. Para especificar una preferencia de
@@ -398,11 +398,11 @@ Pin: release 3.0
 
 <varlistentry>
 <term>La línea <literal/Component:/ </term>
-<listitem><simpara>Indica la licencia asociada a los paquetes en el árbol 
-de directorios correspondiente al fichero <filename/Release/. Por ejemplo, 
-la línea <literal/Component: main/ especifica que todos los ejemplares son 
+<listitem><simpara>Indica la licencia asociada a los paquetes en el árbol
+de directorios correspondiente al fichero <filename/Release/. Por ejemplo,
+la línea <literal/Component: main/ especifica que todos los ejemplares son
 de la sección <literal/main/, ésto asegura que su licencia se ajusta a las
-DFSG. Para especificar una preferencia de acuerdo con este parámetro tendrá 
+DFSG. Para especificar una preferencia de acuerdo con este parámetro tendrá
 que poner la siguiente línea en el fichero de preferencias de APT:
 </simpara>
 <programlisting>
@@ -415,8 +415,8 @@ Pin: release c=main
 <term>La línea <literal/Origin:/ </term>
 <listitem><simpara>Indica la procedencia de los paquetes en el árbol de
 directorios del fichero <filename/Release/. La procedencia más común es
-<literal/Debian/. Para especificar una preferencia de acuerdo con este 
-parámetro tendrá que poner la siguiente línea en el fichero de preferencias 
+<literal/Debian/. Para especificar una preferencia de acuerdo con este
+parámetro tendrá que poner la siguiente línea en el fichero de preferencias
 de APT:
 </simpara>
 <programlisting>

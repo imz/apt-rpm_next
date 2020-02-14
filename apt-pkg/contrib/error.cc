@@ -2,21 +2,21 @@
 // Description								/*{{{*/
 // $Id: error.cc,v 1.2 2002/07/25 18:07:18 niemeyer Exp $
 /* ######################################################################
-   
+
    Global Erorr Class - Global error mechanism
 
    We use a simple STL vector to store each error record. A PendingFlag
    is kept which indicates when the vector contains a Sever error.
-   
+
    This source is placed in the Public Domain, do with it what you will
    It was originally written by Jason Gunthorpe.
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
 #ifdef __GNUG__
 #pragma implementation "apt-pkg/error.h"
-#endif 
+#endif
 
 #include <apt-pkg/error.h>
 
@@ -48,7 +48,7 @@ using namespace std;
  {
     static pthread_once_t Once = PTHREAD_ONCE_INIT;
     pthread_once(&Once,KeyAlloc);
-    
+
     void *Res = pthread_getspecific(ErrorKey);
     if (Res == 0)
        pthread_setspecific(ErrorKey,Res = new GlobalError);
@@ -94,10 +94,10 @@ bool GlobalError::Errno(const char *Function,const char *Description,...)
    Itm->Text = S;
    Itm->Error = true;
    Insert(Itm);
-   
+
    PendingFlag = true;
 
-   return false;   
+   return false;
 }
 									/*}}}*/
 // GlobalError::WarningE - Get part of the warn string from errno	/*{{{*/
@@ -122,8 +122,8 @@ bool GlobalError::WarningE(const char *Function,const char *Description,...)
    Itm->Text = S;
    Itm->Error = false;
    Insert(Itm);
-   
-   return false;   
+
+   return false;
 }
 									/*}}}*/
 // GlobalError::Error - Add an error to the list			/*{{{*/
@@ -143,9 +143,9 @@ bool GlobalError::Error(const char *Description,...)
    Itm->Text = S;
    Itm->Error = true;
    Insert(Itm);
-   
+
    PendingFlag = true;
-   
+
    return false;
 }
 									/*}}}*/
@@ -166,7 +166,7 @@ bool GlobalError::Warning(const char *Description,...)
    Itm->Text = S;
    Itm->Error = false;
    Insert(Itm);
-   
+
    return false;
 }
 									/*}}}*/
@@ -178,17 +178,17 @@ bool GlobalError::PopMessage(string &Text)
 {
    if (List == 0)
       return false;
-      
+
    bool Ret = List->Error;
    Text = List->Text;
    Item *Old = List;
    List = List->Next;
    delete Old;
-   
+
    // This really should check the list to see if only warnings are left..
    if (List == 0)
       PendingFlag = false;
-   
+
    return Ret;
 }
 									/*}}}*/
@@ -220,7 +220,7 @@ void GlobalError::Discard()
       List = List->Next;
       delete Old;
    }
-   
+
    PendingFlag = false;
 };
 									/*}}}*/

@@ -1,4 +1,4 @@
-Lua script to allow installing and viewing package groups, determined by 
+Lua script to allow installing and viewing package groups, determined by
 a backend script to allow it to work on arbitrary group-metadata formats.
 
 This script must be plugged into the following APT script slots:
@@ -8,7 +8,7 @@ This script must be plugged into the following APT script slots:
     Scripts::AptGet::Help::Command::
     Scripts::AptCache::Help::Command::
 
-The backend script name must be specified with the configuration 
+The backend script name must be specified with the configuration
 item Scripts::Groupinstall::Backend, the path is relative to the generic
 scripts directory specified by Dir::Bin::scripts.
 
@@ -27,15 +27,15 @@ Usage:
 
 About the backend:
 
-The backend is also compatible with Synaptic's task-support (new as of 
+The backend is also compatible with Synaptic's task-support (new as of
 synaptic-0.53), provided that you set Synaptic::taskHelperProg configuration
 item to whatever the path is to your backend script/program.
 
 The supplied groupinstall-backend-comps.py is known to work in RHL 8.0, 9,
 RHEL 3 and Fedora Core 1 and 2. Requires python, comps and
-rhpl packages to be installed. 
+rhpl packages to be installed.
 
-There's also a backend for SuSe called groupinstall-backend-suse by 
+There's also a backend for SuSe called groupinstall-backend-suse by
 Richard Bos which should work on any recent SuSe system with Yast.
 
 Groupinstall can be made to work on any system where package group
@@ -52,7 +52,7 @@ what packages to install/remove in groupinstall and groupremove operations)
 <backend> --task-packages <group1> [--task-packages <group2> ...]
 
 Additionally the backend must be capable of handling the following options
-passed in before the actual groupnames, even if unimplemented (some options 
+passed in before the actual groupnames, even if unimplemented (some options
 might not be relevant to a given system):
 -h (show hidden groups)
 -a (show/install/remove all packages beloging to group, not just default)

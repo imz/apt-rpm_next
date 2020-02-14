@@ -6,8 +6,8 @@
    System - Abstraction for running on different systems.
 
    RPM version of the system stuff
-   
-   ##################################################################### 
+
+   #####################################################################
  */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -30,7 +30,7 @@
 #include <apt-pkg/rpmpackagedata.h>
 
 #include <apti18n.h>
-    
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -272,7 +272,7 @@ string rpmSystem::DistroVer(Configuration const &Cnf)
       rpmdbFreeIterator(iter);
       rpmtsFree(ts);
    }
-   
+
    return DistroVersion;
 }
 
@@ -319,17 +319,17 @@ static void gatherFileDependencies(map<string,int> &filedeps, Header header)
    //char **verl;
    //int *flagl;
    int res;
-   
+
    res = headerGetEntry(header, RPMTAG_REQUIRENAME, &type,
 			(void **)&namel, &count);
    /*
-   res = headerGetEntry(header, RPMTAG_REQUIREVERSION, &type, 
+   res = headerGetEntry(header, RPMTAG_REQUIREVERSION, &type,
 			(void **)&verl, &count);
    res = headerGetEntry(header, RPMTAG_REQUIREFLAGS, &type,
 			(void **)&flagl, &count);
    */
-   
-   while (count--) 
+
+   while (count--)
    {
       if (*namel[count] == '/')
 	 filedeps[string(namel[count])] = 1;
@@ -343,13 +343,13 @@ bool rpmSystem::processIndexFile(rpmIndexFile *Index,OpProgress &Progress)
 {
    Header hdr;
    map<string,string> archmap;
-   
+
    RPMHandler *Handler = Index->CreateHandler();
    if (_error->PendingError() == true)
       return false;
 
    Progress.SubProgress(0, Index->Describe());
-   
+
    Handler->Rewind();
 
    while (Handler->Skip() == true)
@@ -364,7 +364,7 @@ bool rpmSystem::processIndexFile(rpmIndexFile *Index,OpProgress &Progress)
 #ifdef OLD_FILEDEPS
       gatherFileDependencies(FileDeps, hdr);
 #endif
-      
+
       /*
        * Make it so that for each version, we keep track of the best
        * architecture.
@@ -372,7 +372,7 @@ bool rpmSystem::processIndexFile(rpmIndexFile *Index,OpProgress &Progress)
       res = headerGetEntry(hdr, RPMTAG_ARCH, &type,
 			   (void **)&arch, &count);
       assert(type == RPM_STRING_TYPE);
-      if (res) 
+      if (res)
       {
 	 char *name;
 	 char *version;
@@ -380,7 +380,7 @@ bool rpmSystem::processIndexFile(rpmIndexFile *Index,OpProgress &Progress)
 	 int_32 *epoch;
 	 int res;
 	 char buf[256];
-	 
+
 	 headerGetEntry(hdr, RPMTAG_NAME, &type,
 			(void **)&name, &count);
 	 headerGetEntry(hdr, RPMTAG_VERSION, &type,
@@ -389,39 +389,39 @@ bool rpmSystem::processIndexFile(rpmIndexFile *Index,OpProgress &Progress)
 			(void **)&release, &count);
 	 res = headerGetEntry(hdr, RPMTAG_EPOCH, &type,
 			      (void **)&epoch, &count);
-	 
+
 	 if (res == 1)
 	    snprintf(buf, sizeof(buf), "%i:%s-%s", *epoch, version, release);
 	 else
 	    snprintf(buf, sizeof(buf), "%s-%s", version, release);
 	 string n = string(name)+"#"+string(buf);
-	 
-	 if (archmap.find(n) != archmap.end()) 
+
+	 if (archmap.find(n) != archmap.end())
 	 {
-	    if (strcmp(archmap[n].c_str(), arch) != 0) 
+	    if (strcmp(archmap[n].c_str(), arch) != 0)
 	    {
 	       int a = rpmMachineScore(RPM_MACHTABLE_INSTARCH, archmap[n].c_str());
 	       int b = rpmMachineScore(RPM_MACHTABLE_INSTARCH, arch);
-	       
-	       if (b < a) 
+
+	       if (b < a)
 	       {
 		  MultiArchPkgs[n] = string(arch);
 		  // this is a multiarch pkg
 		  archmap[n] = MultiArchPkgs[n];
 	       }
-	       else 
+	       else
 	       {
 		  MultiArchPkgs[n] = archmap[n];
 	       }
 	    }
 	 }
-	 else 
+	 else
 	 {
 	    archmap[n] = string(arch);
 	 }
       }
    }
-   
+
    if (Handler->IsDatabase() == false)
        delete Handler;
 
@@ -437,15 +437,15 @@ bool rpmSystem::PreProcess(pkgIndexFile **Start,pkgIndexFile **End,
    unsigned long TotalSize = 0, CurrentSize = 0;
 
    // calculate size of files
-   
+
    for (; Start != End; Start++)
    {
       if ((*Start)->HasPackages() == false)
 	  continue;
-      
+
       if ((*Start)->Exists() == false)
 	  continue;
-      
+
       unsigned long Size = (*Start)->Size();
       Progress.OverallProgress(CurrentSize,TotalSize,Size,_("Reading Package Lists"));
       CurrentSize += Size;
@@ -453,7 +453,7 @@ bool rpmSystem::PreProcess(pkgIndexFile **Start,pkgIndexFile **End,
       if (processIndexFile((rpmIndexFile*)*Start,Progress) == false)
 	 return false;
    }
-  
+
    return true;
 }
 
@@ -486,7 +486,7 @@ bool rpmSystem::FindIndex(pkgCache::PkgFileIterator File,
       Found = StatusFile;
       return true;
    }
-   
+
    return false;
 }
 									/*}}}*/
@@ -502,7 +502,7 @@ bool rpmSystem::ProcessCache(pkgDepCache &Cache,pkgProblemResolver &Fix)
       // Ignore virtual packages
       if (I->VersionList == 0)
 	 continue;
-	 
+
       // Do package holding
       if (I->CurrentVer != 0)
       {

@@ -4,11 +4,11 @@
    valid file. Most of the options have sane default values, unless
    you have specific needs you should NOT include arbitary items in a custom
    configuration.
-   
+
    In some instances involving filenames it is possible to set the default
    directory when the path is evaluated. This means you can use relative
    paths within the sub scope.
-   
+
    The configuration directives are specified in a tree with {} designating
    a subscope relative to the tag before the {}. You can further specify
    a subscope using scope notation eg,
@@ -18,21 +18,21 @@
 */
 
 // Options for APT in general
-APT 
+APT
 {
   Architecture "i386";
   Build-Essential "build-essential";
-  
+
   // Options for apt-get
-  Get 
+  Get
   {
      Arch-Only "false";
      Download-Only "false";
      Simulate "false";
      Assume-Yes "false";
      Force-Yes "false";             // I would never set this.
-     Fix-Broken "false";  
-     Fix-Missing "false";     
+     Fix-Broken "false";
+     Fix-Missing "false";
      Show-Upgraded "false";
      Upgrade "true";
      Print-URIs "false";
@@ -45,7 +45,7 @@ APT
      Remove "true";
   };
 
-  Cache 
+  Cache
   {
      Important "false";
      AllVersions "false";
@@ -53,7 +53,7 @@ APT
      RecruseDepends "false";
   };
 
-  CDROM 
+  CDROM
   {
      Rename "false";
      NoMount "false";
@@ -76,19 +76,19 @@ Acquire
   Queue-Mode "host";       // host|access
   Retries "0";
   Source-Symlinks "true";
-  
+
   // HTTP method configuration
-  http 
+  http
   {
     Proxy "http://127.0.0.1:3128";
     Proxy::http.us.debian.org "DIRECT";  // Specific per-host setting
     Timeout "120";
     Pipeline-Depth "5";
-    
+
     // Cache Control. Note these do not work with Squid 2.0.2
     No-Cache "false";
     Max-Age "86400";     // 1 Day age on index files
-    No-Store "false";    // Prevent the cache from storing archives    
+    No-Store "false";    // Prevent the cache from storing archives
   };
 
   ftp
@@ -105,16 +105,16 @@ Acquire
        "USER $(SITE_USER)@$(SITE):$(SITE_PORT)";
        "PASS $(SITE_PASS)";
     };
-    
+
     Timeout "120";
-    
+
     /* Passive mode control, proxy, non-proxy and per-host. Pasv mode
        is prefered if possible */
     Passive "true";
     Proxy::Passive "true";
     Passive::http.us.debian.org "true"; // Specific per-host setting
   };
-  
+
   cdrom
   {
     Mount "/cdrom";
@@ -132,7 +132,7 @@ Acquire
 Dir "/"
 {
   // Location of the state dir
-  State "var/lib/apt/" 
+  State "var/lib/apt/"
   {
      lists "lists/";
      xstatus "xstatus";
@@ -140,21 +140,21 @@ Dir "/"
      status "/var/lib/dpkg/status";
      cdroms "cdroms.list";
   };
-  
+
   // Location of the cache dir
   Cache "var/cache/apt/" {
      archives "archives/";
      srcpkgcache "srcpkgcache.bin";
-     pkgcache "pkgcache.bin";     
+     pkgcache "pkgcache.bin";
   };
-  
+
   // Config files
   Etc "etc/apt/" {
      sourcelist "sources.list";
      main "apt.conf";
-     preferences "preferences";     
+     preferences "preferences";
   };
-  
+
   // Locations of binaries
   Bin {
      methods "/usr/lib/apt/methods/";
@@ -168,7 +168,7 @@ Dir "/"
 };
 
 // Things that effect the APT dselect method
-DSelect 
+DSelect
 {
    Clean "auto";   // always|auto|prompt|never
    Options "-f";
@@ -177,18 +177,18 @@ DSelect
    CheckDir "no";
 }
 
-DPkg 
+DPkg
 {
    // Probably don't want to use force-downgrade..
    Options {"--force-overwrite";"--force-downgrade";}
-   
+
    // Auto re-mounting of a readonly /usr
    Pre-Invoke {"mount -o remount,rw /usr";};
    Post-Invoke {"mount -o remount,ro /usr";};
-   
+
    // Prevents daemons from getting cwd as something mountable (default)
    Run-Directory "/";
-   
+
    // Build options for apt-get source --compile
    Build-Options "-b -uc";
 
@@ -205,14 +205,14 @@ DPkg
 
 /* Options you can set to see some debugging text They correspond to names
    of classes in the source code */
-Debug 
+Debug
 {
   pkgProblemResolver "false";
   pkgAcquire "false";
   pkgAcquire::Worker "false";
   pkgDPkgPM "false";
   pkgOrderList "false";
-  
+
   pkgInitialize "false";   // This one will dump the configuration space
   NoLocking "false";
   Acquire::Ftp "false";    // Show ftp command traffic

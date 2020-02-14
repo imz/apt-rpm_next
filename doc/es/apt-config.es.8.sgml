@@ -6,7 +6,7 @@
 
 ]>
 
-<!-- 
+<!--
 (c) 2003 Software in the Public Interest
 Esta traducción ha sido realizada por Carlos Mestre
 Está basada en la página de manual original:
@@ -16,12 +16,12 @@ versión 1.2 del CVS de
 
 <refentry lang=es>
  &apt-docinfo;
- 
+
  <refmeta>
    <refentrytitle>apt-config</>
    <manvolnum>8</>
  </refmeta>
- 
+
  <!-- Man page title -->
  <refnamediv>
     <refname>apt-config</>
@@ -38,10 +38,10 @@ versión 1.2 del CVS de
       <group choice=req>
          <arg>shell</>
          <arg>dump</>
-      </group>   
+      </group>
    </cmdsynopsis>
  </refsynopsisdiv>
- 
+
  <RefSect1><Title>Descripción</>
    <para>
    <command/apt-config/ es un programa interno usado por varios programas del
@@ -52,7 +52,7 @@ versión 1.2 del CVS de
    A menos que se incluya la opción <option/-h/ o <option/--help/, una de de
    los siguientes órdenes debe estar presente.
    </para>
-   
+
    <VariableList>
      <VarListEntry><Term>shell</Term>
      <ListItem><Para>
@@ -63,7 +63,7 @@ versión 1.2 del CVS de
      de órdenes asignados al intérprete de órdenes por cada valor presente. En
      un fichero de órdenes, este debería usarse como:
      </para>
-     
+
 <informalexample><programlisting>
 OPTS="-f"
 RES=`apt-config shell OPTS MyApp::Options`
@@ -73,7 +73,7 @@ eval $RES
      <para>
      Esto debería fijar la variable de entorno del intérprete de órdenes $OPTS
      al valor deMyApp::Opciones, con un valor por omisión de <option/-f/.
-     
+
      <para>
      El elemento de configuración podría ser corregido después con /[fdbi]. f
      devuelve nombres de ficheros, d devuelve los directorios, b devuelve
@@ -91,11 +91,11 @@ eval $RES
 
  <RefSect1><Title>Opciones</>
    &apt-cmdblurb;
-   
+
    <VariableList>
-   
+
      &apt-commonoptions;
-     
+
    </VariableList>
  </RefSect1>
 
@@ -119,5 +119,5 @@ eval $RES
       &lt;debian-l10n-spanish@lists.debian.org&gt;
     </para>
   </refsect1>
- 
+
 </refentry>

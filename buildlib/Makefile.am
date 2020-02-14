@@ -35,7 +35,7 @@ copy-apti18n:
 	@$(mkinstalldirs) $(top_builddir)/include
 	@echo "Copying gettext.h to $(top_builddir)/include/apti18n.h"
 	@cp -f -p $(srcdir)/gettext.h $(top_builddir)/include/apti18n.h
-	
+
 copy-inttypes:
 	@echo "Copying inttypes.h to $(top_builddir)/include/inttypes.h"
 	@cp -f -p $(srcdir)/inttypes.h $(top_builddir)/include/inttypes.h

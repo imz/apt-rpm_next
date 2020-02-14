@@ -4,7 +4,7 @@
 /* ######################################################################
 
    CDROM URI method for APT
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -24,7 +24,7 @@
 #include <apti18n.h>
 									/*}}}*/
 // CNC:2002-10-18
-#include <utime.h>  
+#include <utime.h>
 
 using namespace std;
 
@@ -35,7 +35,7 @@ class CDROMMethod : public pkgAcqMethod
    string CurrentID;
    string CDROM;
    bool Mounted;
-   
+
    virtual bool Fetch(FetchItem *Itm);
    string GetID(string Name);
    virtual void Exit();
@@ -43,9 +43,9 @@ class CDROMMethod : public pkgAcqMethod
 
    // CNC:2002-10-18
    bool Copy(string Src, string Dest);
-   
+
    public:
-   
+
    CDROMMethod();
 };
 
@@ -54,8 +54,8 @@ class CDROMMethod : public pkgAcqMethod
 /* */
 CDROMMethod::CDROMMethod() : pkgAcqMethod("1.0",SingleInstance | LocalOnly |
 					  SendConfig | NeedsCleanup |
-					  Removable | HasPreferredURI), 
-                                          DatabaseLoaded(false), 
+					  Removable | HasPreferredURI),
+                                          DatabaseLoaded(false),
                                           Mounted(false)
 {
 };
@@ -110,12 +110,12 @@ string CDROMMethod::GetID(string Name)
    const Configuration::Item *Top = Database.Tree("CD");
    if (Top != 0)
       Top = Top->Child;
-   
+
    for (; Top != 0;)
-   {      
+   {
       if (Top->Value == Name)
 	 return Top->Tag;
-      
+
       Top = Top->Next;
    }
    return string();
@@ -133,7 +133,7 @@ bool CDROMMethod::Copy(string Src, string Dest)
       To.OpFail();
       return false;
    }
-   
+
    // Copy the file
    if (CopyFile(From,To) == false)
    {
@@ -143,11 +143,11 @@ bool CDROMMethod::Copy(string Src, string Dest)
 
    From.Close();
    To.Close();
- 
+
    struct stat Buf;
    if (stat(Src.c_str(),&Buf) != 0)
-       return _error->Error("File not found");      
-   
+       return _error->Error("File not found");
+
    // Transfer the modification times
    struct utimbuf TimeBuf;
    TimeBuf.actime = Buf.st_atime;
@@ -171,7 +171,7 @@ bool CDROMMethod::Fetch(FetchItem *Itm)
 
    bool Debug = _config->FindB("Debug::Acquire::cdrom",false);
 
-   /* All IMS queries are returned as a hit, CDROMs are readonly so 
+   /* All IMS queries are returned as a hit, CDROMs are readonly so
       time stamps never change */
    if (Itm->LastModified != 0)
    {
@@ -195,7 +195,7 @@ bool CDROMMethod::Fetch(FetchItem *Itm)
       }
       DatabaseLoaded = true;
    }
-       
+
    // All non IMS queries for package files fail.
    if (Itm->IndexFile == true || GetID(Get.Host).empty() == true)
    {
@@ -210,7 +210,7 @@ bool CDROMMethod::Fetch(FetchItem *Itm)
       Fail(_("Wrong CD"),true);
       return true;
    }
-   
+
    CDROM = _config->FindDir("Acquire::cdrom::mount","/cdrom/");
    if (CDROM[0] == '.')
       CDROM= SafeGetCWD() + '/' + CDROM;
@@ -223,21 +223,21 @@ bool CDROMMethod::Fetch(FetchItem *Itm)
       {
 	 if (IdentCdrom(CDROM,NewID,Version) == false)
 	    return false;
-	 
+
 	 if (Debug == true)
 	    clog << "ID " << Version << " " << NewID << endl;
-      
+
 	 // A hit
 	 if (Database.Find("CD::" + NewID) == Get.Host)
 	 {
 	    Hit = true;
 	    break;
-	 }	 
+	 }
       }
 
       if (Hit == true)
 	 break;
-	 
+
       // I suppose this should prompt somehow?
       if (UnmountCdrom(CDROM) == false)
 	 return _error->Error(_("Unable to unmount the CD-ROM in %s, it may still be in use."),
@@ -249,7 +249,7 @@ bool CDROMMethod::Fetch(FetchItem *Itm)
 	 return true;
       }
    }
-   
+
    // CNC:2002-10-18
    // Found a CD
    if (_config->FindB("Acquire::CDROM::Copy-All", false) == true ||
@@ -260,11 +260,11 @@ bool CDROMMethod::Fetch(FetchItem *Itm)
    } else {
       Res.Filename = CDROM + File;
    }
-   
+
    struct stat Buf;
    if (stat(Res.Filename.c_str(),&Buf) != 0)
       return _error->Error(_("File not found"));
-   
+
    if (NewID.empty() == false)
       CurrentID = NewID;
    Res.LastModified = Buf.st_mtime;

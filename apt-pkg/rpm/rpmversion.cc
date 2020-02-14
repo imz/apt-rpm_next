@@ -6,8 +6,8 @@
    RPM Version - Versioning system for RPM
 
    This implements the standard RPM versioning system.
-   
-   ##################################################################### 
+
+   #####################################################################
  */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -46,7 +46,7 @@ rpmVersioningSystem::rpmVersioningSystem()
 // ---------------------------------------------------------------------
 /* Code ripped from rpmlib */
 void rpmVersioningSystem::ParseVersion(const char *V, const char *VEnd,
-				       char **Epoch, 
+				       char **Epoch,
 				       char **Version,
 				       char **Release)
 {
@@ -58,7 +58,7 @@ void rpmVersioningSystem::ParseVersion(const char *V, const char *VEnd,
    char *s;
 
    assert(evr != NULL);
-   
+
    s = strrchr(evr, '-');
    if (s) {
       *s++ = '\0';
@@ -91,7 +91,7 @@ void rpmVersioningSystem::ParseVersion(const char *V, const char *VEnd,
 									/*}}}*/
 // rpmVS::CmpVersion - Comparison for versions				/*{{{*/
 // ---------------------------------------------------------------------
-/* This fragments the version into E:V-R triples and compares each 
+/* This fragments the version into E:V-R triples and compares each
    portion separately. */
 int rpmVersioningSystem::DoCmpVersion(const char *A,const char *AEnd,
 				      const char *B,const char *BEnd)
@@ -143,8 +143,8 @@ int rpmVersioningSystem::DoCmpVersionArch(const char *A,const char *Aend,
    int rc = DoCmpVersion(A, Aend, B, Bend);
    if (rc == 0)
    {
-      int aa = rpmMachineScore(RPM_MACHTABLE_INSTARCH, AA); 
-      int ba = rpmMachineScore(RPM_MACHTABLE_INSTARCH, BA); 
+      int aa = rpmMachineScore(RPM_MACHTABLE_INSTARCH, AA);
+      int ba = rpmMachineScore(RPM_MACHTABLE_INSTARCH, BA);
       if (aa < ba)
 	 rc = 1;
       else if (aa > ba)
@@ -155,7 +155,7 @@ int rpmVersioningSystem::DoCmpVersionArch(const char *A,const char *Aend,
 									/*}}}*/
 // rpmVS::CheckDep - Check a single dependency				/*{{{*/
 // ---------------------------------------------------------------------
-/* This simply preforms the version comparison and switch based on 
+/* This simply preforms the version comparison and switch based on
    operator. If DepVer is 0 then we are comparing against a provides
    with no version. */
 bool rpmVersioningSystem::CheckDep(const char *PkgVer,
@@ -165,7 +165,7 @@ bool rpmVersioningSystem::CheckDep(const char *PkgVer,
    int DepFlags = 0;
    bool invert = false;
    int rc;
-   
+
    switch (Op & 0x0F)
    {
     case pkgCache::Dep::LessEq:
@@ -175,11 +175,11 @@ bool rpmVersioningSystem::CheckDep(const char *PkgVer,
     case pkgCache::Dep::GreaterEq:
       DepFlags = RPMSENSE_GREATER|RPMSENSE_EQUAL;
       break;
-      
+
     case pkgCache::Dep::Less:
       DepFlags = RPMSENSE_LESS;
       break;
-      
+
     case pkgCache::Dep::Greater:
       DepFlags = RPMSENSE_GREATER;
       break;
@@ -187,12 +187,12 @@ bool rpmVersioningSystem::CheckDep(const char *PkgVer,
     case pkgCache::Dep::Equals:
       DepFlags = RPMSENSE_EQUAL;
       break;
-      
+
     case pkgCache::Dep::NotEquals:
       DepFlags = RPMSENSE_EQUAL;
       invert = true;
       break;
-      
+
     default:
       DepFlags = RPMSENSE_ANY;
       break;
@@ -208,10 +208,10 @@ bool rpmVersioningSystem::CheckDep(const char *PkgVer,
    rc = rpmdsCompare(pds, dds);
    rpmdsFree(pds);
    rpmdsFree(dds);
-#else 
+#else
    rc = rpmRangesOverlap("", PkgVer, PkgFlags, "", DepVer, DepFlags);
 #endif
-    
+
    return (!invert && rc) || (invert && !rc);
 }
 									/*}}}*/
@@ -239,14 +239,14 @@ string rpmVersioningSystem::UpstreamVersion(const char *Ver)
    for (; *I != 0 && *I != ':'; I++);
    if (*I == ':')
       Ver = I + 1;
-   
+
    // Chop off the trailing -
    I = Ver;
    unsigned Last = strlen(Ver);
    for (; *I != 0; I++)
       if (*I == '-')
 	 Last = I - Ver;
-   
+
    return string(Ver,Last);
 }
 									/*}}}*/

@@ -72,7 +72,7 @@ if script_slot == "Scripts::AptGet::DistUpgrade" or
         -- Gather information about Allow-Duplicated packges.
         local canddups = {}
         local curdups = {}
-        for i, pkg in pairs(pkglist()) do 
+        for i, pkg in pairs(pkglist()) do
             local name = realname(pkgname(pkg))
             if name then
                 if pkgvercur(pkg) then

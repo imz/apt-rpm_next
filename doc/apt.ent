@@ -77,7 +77,7 @@
     <RefEntryTitle><command/dselect/</RefEntryTitle>
     <ManVolNum/8/
   </CiteRefEntry>">
-    
+
 <!-- Boiler plate docinfo section -->
 <!ENTITY apt-docinfo "
  <docinfo>
@@ -86,13 +86,13 @@
    <copyright><year>1998-2001</> <holder>Jason Gunthorpe</></>
    <date>12 March 2001</>
  </docinfo>
-"> 
+">
 
 <!-- Boiler plate Bug reporting section -->
 <!ENTITY manbugs "
  <RefSect1><Title>Bugs</>
    <para>
-   See the <ulink url='http://bugs.debian.org/src:apt'>APT bug page</>.  
+   See the <ulink url='http://bugs.debian.org/src:apt'>APT bug page</>.
    If you wish to report a bug in APT, please see
    <filename>/usr/share/doc/debian/bug-reporting.txt</> or the &reportbug; command.</>
  </RefSect1>
@@ -115,7 +115,7 @@
      Show a short usage summary.
      </Para></ListItem>
      </VarListEntry>
-     
+
      <VarListEntry><term><option/-v/</><term><option/--version/</>
      <ListItem><Para>
      Show the program version.
@@ -124,15 +124,15 @@
 
      <VarListEntry><term><option/-c/</><term><option/--config-file/</>
      <ListItem><Para>
-     Configuration File; Specify a configuration file to use. 
-     The program will read the default configuration file and then this 
-     configuration file. See &apt-conf; for syntax information.     
+     Configuration File; Specify a configuration file to use.
+     The program will read the default configuration file and then this
+     configuration file. See &apt-conf; for syntax information.
      </Para></ListItem>
      </VarListEntry>
-     
+
      <VarListEntry><term><option/-o/</><term><option/--option/</>
      <ListItem><Para>
-     Set a Configuration Option; This will set an arbitrary configuration 
+     Set a Configuration Option; This will set an arbitrary configuration
      option. The syntax is <option>-o Foo::Bar=bar</>.
      </Para></ListItem>
      </VarListEntry>
@@ -144,7 +144,7 @@
    <para>
    All command line options may be set using the configuration file, the
    descriptions indicate the configuration option to set. For boolean
-   options you can override the config file by using something like 
+   options you can override the config file by using something like
    <option/-f-/,<option/--no-f/, <option/-f=no/ or several other variations.
    </para>
 ">

@@ -3,11 +3,11 @@
 // $Id: versionmatch.cc,v 1.9 2003/05/19 17:58:26 doogie Exp $
 /* ######################################################################
 
-   Version Matching 
-   
+   Version Matching
+
    This module takes a matching string and a type and locates the version
    record that satisfies the constraint described by the matching string.
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -34,10 +34,10 @@ pkgVersionMatch::pkgVersionMatch(string Data,MatchType Type,int Op) : VerOp(Op),
    MatchAll = false;
    VerPrefixMatch = false;
    RelVerPrefixMatch = false;
-   
+
    if (Type == None || Data.length() < 1)
       return;
-   
+
    // Cut up the version representation
    if (Type == Version)
    {
@@ -49,8 +49,8 @@ pkgVersionMatch::pkgVersionMatch(string Data,MatchType Type,int Op) : VerOp(Op),
       else
 	 VerStr = Data;
       return;
-   }   
-   
+   }
+
    if (Type == Release)
    {
       // All empty = match all
@@ -59,7 +59,7 @@ pkgVersionMatch::pkgVersionMatch(string Data,MatchType Type,int Op) : VerOp(Op),
 	 MatchAll = true;
 	 return;
       }
-      
+
       // Are we a simple specification?
       string::const_iterator I = Data.begin();
       for (; I != Data.end() && *I != '='; I++);
@@ -70,15 +70,15 @@ pkgVersionMatch::pkgVersionMatch(string Data,MatchType Type,int Op) : VerOp(Op),
 	    RelVerStr = Data;
 	 else
 	    RelArchive = Data;
-	 
+
 	 if (RelVerStr.length() > 0 && RelVerStr.end()[-1] == '*')
 	 {
 	    RelVerPrefixMatch = true;
 	    RelVerStr = string(RelVerStr.begin(),RelVerStr.end()-1);
-	 }	 
+	 }
 	 return;
       }
-            
+
       char Spec[300];
       char *Fragments[20];
       snprintf(Spec,sizeof(Spec),"%s",Data.c_str());
@@ -88,12 +88,12 @@ pkgVersionMatch::pkgVersionMatch(string Data,MatchType Type,int Op) : VerOp(Op),
 	 Type = None;
 	 return;
       }
-      
+
       for (unsigned J = 0; Fragments[J] != 0; J++)
       {
 	 if (strlen(Fragments[J]) < 3)
 	    continue;
-	    
+
 	 if (stringcasecmp(Fragments[J],Fragments[J]+2,"v=") == 0)
 	    RelVerStr = Fragments[J]+2;
 	 else if (stringcasecmp(Fragments[J],Fragments[J]+2,"o=") == 0)
@@ -105,27 +105,27 @@ pkgVersionMatch::pkgVersionMatch(string Data,MatchType Type,int Op) : VerOp(Op),
 	 else if (stringcasecmp(Fragments[J],Fragments[J]+2,"c=") == 0)
 	    RelComponent = Fragments[J]+2;
       }
-      
+
       if (RelVerStr.end()[-1] == '*')
       {
 	 RelVerPrefixMatch = true;
 	 RelVerStr = string(RelVerStr.begin(),RelVerStr.end()-1);
-      }	 
+      }
       return;
    }
-   
+
    if (Type == Origin)
    {
       OrSite = Data;
       return;
-   }   
+   }
 }
 									/*}}}*/
 // VersionMatch::MatchVer - Match a version string with prefixing	/*{{{*/
 // ---------------------------------------------------------------------
 /* */
 bool pkgVersionMatch::MatchVer(const char *A,string B,bool Prefix)
-{   
+{
    // CNC:2003-11-05 - Patch by ALT-Linux, which ignores the release
    //                  if it was not provided, and the epoch.
    string s(A), sc(A);
@@ -147,7 +147,7 @@ bool pkgVersionMatch::MatchVer(const char *A,string B,bool Prefix)
 
    const char *Ae = Ab + strlen(Ab);
    const char *Af = Ac + strlen(Ac);
-   
+
    // Strings are not a compatible size.
    if (((unsigned)(Ae - Ab) == B.length() || Prefix == true) &&
        (unsigned)(Ae - Ab) >= B.length() &&
@@ -186,12 +186,12 @@ pkgCache::VerIterator pkgVersionMatch::Find(pkgCache::PkgIterator Pkg)
 
 	 continue;
       }
-      
+
       for (pkgCache::VerFileIterator VF = Ver.FileList(); VF.end() == false; VF++)
 	 if (FileMatch(VF.File()) == true)
 	    return Ver;
    }
-      
+
    // CNC:2003-11-11 - Virtual package handling.
    if (Type == Version)
    {
@@ -219,7 +219,7 @@ pkgCache::VerIterator pkgVersionMatch::Find(pkgCache::PkgIterator Pkg)
 									/*}}}*/
 // VersionMatch::FileMatch - Match against an index file		/*{{{*/
 // ---------------------------------------------------------------------
-/* This matcher checks against the release file and the origin location 
+/* This matcher checks against the release file and the origin location
    to see if the constraints are met. */
 bool pkgVersionMatch::FileMatch(pkgCache::PkgFileIterator File)
 {
@@ -227,15 +227,15 @@ bool pkgVersionMatch::FileMatch(pkgCache::PkgFileIterator File)
    {
       if (MatchAll == true)
 	 return true;
-      
+
 /*      cout << RelVerStr << ',' << RelOrigin << ',' << RelArchive << ',' << RelLabel << endl;
       cout << File.Version() << ',' << File.Origin() << ',' << File.Archive() << ',' << File.Label() << endl;*/
-      
+
       if (RelVerStr.empty() == true && RelOrigin.empty() == true &&
 	  RelArchive.empty() == true && RelLabel.empty() == true &&
 	  RelComponent.empty() == true)
 	 return false;
-      
+
       if (RelVerStr.empty() == false)
 	 if (File->Version == 0 ||
 	     MatchVer(File.Version(),RelVerStr,RelVerPrefixMatch) == false)
@@ -246,10 +246,10 @@ bool pkgVersionMatch::FileMatch(pkgCache::PkgFileIterator File)
 	    return false;
       if (RelArchive.empty() == false)
       {
-	 if (File->Archive == 0 || 
+	 if (File->Archive == 0 ||
 	     stringcasecmp(RelArchive,File.Archive()) != 0)
 	    return false;
-      }      
+      }
       if (RelLabel.empty() == false)
 	 if (File->Label == 0 ||
 	     stringcasecmp(RelLabel,File.Label()) != 0)
@@ -260,7 +260,7 @@ bool pkgVersionMatch::FileMatch(pkgCache::PkgFileIterator File)
 	    return false;
       return true;
    }
-   
+
    if (Type == Origin)
    {
       if (OrSite.empty() == false) {
@@ -271,7 +271,7 @@ bool pkgVersionMatch::FileMatch(pkgCache::PkgFileIterator File)
 	    return false;
       return (OrSite == File.Site());		/* both strings match */
    }
-   
+
    return false;
 }
 									/*}}}*/

@@ -28,7 +28,7 @@
 #if RPM_VERSION >= 0x040100
 #include <rpm/rpmts.h>
 #endif
- 
+
 using namespace std;
 
 int tags[] =  {
@@ -43,12 +43,12 @@ int tags[] =  {
        RPMTAG_SIZE,
        RPMTAG_VENDOR,
        RPMTAG_OS,
-       
-       RPMTAG_DESCRIPTION, 
-       RPMTAG_SUMMARY, 
+
+       RPMTAG_DESCRIPTION,
+       RPMTAG_SUMMARY,
        /*RPMTAG_HEADERI18NTABLE*/ HEADER_I18NTABLE,
-       
-       RPMTAG_REQUIREFLAGS, 
+
+       RPMTAG_REQUIREFLAGS,
        RPMTAG_REQUIRENAME,
        RPMTAG_REQUIREVERSION
 };
@@ -58,7 +58,7 @@ int selectDirent(const struct dirent *ent)
 {
    int state = 0;
    const char *p = ent->d_name;
-   
+
    while (1) {
       if (*p == '.') {
 	  state = 1;
@@ -83,24 +83,24 @@ bool readRPMTable(char *file, map<string, list<char*>* > &table)
    FILE *indexf;
    char buf[512];
    string srpm;
-   
+
    indexf = fopen(file, "r");
    if (!indexf) {
       cerr << "gensrclist: could not open file " << file << " for reading: "
 	  << strerror(errno) << endl;
       return false;
    }
-   
+
    while (fgets(buf, 512, indexf)) {
       char *f;
-      
+
       buf[strlen(buf)-1] = '\0';
       f = strchr(buf, ' ');
       *f = '\0';
       f++;
-      
+
       srpm = string(buf);
-      
+
       if (table.find(srpm) != table.end()) {
 	 list<char*> *l = table[srpm];
 	 l->push_front(strdup(f));
@@ -110,9 +110,9 @@ bool readRPMTable(char *file, map<string, list<char*>* > &table)
 	 table[srpm] = l;
       }
    }
-   
+
    fclose(indexf);
-   
+
    return true;
 }
 
@@ -139,7 +139,7 @@ int headerGetRawEntry(Header h, int_32 tag, int_32 * type,
 }
 #endif
 
-int main(int argc, char ** argv) 
+int main(int argc, char ** argv)
 {
    char buf[300];
    char cwd[200];
@@ -198,10 +198,10 @@ int main(int argc, char ** argv)
       usage();
       exit(1);
    }
-   
+
    if (!readRPMTable(arg_srpmindex, rpmTable))
        exit(1);
-   
+
    md5cache = new CachedMD5(string(arg_dir)+string(arg_suffix), "gensrclist");
 
    getcwd(cwd, 200);
@@ -211,10 +211,10 @@ int main(int argc, char ** argv)
       strcat(buf, arg_dir);
    } else
        strcpy(buf, arg_dir);
-   
+
    strcat(buf, "/SRPMS.");
    strcat(buf, arg_suffix);
-   
+
    srpmdir = "SRPMS." + string(arg_suffix);
 #ifdef OLD_FLATSCHEME
    if (flatStructure) {
@@ -244,21 +244,21 @@ int main(int argc, char ** argv)
       srpmdir = "./"+srpmdir;
 #endif
 #endif
-   
+
    entry_no = scandir(buf, &dirEntries, selectDirent, alphasort);
-   if (entry_no < 0) { 
+   if (entry_no < 0) {
       cerr << "gensrclist: error opening directory " << buf << ":"
 	  << strerror(errno) << endl;
       return 1;
    }
 
    chdir(buf);
-   
+
    if (srcListSuffix != NULL)
       sprintf(buf, "%s/srclist.%s", cwd, srcListSuffix);
    else
       sprintf(buf, "%s/srclist.%s", cwd, arg_suffix);
-   
+
    if (srcListAppend == true && FileExists(buf)) {
       outfd = fdOpen(buf, O_WRONLY|O_APPEND, 0644);
    } else {
@@ -277,8 +277,8 @@ int main(int argc, char ** argv)
    rpmtsSetVSFlags(ts, (rpmVSFlags_e)-1);
 #else
    Header sigs;
-#endif   
-  
+#endif
+
    for (entry_cur = 0; entry_cur < entry_no; entry_cur++) {
       struct stat sb;
 
@@ -290,13 +290,13 @@ int main(int argc, char ** argv)
       }
 
       if (stat(dirEntries[entry_cur]->d_name, &sb) < 0) {
-	 cerr << "\nWarning: " << strerror(errno) << ": " << 
+	 cerr << "\nWarning: " << strerror(errno) << ": " <<
 	         dirEntries[entry_cur]->d_name << endl;
 	 continue;
       }
-      
+
       fd = fdOpen(dirEntries[entry_cur]->d_name, O_RDONLY, 0666);
-	 
+
       if (!fd) {
 	 cerr << "\nWarning: " << strerror(errno) << ": " <<
 	         dirEntries[entry_cur]->d_name << endl;
@@ -304,7 +304,7 @@ int main(int argc, char ** argv)
       }
 
       size[0] = sb.st_size;
-	 
+
 #if RPM_VERSION >= 0x040100
       rc = rpmReadPackageFile(ts, fd, dirEntries[entry_cur]->d_name, &h);
       if (rc == RPMRC_OK || rc == RPMRC_NOTTRUSTED || rc == RPMRC_NOKEY) {
@@ -315,15 +315,15 @@ int main(int argc, char ** argv)
 	    Header newHeader;
 	    int i;
 	    bool foundInIndex;
-	    
+
 	    newHeader = headerNew();
-	    
+
 	    // the std tags
 	    for (i = 0; i < numTags; i++) {
 	       int type, count;
 	       void *data;
 	       int res;
-	       
+
 	       // Copy raw entry, so that internationalized strings
 	       // will get copied correctly.
 	       res = headerGetRawEntry(h, tags[i], &type, &data, &count);
@@ -331,44 +331,44 @@ int main(int argc, char ** argv)
 		  continue;
 	       headerAddEntry(newHeader, tags[i], type, data, count);
 	    }
-	    
-	    
+
+
 	    // our additional tags
 	    headerAddEntry(newHeader, CRPMTAG_DIRECTORY, RPM_STRING_TYPE,
 			   srpmdir.c_str(), 1);
-	    
-	    headerAddEntry(newHeader, CRPMTAG_FILENAME, RPM_STRING_TYPE, 
+
+	    headerAddEntry(newHeader, CRPMTAG_FILENAME, RPM_STRING_TYPE,
 			   dirEntries[entry_cur]->d_name, 1);
 	    headerAddEntry(newHeader, CRPMTAG_FILESIZE, RPM_INT32_TYPE,
 			   size, 1);
-	    
+
 	    {
 	       char md5[34];
-	       
+
 	       md5cache->MD5ForFile(dirEntries[entry_cur]->d_name, sb.st_mtime, md5);
-	       
+
 	       headerAddEntry(newHeader, CRPMTAG_MD5, RPM_STRING_TYPE,
 			      md5, 1);
 	    }
-	    
+
 	    foundInIndex = false;
 	    {
 	       int count = 0;
 	       char **l = NULL;
 	       list<char*> *rpmlist = rpmTable[string(dirEntries[entry_cur]->d_name)];
-	       
+
 	       if (rpmlist) {
 		  l = new char *[rpmlist->size()];
-		  
+
 		  foundInIndex = true;
-		  
+
 		  for (list<char*>::const_iterator i = rpmlist->begin();
 		       i != rpmlist->end();
 		       i++) {
 		     l[count++] = *i;
 		  }
 	       }
-	       
+
 	       if (count) {
 		  headerAddEntry(newHeader, CRPMTAG_BINARY,
 				 RPM_STRING_ARRAY_TYPE, l, count);
@@ -376,7 +376,7 @@ int main(int argc, char ** argv)
 	    }
 	    if (foundInIndex || !mapi)
 		headerWrite(outfd, newHeader, HEADER_MAGIC_YES);
-	    
+
 	    headerFree(newHeader);
 	    headerFree(h);
 #if RPM_VERSION < 0x040100
@@ -387,16 +387,16 @@ int main(int argc, char ** argv)
 	         dirEntries[entry_cur]->d_name << endl;
       }
       Fclose(fd);
-   } 
-   
+   }
+
    Fclose(outfd);
 
 #if RPM_VERSION >= 0x040100
    ts = rpmtsFree(ts);
-#endif   
-   
+#endif
+
    delete md5cache;
-   
+
    return 0;
 }
 

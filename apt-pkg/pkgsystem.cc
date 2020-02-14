@@ -6,7 +6,7 @@
    System - Abstraction for running on different systems.
 
    Basic general structure..
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -40,6 +40,6 @@ pkgSystem *pkgSystem::GetSystem(const char *Label)
    for (unsigned I = 0; I != GlobalListLen; I++)
       if (strcmp(SysList[I]->Label,Label) == 0)
 	 return SysList[I];
-   return 0;   
+   return 0;
 }
 									/*}}}*/

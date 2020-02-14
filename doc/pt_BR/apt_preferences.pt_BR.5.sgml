@@ -56,11 +56,11 @@ entrada no arquivo que se aplique a uma instância em particular, a
 prioridade atribuída a essa instância é a prioridade da distribuição
 para a qual a instância pertence. É possível selecionar uma distribuição,
 conhecida como "a versão alvo" (the target release), que recebe uma
-prioridade maior do que as outras distribuições. 
+prioridade maior do que as outras distribuições.
 A versão alvo pode ser definida na linha de comando do
 <command>apt-get</command> ou no arquivo de configuração do APT
 <filename>/etc/apt/apt.conf</filename>.
-Por exemplo, 
+Por exemplo,
 <programlisting>
 <command>apt-get install -t testing <replaceable>algum-pacote</replaceable></command>
 </programlisting>

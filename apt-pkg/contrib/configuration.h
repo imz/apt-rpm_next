@@ -4,11 +4,11 @@
 /* ######################################################################
 
    Configuration Class
-   
+
    This class provides a configuration file and command line parser
    for a tree-oriented configuration environment. All runtime configuration
    is stored in here.
-   
+
    Each configuration name is given as a fully scoped string such as
      Foo::Bar
    And has associated with it a text string. The Configuration class only
@@ -19,10 +19,10 @@
      cout << _config->Find("Foo::Bar") << endl;
 
    A special extension, support for ordered lists is provided by using the
-   special syntax, "block::list::" the trailing :: designates the 
+   special syntax, "block::list::" the trailing :: designates the
    item as a list. To access the list you must use the tree function on
    "block::list".
-   
+
    ##################################################################### */
 									/*}}}*/
 #ifndef PKGLIB_CONFIGURATION_H
@@ -30,7 +30,7 @@
 
 #ifdef __GNUG__
 #pragma interface "apt-pkg/configuration.h"
-#endif 
+#endif
 
 #include <string>
 #include <iostream>
@@ -40,7 +40,7 @@ using std::string;
 class Configuration
 {
    public:
-   
+
    struct Item
    {
       string Value;
@@ -48,27 +48,27 @@ class Configuration
       Item *Parent;
       Item *Child;
       Item *Next;
-      
+
       string FullTag(const Item *Stop = 0) const;
-      
+
       Item() : Parent(0), Child(0), Next(0) {};
    };
-   
+
    private:
-   
+
    Item *Root;
    bool ToFree;
-   
+
    Item *Lookup(Item *Head,const char *S,unsigned long Len,bool Create);
-   Item *Lookup(const char *Name,bool Create);   
+   Item *Lookup(const char *Name,bool Create);
    inline const Item *Lookup(const char *Name) const
    {
       return ((Configuration *)this)->Lookup(Name,false);
-   }  
+   }
 
    // CNC:2003-02-23 - Helper for copy constructor.
    void CopyChildren(Item *From, Item *To);
-   
+
    public:
 
    string Find(const char *Name,const char *Default = 0) const;
@@ -80,18 +80,18 @@ class Configuration
    bool FindB(const char *Name,bool Default = false) const;
    bool FindB(string Name,bool Default = false) const {return FindB(Name.c_str(),Default);};
    string FindAny(const char *Name,const char *Default = 0) const;
-	      
+
    inline void Set(string Name,string Value) {Set(Name.c_str(),Value);};
    void CndSet(const char *Name,string Value);
    void Set(const char *Name,string Value);
-   void Set(const char *Name,int Value);   
-   
+   void Set(const char *Name,int Value);
+
    inline bool Exists(string Name) const {return Exists(Name.c_str());};
    bool Exists(const char *Name) const;
    bool ExistsAny(const char *Name) const;
 
    void Clear(string Name);
-   
+
    inline const Item *Tree(const char *Name) const {return Lookup(Name);};
 
    inline void Dump() { Dump(std::clog); };
@@ -121,9 +121,9 @@ bool ReadConfigDir(Configuration &Conf,string Dir,bool AsSectional = false,
       Item *Parent;
       Item *Child;
       Item *Next;
-      
+
       string FullTag(const Item *Stop = 0) const;
-      
+
       Item() : Parent(0), Child(0), Next(0) {};
    };
 #endif

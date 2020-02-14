@@ -4,7 +4,7 @@
 /* ######################################################################
 
    Index File - Abstraction for an index of archive/souce file.
-   
+
    ##################################################################### */
 									/*}}}*/
 // Include Files							/*{{{*/
@@ -27,7 +27,7 @@ unsigned long pkgIndexFile::Type::GlobalListLen = 0;
 pkgIndexFile::Type::Type()
 {
    ItmList[GlobalListLen] = this;
-   GlobalListLen++;   
+   GlobalListLen++;
 }
 									/*}}}*/
 // Type::GetType - Locate the type by name				/*{{{*/
@@ -41,7 +41,7 @@ pkgIndexFile::Type *pkgIndexFile::Type::GetType(const char *Type)
    return 0;
 }
 									/*}}}*/
-    
+
 // IndexFile::GetIndexes - Stub						/*{{{*/
 // ---------------------------------------------------------------------
 /* */

@@ -4,14 +4,14 @@
 /* ######################################################################
 
    RPM Index Files
-   
+
    There are three sorts currently
-   
+
    pkglist files
    The system RPM database
    srclist files
-   
-   ##################################################################### 
+
+   #####################################################################
  */
 									/*}}}*/
 #ifndef PKGLIB_RPMINDEXFILE_H
@@ -30,7 +30,7 @@ class pkgRepository;
 
 class rpmIndexFile : public pkgIndexFile
 {
-   
+
    public:
 
    virtual RPMHandler *CreateHandler() const = 0;
@@ -46,10 +46,10 @@ class rpmDatabaseIndex : public rpmIndexFile
 
    // Creates a RPMHandler suitable for usage with this object
    virtual RPMHandler *CreateHandler() const;
-   
+
    // Interface for acquire
    virtual string Describe(bool Short) const {return "RPM Database";};
-   
+
    // Interface for the Cache Generator
    virtual bool Exists() const {return true;};
    virtual unsigned long Size() const;
@@ -71,14 +71,14 @@ class rpmListIndex : public rpmIndexFile
    string Dist;
    string Section;
    pkgRepository *Repository;
-   
+
    string ReleaseFile(string Type) const;
-   string ReleaseURI(string Type) const;   
-   string ReleaseInfo(string Type) const;   
+   string ReleaseURI(string Type) const;
+   string ReleaseInfo(string Type) const;
 
    string Info(string Type) const;
    string IndexFile(string Type) const;
-   string IndexURI(string Type) const;   
+   string IndexURI(string Type) const;
 
    virtual string MainType() const = 0;
    virtual string IndexPath() const {return IndexFile(MainType());};
@@ -93,7 +93,7 @@ class rpmListIndex : public rpmIndexFile
    virtual unsigned long Size() const;
 
    // Interface for acquire
-   virtual string Describe(bool Short) const;   
+   virtual string Describe(bool Short) const;
 
    rpmListIndex(string URI,string Dist,string Section,
 		pkgRepository *Repository) :
@@ -111,7 +111,7 @@ class rpmPkgListIndex : public rpmListIndex
    public:
 
    virtual const Type *GetType() const;
-   
+
    // Creates a RPMHandler suitable for usage with this object
    virtual RPMHandler *CreateHandler() const
 	   { return new RPMFileHandler(IndexPath()); };
@@ -119,10 +119,10 @@ class rpmPkgListIndex : public rpmListIndex
    // Stuff for accessing files on remote items
    virtual string ArchiveInfo(pkgCache::VerIterator Ver) const;
    virtual string ArchiveURI(string File) const;
-   
+
    // Interface for acquire
    virtual bool GetIndexes(pkgAcquire *Owner) const;
-   
+
    // Interface for the Cache Generator
    virtual bool HasPackages() const {return true;};
    virtual bool Merge(pkgCacheGenerator &Gen,OpProgress &Prog) const;
@@ -155,13 +155,13 @@ class rpmSrcListIndex : public rpmListIndex
    virtual string SourceInfo(pkgSrcRecords::Parser const &Record,
 			     pkgSrcRecords::File const &File) const;
    virtual string ArchiveURI(string File) const;
-   
+
    // Interface for acquire
    virtual bool GetIndexes(pkgAcquire *Owner) const;
 
    // Interface for the record parsers
    virtual pkgSrcRecords::Parser *CreateSrcParser() const;
-   
+
 
    rpmSrcListIndex(string URI,string Dist,string Section,
 		   pkgRepository *Repository) :
@@ -174,7 +174,7 @@ class rpmPkgDirIndex : public rpmPkgListIndex
    protected:
 
    virtual string MainType() const {return "pkgdir";}
-   virtual string IndexPath() const;   
+   virtual string IndexPath() const;
    virtual string ReleasePath() const;
 
    public:
@@ -187,7 +187,7 @@ class rpmPkgDirIndex : public rpmPkgListIndex
 	   { return new RPMDirHandler(IndexPath()); };
 
    virtual const Type *GetType() const;
-   
+
    // Interface for the Cache Generator
    virtual unsigned long Size() const;
 
@@ -202,7 +202,7 @@ class rpmSrcDirIndex : public rpmSrcListIndex
    protected:
 
    virtual string MainType() const {return "srcdir";}
-   virtual string IndexPath() const;   
+   virtual string IndexPath() const;
 
    public:
 
@@ -214,7 +214,7 @@ class rpmSrcDirIndex : public rpmSrcListIndex
 	   { return new RPMDirHandler(IndexPath()); };
 
    virtual const Type *GetType() const;
-   
+
    // Interface for the Cache Generator
    virtual unsigned long Size() const;
 
@@ -245,7 +245,7 @@ class rpmSinglePkgIndex : public rpmPkgListIndex
    virtual string ArchiveURI(string File) const;
 
    virtual const Type *GetType() const;
-   
+
    rpmSinglePkgIndex(string File) :
 	   rpmPkgListIndex("", "", "", NULL), FilePath(File) {};
 };
@@ -271,7 +271,7 @@ class rpmSingleSrcIndex : public rpmSrcListIndex
    virtual string ArchiveURI(string File) const;
 
    virtual const Type *GetType() const;
-   
+
    rpmSingleSrcIndex(string File) :
 	   rpmSrcListIndex("", "", "", NULL), FilePath(File) {};
 };
