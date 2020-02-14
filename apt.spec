@@ -4,7 +4,7 @@ Release: alt71.3
 
 Summary: Debian's Advanced Packaging Tool with RPM support
 Summary(ru_RU.UTF-8): Debian APT - Усовершенствованное средство управления пакетами с поддержкой RPM
-License: GPL
+License: GPL-2.0-or-later
 Group: System/Configuration/Packaging
 URL: http://apt-rpm.org
 Vcs: git://git.altlinux.org/gears/a/apt.git
